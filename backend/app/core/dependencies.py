@@ -10,7 +10,6 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 
-
 def get_current_user(
     token: str = Depends(oauth2_scheme)
 ):
@@ -23,10 +22,8 @@ def get_current_user(
             algorithms=[settings.ALGORITHM]
         )
 
-
         user_id = payload.get("user_id")
         role_id = payload.get("role_id")
-
 
         if user_id is None:
             raise HTTPException(
@@ -34,12 +31,10 @@ def get_current_user(
                 detail="Invalid token"
             )
 
-
         return {
             "user_id": user_id,
             "role_id": role_id
         }
-
 
     except JWTError:
 
@@ -47,3 +42,23 @@ def get_current_user(
             status_code=401,
             detail="Invalid token"
         )
+
+
+def require_roles(*allowed_roles: int):
+
+    def role_checker(
+        current_user: dict = Depends(get_current_user)
+    ):
+
+        role_id = current_user.get("role_id")
+
+        if role_id not in allowed_roles:
+
+            raise HTTPException(
+                status_code=403,
+                detail="You do not have permission to perform this action"
+            )
+
+        return current_user
+
+    return role_checker

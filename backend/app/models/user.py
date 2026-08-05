@@ -43,3 +43,14 @@ class User(Base):
         Integer,
         ForeignKey("departments.id")
     )
+
+    # ========================================================
+    # SLACK USER ID
+    # ========================================================
+
+    slack_user_id = Column(
+        String,
+        unique=True,
+        nullable=True,
+        index=True
+    )

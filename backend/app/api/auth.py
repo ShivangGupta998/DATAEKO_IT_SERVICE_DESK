@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -21,9 +21,9 @@ router = APIRouter(
 )
 
 
-# ==========================
+# ============================================================
 # REGISTER USER
-# ==========================
+# ============================================================
 
 @router.post("/register")
 def register(
@@ -31,18 +31,29 @@ def register(
     db: Session = Depends(get_db)
 ):
 
-    existing_user = db.query(User).filter(
+    # Check duplicate email
+    existing_email = db.query(User).filter(
         User.email == user.email
     ).first()
 
-
-    if existing_user:
+    if existing_email:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
 
+    # Check duplicate username
+    existing_username = db.query(User).filter(
+        User.username == user.username
+    ).first()
 
+    if existing_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already registered"
+        )
+
+    # Create user
     new_user = User(
         username=user.username,
         email=user.email,
@@ -52,11 +63,9 @@ def register(
         is_active=True
     )
 
-
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-
 
     return {
         "id": new_user.id,
@@ -68,10 +77,9 @@ def register(
     }
 
 
-
-# ==========================
-# LOGIN USER (JWT)
-# ==========================
+# ============================================================
+# LOGIN USER
+# ============================================================
 
 @router.post("/login")
 def login(
@@ -79,53 +87,56 @@ def login(
     db: Session = Depends(get_db)
 ):
 
-    # Swagger sends username field
-    # We are using email as username
-
+    # Swagger's "username" field contains the EMAIL
     user = db.query(User).filter(
         User.email == form_data.username
     ).first()
 
-
+    # Do not reveal whether the email exists
     if not user:
         raise HTTPException(
-            status_code=404,
-            detail="User not found"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
         )
 
+    # Check account status
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is inactive"
+        )
 
+    # Verify password
     if not verify_password(
         form_data.password,
         user.hashed_password
     ):
         raise HTTPException(
-            status_code=401,
-            detail="Invalid password"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
         )
 
-
-    token = create_access_token(
+    # Create JWT
+    access_token = create_access_token(
         {
             "user_id": user.id,
             "role_id": user.role_id
         }
     )
 
-
     return {
-        "access_token": token,
+        "access_token": access_token,
         "token_type": "bearer"
     }
 
 
-
-# ==========================
-# PROTECTED ROUTE
-# ==========================
+# ============================================================
+# CURRENT USER
+# ============================================================
 
 @router.get("/me")
 def get_profile(
-    current_user = Depends(get_current_user)
+    current_user=Depends(get_current_user)
 ):
 
     return {
