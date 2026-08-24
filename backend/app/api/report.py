@@ -89,19 +89,75 @@ def get_reports_dashboard(
         for row in priority_rows
     ]
 
+    # Agent / Technician Workload Breakdown
+    technicians = db.query(User).filter(User.role_id == 3).all()
+    agent_performance = []
+    
+    for tech in technicians:
+        total_assigned = db.query(Ticket).filter(Ticket.assignee_id == tech.id).count()
+        resolved_tickets = db.query(Ticket).filter(
+            Ticket.assignee_id == tech.id,
+            Ticket.status.in_(["resolved", "closed"])
+        ).count()
+        pending_queue = db.query(Ticket).filter(
+            Ticket.assignee_id == tech.id,
+            Ticket.status.in_(["open", "in_progress"])
+        ).count()
+
+        agent_performance.append({
+            "id": tech.id,
+            "user_id": tech.id,
+            "agent_name": tech.username or f"User #{tech.id}",
+            "username": tech.username or f"User #{tech.id}",
+            "total_assigned": total_assigned,
+            "resolved_tickets": resolved_tickets,
+            "pending_queue": pending_queue
+        })
+
     return {
         "total_volume": total_tickets,
         "active_in_flight": active_in_flight,
         "resolved_rate": resolved_rate,
         "sla_health": sla_health,
         "status_breakdown": status_breakdown,
-        "priority_breakdown": priority_breakdown
+        "priority_breakdown": priority_breakdown,
+        "agent_performance": agent_performance,
+        "technicians": agent_performance
     }
 
 
 # ============================================================
 # INDIVIDUAL SUB-REPORTS
 # ============================================================
+@router.get("/technician-workload")
+def get_technician_workload(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin_manager)
+):
+    technicians = db.query(User).filter(User.role_id == 3).all()
+    result = []
+    for tech in technicians:
+        total_assigned = db.query(Ticket).filter(Ticket.assignee_id == tech.id).count()
+        resolved_tickets = db.query(Ticket).filter(
+            Ticket.assignee_id == tech.id,
+            Ticket.status.in_(["resolved", "closed"])
+        ).count()
+        pending_queue = db.query(Ticket).filter(
+            Ticket.assignee_id == tech.id,
+            Ticket.status.in_(["open", "in_progress"])
+        ).count()
+
+        result.append({
+            "id": tech.id,
+            "user_id": tech.id,
+            "agent_name": tech.username or f"User #{tech.id}",
+            "username": tech.username or f"User #{tech.id}",
+            "total_assigned": total_assigned,
+            "resolved_tickets": resolved_tickets,
+            "pending_queue": pending_queue
+        })
+    return result
+
 @router.get("/tickets-summary")
 def ticket_summary_report(db: Session = Depends(get_db), current_user=Depends(require_admin_manager)):
     counts = db.query(

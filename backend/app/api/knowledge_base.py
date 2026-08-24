@@ -1,242 +1,140 @@
-from typing import List
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    status,
-    Query
-)
-from sqlalchemy.orm import Session, joinedload
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import or_
 
 from app.database.database import get_db
 from app.models.knowledge_base import KnowledgeArticle
 from app.models.user import User
 from app.schemas.knowledge_base import (
     KnowledgeArticleCreate,
+    KnowledgeArticleUpdate,
     KnowledgeArticleResponse,
-    KnowledgeArticleUpdate
 )
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_roles
 
+# ============================================================
+# ROUTER DEFINITION (Defined first to prevent initialization NameErrors)
+# ============================================================
 
 router = APIRouter(
     prefix="/knowledge-base",
     tags=["Knowledge Base"]
 )
 
-
-def get_user_id(user_obj) -> int:
-    """Safely extracts user ID whether current_user is a dict or User ORM object."""
-    if isinstance(user_obj, dict):
-        return user_obj.get("user_id") or user_obj.get("id")
-    return getattr(user_obj, "id", None)
-
-
-def get_role_id(user_obj) -> int:
-    """Safely extracts role ID whether current_user is a dict or User ORM object."""
-    if isinstance(user_obj, dict):
-        return user_obj.get("role_id")
-    return getattr(user_obj, "role_id", None)
-
-
-def require_staff_role(current_user=Depends(get_current_user)):
-    # Role IDs: 1 = Admin, 2 = Manager, 3 = Technician
-    role_id = get_role_id(current_user)
-
-    if role_id not in [1, 2, 3]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to perform this action"
-        )
-
-    return current_user
+# Role Constants
+ADMIN = 1
+MANAGER = 2
+TECHNICIAN = 3
+EMPLOYEE = 4
 
 
 # ============================================================
-# CREATE KNOWLEDGE ARTICLE
+# SEARCH ARTICLES
+# ============================================================
+
+@router.get("/search", response_model=List[KnowledgeArticleResponse])
+def search_articles(
+    q: Optional[str] = Query(None, description="Search query string"),
+    category: Optional[str] = Query(None, description="Filter by article category"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(KnowledgeArticle)
+
+    if q:
+        search_pattern = f"%{q}%"
+        query = query.filter(
+            or_(
+                KnowledgeArticle.title.ilike(search_pattern),
+                KnowledgeArticle.content.ilike(search_pattern),
+                KnowledgeArticle.tags.ilike(search_pattern),
+                KnowledgeArticle.category.ilike(search_pattern)
+            )
+        )
+
+    if category:
+        query = query.filter(KnowledgeArticle.category.ilike(f"%{category}%"))
+
+    # Employees only see published articles
+    if current_user.role_id == EMPLOYEE:
+        query = query.filter(KnowledgeArticle.is_published == True)
+
+    return query.order_by(KnowledgeArticle.created_at.desc()).all()
+
+
+# ============================================================
+# CREATE ARTICLE
+# ADMIN / MANAGER / TECHNICIAN
 # ============================================================
 
 @router.post(
-    "",
+    "/",
     response_model=KnowledgeArticleResponse,
     status_code=status.HTTP_201_CREATED
 )
 def create_article(
     article_data: KnowledgeArticleCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_staff_role)
+    current_user: User = Depends(require_roles(ADMIN, MANAGER, TECHNICIAN))
 ):
-    current_user_id = get_user_id(current_user)
-    user = db.query(User).filter(User.id == current_user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-
-    # Force is_published to True if not explicitly provided
-    is_pub = article_data.is_published if article_data.is_published is not None else True
-
     article = KnowledgeArticle(
         title=article_data.title,
         content=article_data.content,
         category=article_data.category,
-        created_by=user.id,
-        is_published=is_pub
+        tags=article_data.tags,
+        is_published=article_data.is_published if article_data.is_published is not None else True,
+        author_id=current_user.id
     )
 
     db.add(article)
     db.commit()
     db.refresh(article)
-
     return article
 
 
 # ============================================================
-# GET ALL PUBLISHED ARTICLES
+# GET ALL ARTICLES
 # ============================================================
 
-@router.get(
-    "",
-    response_model=List[KnowledgeArticleResponse]
-)
-def get_all_articles(
+@router.get("/", response_model=List[KnowledgeArticleResponse])
+def get_articles(
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-    articles = (
-        db.query(KnowledgeArticle)
-        .options(joinedload(KnowledgeArticle.author))
-        .filter(KnowledgeArticle.is_published == True)
-        .order_by(KnowledgeArticle.created_at.desc())
-        .all()
-    )
+    query = db.query(KnowledgeArticle)
 
-    return articles
+    if current_user.role_id == EMPLOYEE:
+        query = query.filter(KnowledgeArticle.is_published == True)
 
-
-# ============================================================
-# GET MY CREATED ARTICLES
-# ============================================================
-
-@router.get(
-    "/my",
-    response_model=List[KnowledgeArticleResponse]
-)
-def get_my_articles(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
-    current_user_id = get_user_id(current_user)
-    articles = (
-        db.query(KnowledgeArticle)
-        .options(joinedload(KnowledgeArticle.author))
-        .filter(KnowledgeArticle.created_by == current_user_id)
-        .order_by(KnowledgeArticle.created_at.desc())
-        .all()
-    )
-
-    return articles
-
-
-# ============================================================
-# SEARCH KNOWLEDGE ARTICLES
-# ============================================================
-
-@router.get(
-    "/search",
-    response_model=List[KnowledgeArticleResponse]
-)
-def search_articles(
-    keyword: str = Query(...),
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
-    articles = (
-        db.query(KnowledgeArticle)
-        .options(joinedload(KnowledgeArticle.author))
-        .filter(
-            KnowledgeArticle.is_published == True,
-            (
-                KnowledgeArticle.title.ilike(f"%{keyword}%")
-                | KnowledgeArticle.content.ilike(f"%{keyword}%")
-                | KnowledgeArticle.category.ilike(f"%{keyword}%")
-            )
-        )
-        .all()
-    )
-
-    return articles
+    return query.order_by(KnowledgeArticle.created_at.desc()).all()
 
 
 # ============================================================
 # GET SINGLE ARTICLE
 # ============================================================
 
-@router.get(
-    "/{article_id}",
-    response_model=KnowledgeArticleResponse
-)
-def get_single_article(
+@router.get("/{article_id}", response_model=KnowledgeArticleResponse)
+def get_article(
     article_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-    article = (
-        db.query(KnowledgeArticle)
-        .options(joinedload(KnowledgeArticle.author))
-        .filter(KnowledgeArticle.id == article_id)
-        .first()
-    )
-
+    article = db.query(KnowledgeArticle).filter(KnowledgeArticle.id == article_id).first()
     if not article:
         raise HTTPException(
             status_code=404,
-            detail="Article not found"
+            detail="Knowledge base article not found"
         )
 
-    return article
-
-
-# ============================================================
-# UPDATE KNOWLEDGE ARTICLE
-# ============================================================
-
-@router.patch(
-    "/{article_id}",
-    response_model=KnowledgeArticleResponse
-)
-def update_article(
-    article_id: int,
-    update_data: KnowledgeArticleUpdate,
-    db: Session = Depends(get_db),
-    current_user=Depends(require_staff_role)
-):
-    article = (
-        db.query(KnowledgeArticle)
-        .filter(KnowledgeArticle.id == article_id)
-        .first()
-    )
-
-    if not article:
+    if current_user.role_id == EMPLOYEE and not article.is_published:
         raise HTTPException(
-            status_code=404,
-            detail="Article not found"
+            status_code=403,
+            detail="You do not have permission to view unpublished articles"
         )
 
-    if update_data.title is not None:
-        article.title = update_data.title
-
-    if update_data.content is not None:
-        article.content = update_data.content
-
-    if update_data.category is not None:
-        article.category = update_data.category
-
-    if update_data.is_published is not None:
-        article.is_published = update_data.is_published
-
+    # Increment view count on read
+    article.views = (article.views or 0) + 1
     db.commit()
     db.refresh(article)
 
@@ -244,32 +142,58 @@ def update_article(
 
 
 # ============================================================
-# DELETE KNOWLEDGE ARTICLE
+# UPDATE ARTICLE
+# ADMIN / MANAGER / TECHNICIAN
 # ============================================================
 
-@router.delete(
-    "/{article_id}"
-)
-def delete_article(
+@router.patch("/{article_id}", response_model=KnowledgeArticleResponse)
+def update_article(
     article_id: int,
+    article_data: KnowledgeArticleUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_staff_role)
+    current_user: User = Depends(require_roles(ADMIN, MANAGER, TECHNICIAN))
 ):
-    article = (
-        db.query(KnowledgeArticle)
-        .filter(KnowledgeArticle.id == article_id)
-        .first()
-    )
-
+    article = db.query(KnowledgeArticle).filter(KnowledgeArticle.id == article_id).first()
     if not article:
         raise HTTPException(
             status_code=404,
-            detail="Article not found"
+            detail="Knowledge base article not found"
+        )
+
+    if article_data.title is not None:
+        article.title = article_data.title
+    if article_data.content is not None:
+        article.content = article_data.content
+    if article_data.category is not None:
+        article.category = article_data.category
+    if article_data.tags is not None:
+        article.tags = article_data.tags
+    if article_data.is_published is not None:
+        article.is_published = article_data.is_published
+
+    db.commit()
+    db.refresh(article)
+    return article
+
+
+# ============================================================
+# DELETE ARTICLE
+# ADMIN / MANAGER
+# ============================================================
+
+@router.delete("/{article_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_article(
+    article_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(ADMIN, MANAGER))
+):
+    article = db.query(KnowledgeArticle).filter(KnowledgeArticle.id == article_id).first()
+    if not article:
+        raise HTTPException(
+            status_code=404,
+            detail="Knowledge base article not found"
         )
 
     db.delete(article)
     db.commit()
-
-    return {
-        "message": "Article deleted successfully"
-    }
+    return None

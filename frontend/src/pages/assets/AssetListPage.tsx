@@ -6,6 +6,7 @@ import {
   UserCheck,
   Ban,
   RefreshCw,
+  DollarSign,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -46,6 +47,7 @@ export const AssetListPage: React.FC = () => {
   const [category, setCategory] = useState('Laptop');
   const [model, setModel] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
+  const [cost, setCost] = useState<string>('');
   const [location, setLocation] = useState('HQ - 3rd Floor');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,6 +90,7 @@ export const AssetListPage: React.FC = () => {
         category,
         model: model.trim() || undefined,
         serial_number: serialNumber.trim() || undefined,
+        cost: cost !== '' ? parseFloat(cost) : undefined,
         location: location.trim() || undefined,
         notes: notes.trim() || undefined,
       });
@@ -99,6 +102,7 @@ export const AssetListPage: React.FC = () => {
       setAssetName('');
       setModel('');
       setSerialNumber('');
+      setCost('');
       setNotes('');
       fetchAssets();
     } catch (err: any) {
@@ -115,7 +119,6 @@ export const AssetListPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      // ✅ Payload payload modified to match FastAPI expected schema: `assigned_to`
       await assetService.assignAsset(selectedAsset.id, {
         assigned_to: parseInt(assigneeUserId.trim(), 10),
         notes: assignNotes.trim() || undefined,
@@ -188,7 +191,7 @@ export const AssetListPage: React.FC = () => {
             <span>IT Asset Management</span>
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Track enterprise hardware, serial inventory, assignments, and device lifecycles.
+            Track enterprise hardware, serial inventory, costs, assignments, and device lifecycles.
           </p>
         </div>
 
@@ -253,7 +256,7 @@ export const AssetListPage: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         {isLoading ? (
           <div className="p-6">
-            <TableSkeleton rows={5} columns={6} />
+            <TableSkeleton rows={5} columns={7} />
           </div>
         ) : filteredAssets.length === 0 ? (
           <EmptyState
@@ -272,6 +275,7 @@ export const AssetListPage: React.FC = () => {
                     <th className="py-3 px-4">Name & Model</th>
                     <th className="py-3 px-4">Category</th>
                     <th className="py-3 px-4">Serial Number</th>
+                    <th className="py-3 px-4">Cost</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4">Assigned To</th>
                     <th className="py-3 px-4">Location</th>
@@ -291,6 +295,9 @@ export const AssetListPage: React.FC = () => {
                       <td className="py-3.5 px-4">{asset.category || 'General'}</td>
                       <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500">
                         {asset.serial_number || 'N/A'}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono font-semibold text-slate-900 dark:text-white">
+                        {asset.cost !== undefined && asset.cost !== null ? `$${asset.cost.toLocaleString()}` : '$0.00'}
                       </td>
                       <td className="py-3.5 px-4">
                         <StatusBadge status={asset.status} />
@@ -411,7 +418,7 @@ export const AssetListPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Model
@@ -436,6 +443,24 @@ export const AssetListPage: React.FC = () => {
                 placeholder="C02XXXXXXXX"
                 className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-mono"
               />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Cost ($)
+              </label>
+              <div className="relative">
+                <DollarSign className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={cost}
+                  onChange={(e) => setCost(e.target.value)}
+                  placeholder="1200.00"
+                  className="w-full pl-7 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-mono"
+                />
+              </div>
             </div>
           </div>
 

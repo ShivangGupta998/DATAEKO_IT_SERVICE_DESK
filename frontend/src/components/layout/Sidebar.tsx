@@ -31,7 +31,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
   const navigate = useNavigate();
 
   // Role IDs: 1 = Admin, 2 = Manager, 3 = Technician, 4 = Employee
-  // Fallback defaults to Employee (4) if unmapped for safety
   const currentRoleId = roleId && [1, 2, 3, 4].includes(roleId) ? roleId : 4;
 
   // Role-restricted navigation
@@ -40,7 +39,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
       to: '/dashboard',
       label: 'Dashboard',
       icon: LayoutDashboard,
-      roles: [1, 2, 3, 4], // All Roles
+      roles: [1, 2, 3, 4],
+      end: false,
     },
     {
       to: '/tickets',
@@ -50,43 +50,50 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
         ? 'Assigned Tickets'
         : 'Tickets',
       icon: Ticket,
-      roles: [1, 2, 3, 4], // All Roles
+      roles: [1, 2, 3, 4],
+      end: true, // EXACT MATCH ONLY (Prevents highlighting on /tickets/new)
     },
     {
       to: '/tickets/new',
       label: 'Create Ticket',
       icon: PlusCircle,
-      roles: [1, 2, 4], // Admin, Manager & Employee Only (Technician Removed)
+      roles: [1, 2, 4],
+      end: false,
     },
     {
       to: '/assets',
       label: 'Assets',
       icon: Laptop,
-      roles: [1, 2], // Admin & Manager Only
+      roles: [1, 2],
+      end: false,
     },
     {
       to: '/access-requests',
       label: 'Access Requests',
       icon: KeyRound,
-      roles: [1, 2], // Admin & Manager Only (Technician Removed)
+      roles: [1, 2],
+      end: false,
     },
     {
       to: '/offboarding',
       label: 'Offboarding',
       icon: UserX,
-      roles: [1, 2], // Admin & Manager Only
+      roles: [1, 2],
+      end: false,
     },
     {
       to: '/knowledge-base',
       label: 'Knowledge Base',
       icon: BookOpen,
-      roles: [1, 2, 3, 4], // All Roles
+      roles: [1, 2, 3, 4],
+      end: false,
     },
     {
       to: '/reports',
       label: 'Reports & Analytics',
       icon: BarChart3,
-      roles: [1, 2], // Admin & Manager Only
+      roles: [1, 2],
+      end: false,
     },
   ];
 
@@ -133,6 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
             <NavLink
               key={item.to}
               to={item.to}
+              end={item.end}
               onClick={onCloseMobile}
               className={({ isActive }) =>
                 `flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors ${

@@ -30,7 +30,7 @@ import { parseApiError } from '../../api/client';
 export const TicketDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, roleId, isAdmin, isManager, isTechnician, isEmployee } = useAuth();
+  const { user, isAdmin, isManager, isTechnician } = useAuth();
   const { success, error: toastError } = useToast();
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
@@ -264,137 +264,100 @@ export const TicketDetailPage: React.FC = () => {
               </div>
 
               <div className="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60">
-                <span className="text-slate-500">Source:</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">
-                  {ticket.source || 'Portal'}
+                <span className="text-slate-500">Created At:</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300">
+                  {formatFullDate(ticket.created_at)}
                 </span>
               </div>
 
-              <div className="flex justify-between items-center py-1.5 border-b border-slate-100 dark:border-slate-800/60">
-                <span className="text-slate-500">Created:</span>
-                <span className="text-slate-700 dark:text-slate-300">{formatFullDate(ticket.created_at)}</span>
+              <div className="flex justify-between items-center py-1.5">
+                <span className="text-slate-500">Last Updated:</span>
+                <span className="font-medium text-slate-700 dark:text-slate-300">
+                  {formatFullDate(ticket.updated_at)}
+                </span>
               </div>
-
-              {ticket.updated_at && (
-                <div className="flex justify-between items-center py-1.5">
-                  <span className="text-slate-500">Last Updated:</span>
-                  <span className="text-slate-700 dark:text-slate-300">{formatFullDate(ticket.updated_at)}</span>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Role-Based Controls */}
+          {/* Action / Management Form Card */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 text-xs">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-indigo-600" />
+              <span>Update Ticket Progress</span>
+            </h3>
 
-          {/* Employee: View-only Notice */}
-          {isEmployee && (
-            <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-center space-y-2">
-              <Lock className="w-5 h-5 text-slate-400 mx-auto" />
-              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                You have view-only access to this ticket.
-              </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Support agents and technicians will update the ticket as resolution progresses.
-              </p>
-            </div>
-          )}
-
-          {/* Admin / Manager / Technician: Update Ticket Form */}
-          {(isAdmin || isManager || isTechnician) && (
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Shield className="w-4 h-4 text-indigo-600" />
-                <span>{isAdmin || isManager ? 'Manage & Assign Ticket' : 'Update Assigned Ticket'}</span>
-              </h3>
-
-              <form onSubmit={handleUpdateTicket} className="space-y-4 text-xs">
-                {/* Status Selector */}
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Update Status
-                  </label>
-                  <select
-                    value={newStatus}
-                    onChange={(e) => setNewStatus(e.target.value as TicketStatus)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden font-medium"
-                  >
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Resolved">Resolved</option>
-                    <option value="Closed">Closed</option>
-                  </select>
-                </div>
-
-                {/* Priority Selector */}
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Update Priority
-                  </label>
-                  <select
-                    value={newPriority}
-                    onChange={(e) => setNewPriority(e.target.value as TicketPriority)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden font-medium"
-                  >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Critical">Critical</option>
-                  </select>
-                </div>
-
-                {/* Assignee Control - Strictly visible ONLY for Admin & Manager */}
-                {(isAdmin || isManager) && (
-                  <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
-                      <span>Assignee Technician (User ID)</span>
-                      <span className="text-[10px] text-slate-400 font-normal">Role 1 / 2 Only</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={assigneeIdInput}
-                        onChange={(e) => setAssigneeIdInput(e.target.value)}
-                        placeholder="e.g. 3 (Technician User ID) or blank"
-                        className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden font-mono"
-                      />
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      Leave blank to unassign or enter the Technician's user ID.
-                    </p>
-                  </div>
-                )}
-
-                {/* Comment / Progress Note */}
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Resolution Comment / Work Note
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="Provide diagnostic steps, RCA notes, or resolution update..."
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden resize-none"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isUpdating}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 transition-all shadow-xs"
+            <form onSubmit={handleUpdateTicket} className="space-y-4">
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  Status
+                </label>
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value as TicketStatus)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
                 >
-                  {isUpdating ? (
-                    <span>Saving Changes...</span>
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Update Ticket</span>
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
-          )}
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  Priority
+                </label>
+                <select
+                  value={newPriority}
+                  onChange={(e) => setNewPriority(e.target.value as TicketPriority)}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
+                >
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+
+              {(isAdmin || isManager) && (
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    Assignee User ID
+                  </label>
+                  <input
+                    type="number"
+                    value={assigneeIdInput}
+                    onChange={(e) => setAssigneeIdInput(e.target.value)}
+                    placeholder="Enter technician user ID"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-mono"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">Leave blank to keep unassigned</p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                  Add Comment / Activity Note
+                </label>
+                <textarea
+                  rows={3}
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Describe resolution steps or status change justification..."
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isUpdating}
+                className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>{isUpdating ? 'Saving...' : 'Update & Log Event'}</span>
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

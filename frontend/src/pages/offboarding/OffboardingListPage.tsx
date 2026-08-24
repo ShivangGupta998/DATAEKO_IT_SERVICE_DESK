@@ -6,16 +6,12 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  Laptop,
-  KeyRound,
   RefreshCw,
   Edit,
-  ShieldCheck,
-  AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { offboardingService } from '../../services/offboardingService';
+import { offboardingService, InitiateOffboardingPayload } from '../../services/offboardingService';
 import { Offboarding, OffboardingStatus } from '../../types/offboarding';
 import { StatusBadge } from '../../components/common/Badge';
 import { TableSkeleton } from '../../components/common/LoadingState';
@@ -26,7 +22,7 @@ import { Pagination } from '../../components/common/Pagination';
 import { parseApiError } from '../../api/client';
 
 export const OffboardingListPage: React.FC = () => {
-  const { user, isAdmin, isManager, isEmployee } = useAuth();
+  const { isAdmin, isManager, isEmployee } = useAuth();
   const { success, error: toastError } = useToast();
 
   const [records, setRecords] = useState<Offboarding[]>([]);
@@ -85,11 +81,19 @@ export const OffboardingListPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await offboardingService.initiateOffboarding({
+      const payload: InitiateOffboardingPayload = {
         user_id: Number(targetUserId.trim()),
-        departure_date: departureDate || undefined,
-        notes: initiateNotes.trim() || undefined,
-      });
+      };
+
+      if (departureDate.trim()) {
+        payload.departure_date = departureDate;
+      }
+
+      if (initiateNotes.trim()) {
+        payload.notes = initiateNotes.trim();
+      }
+
+      await offboardingService.initiateOffboarding(payload);
 
       success('Offboarding Initiated', `Offboarding process for User #${targetUserId} has been logged.`);
       setShowInitiateModal(false);

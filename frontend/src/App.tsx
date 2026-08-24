@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { AppLayout } from './components/layout/AppLayout';
 import { LoadingSpinner } from './components/common/LoadingState';
 
@@ -27,7 +28,7 @@ const ProtectedRoute: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex items-center justify-center transition-colors duration-300">
         <LoadingSpinner size="lg" label="Validating credentials..." />
       </div>
     );
@@ -45,7 +46,7 @@ const RoleRoute: React.FC<{ allowedRoles: number[] }> = ({ allowedRoles }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex items-center justify-center transition-colors duration-300">
         <LoadingSpinner size="lg" label="Checking permissions..." />
       </div>
     );
@@ -61,66 +62,68 @@ const RoleRoute: React.FC<{ allowedRoles: number[] }> = ({ allowedRoles }) => {
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <NotificationProvider>
-            <Routes>
-              {/* Public Authentication Routes */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <Routes>
+                {/* Public Authentication Routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
 
-              {/* Protected Workspace Routes */}
-              <Route element={<ProtectedRoute />}>
-                <Route element={<AppLayout />}>
-                  {/* Default root redirects to dashboard */}
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
+                {/* Protected Workspace Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<AppLayout />}>
+                    {/* Default root redirects to dashboard */}
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
 
-                  {/* Ticket Management */}
-                  <Route path="/tickets" element={<TicketListPage />} />
-                  <Route path="/tickets/:id" element={<TicketDetailPage />} />
+                    {/* Ticket Management */}
+                    <Route path="/tickets" element={<TicketListPage />} />
+                    <Route path="/tickets/:id" element={<TicketDetailPage />} />
 
-                  {/* Create Ticket (Admin:1, Manager:2, Employee:4) */}
-                  <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
-                    <Route path="/tickets/new" element={<TicketCreatePage />} />
+                    {/* Create Ticket (Admin:1, Manager:2, Employee:4) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
+                      <Route path="/tickets/new" element={<TicketCreatePage />} />
+                    </Route>
+
+                    {/* Assets (Admin:1, Manager:2, Employee:4) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
+                      <Route path="/assets" element={<AssetListPage />} />
+                    </Route>
+
+                    {/* Access Requests (Admin:1, Manager:2, Employee:4) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
+                      <Route path="/access-requests" element={<AccessRequestListPage />} />
+                    </Route>
+
+                    {/* Offboarding (Admin:1, Manager:2, Employee:4) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
+                      <Route path="/offboarding" element={<OffboardingListPage />} />
+                    </Route>
+
+                    {/* Knowledge Base (Admin:1, Manager:2, Technician:3, Employee:4) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2, 3, 4]} />}>
+                      <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
+                    </Route>
+
+                    {/* Reports & Analytics (Admin:1, Manager:2) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2]} />}>
+                      <Route path="/reports" element={<ReportsPage />} />
+                    </Route>
+
+                    {/* User Profile */}
+                    <Route path="/profile" element={<ProfilePage />} />
                   </Route>
-
-                  {/* Assets (Admin:1, Manager:2, Employee:4) */}
-                  <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
-                    <Route path="/assets" element={<AssetListPage />} />
-                  </Route>
-
-                  {/* Access Requests (Admin:1, Manager:2, Employee:4) */}
-                  <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
-                    <Route path="/access-requests" element={<AccessRequestListPage />} />
-                  </Route>
-
-                  {/* Offboarding (Admin:1, Manager:2, Employee:4) */}
-                  <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
-                    <Route path="/offboarding" element={<OffboardingListPage />} />
-                  </Route>
-
-                  {/* Knowledge Base (Admin:1, Manager:2, Technician:3, Employee:4) */}
-                  <Route element={<RoleRoute allowedRoles={[1, 2, 3, 4]} />}>
-                    <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
-                  </Route>
-
-                  {/* Reports & Analytics (Admin:1, Manager:2) */}
-                  <Route element={<RoleRoute allowedRoles={[1, 2]} />}>
-                    <Route path="/reports" element={<ReportsPage />} />
-                  </Route>
-
-                  {/* User Profile */}
-                  <Route path="/profile" element={<ProfilePage />} />
                 </Route>
-              </Route>
 
-              {/* 404 Fallback */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </NotificationProvider>
-        </AuthProvider>
-      </ToastProvider>
+                {/* 404 Fallback */}
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </NotificationProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

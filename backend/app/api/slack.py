@@ -1,411 +1,96 @@
-import json
-import re
-
-from fastapi import APIRouter, Request, Depends
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Request, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+import logging
 
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
-
-from app.core.config import settings
 from app.database.database import get_db
-
-from app.models.user import User
 from app.models.ticket import Ticket
-from app.models.ticket_activity import TicketActivity
-
+from app.models.user import User
 from app.services.slack_service import send_slack_message
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/slack",
-    tags=["Slack"],
+    tags=["slack"]
 )
-
-
-# ============================================================
-# SLACK CLIENT
-# ============================================================
-
-slack_client = WebClient(
-    token=settings.SLACK_BOT_TOKEN
-)
-
-
-# ============================================================
-# HEALTH CHECK
-# ============================================================
-
-@router.get("/health")
-async def slack_health():
-
-    return {
-        "status": "Slack API is working"
-    }
-
-
-# ============================================================
-# TEST SLACK NOTIFICATION
-# ============================================================
-
-@router.get("/test-notification")
-async def test_slack_notification():
-
-    success = send_slack_message(
-        (
-            "🔔 *IT Service Desk Test Notification*\n\n"
-            "Slack notifications are working successfully."
-        )
-    )
-
-    return {
-        "success": success
-    }
-
-
-# ============================================================
-# SLACK EVENTS
-# ============================================================
 
 @router.post("/events")
-async def slack_events(
-    request: Request,
-    db: Session = Depends(get_db)
-):
+async def handle_slack_events(request: Request, db: Session = Depends(get_db)):
+    """
+    Handle incoming Slack Events API webhooks to auto-create tickets from messages/mentions.
+    """
+    data = await request.json()
 
-    print("\n")
-    print("=" * 60)
-    print("SLACK REQUEST RECEIVED")
-    print("=" * 60)
+    # 1. Handle Slack URL Verification Challenge
+    if "challenge" in data:
+        return {"challenge": data["challenge"]}
 
-    # ========================================================
-    # READ REQUEST BODY
-    # ========================================================
+    event = data.get("event", {})
+    event_type = event.get("type")
 
-    body = await request.body()
+    # 2. Process message or app_mention events
+    if event_type in ["message", "app_mention"]:
+        # Avoid reacting to bot's own messages
+        if event.get("bot_id") or event.get("subtype") == "bot_message":
+            return {"status": "ok", "message": "Ignored bot event"}
 
-    if not body:
+        text = event.get("text", "")
+        slack_user_id = event.get("user")
 
-        return JSONResponse(
-            status_code=200,
-            content={
-                "ok": True
-            }
-        )
+        if not text:
+            return {"status": "ok", "message": "Empty message ignored"}
 
-    # ========================================================
-    # PARSE JSON
-    # ========================================================
+        # Clean mention tags from text if app_mention
+        cleaned_text = text.replace("<@U", "").replace(">", "").strip()
 
-    try:
+        # Find matching internal user by slack_user_id or fallback to default user
+        user = db.query(User).filter(User.slack_user_id == slack_user_id).first()
+        if not user:
+            user = db.query(User).first()
 
-        data = json.loads(
-            body.decode("utf-8")
-        )
+        requester_id = user.id if user else 1
 
-    except Exception as error:
+        # Truncate first line for ticket title
+        lines = text.strip().split("\n")
+        title = lines[0][:100] if lines else "Ticket from Slack"
 
-        print(
-            "JSON parsing error:",
-            error
-        )
-
-        return JSONResponse(
-            status_code=200,
-            content={
-                "ok": True
-            }
-        )
-
-    # ========================================================
-    # PRINT SLACK EVENT
-    # ========================================================
-
-    print(
-        json.dumps(
-            data,
-            indent=2
-        )
-    )
-
-    # ========================================================
-    # URL VERIFICATION
-    # ========================================================
-
-    if data.get("type") == "url_verification":
-
-        print(
-            "Slack URL verification received"
-        )
-
-        return JSONResponse(
-            status_code=200,
-            content={
-                "challenge": data.get(
-                    "challenge"
-                )
-            }
-        )
-    # ========================================================
-    # EVENT CALLBACK
-    # ========================================================
-
-    if data.get("type") == "event_callback":
-
-        event = data.get(
-            "event",
-            {}
-        )
-
-        event_type = event.get(
-            "type"
-        )
-
-        print(
-            "Event type:",
-            event_type
-        )
-
-        # ====================================================
-        # APP MENTION
-        # ====================================================
-
-        if event_type == "app_mention":
-
-            # ------------------------------------------------
-            # GET SLACK INFORMATION
-            # ------------------------------------------------
-
-            channel_id = event.get(
-                "channel"
-            )
-
-            slack_user_id = event.get(
-                "user"
-            )
-
-            message = event.get(
-                "text",
-                ""
-            )
-
-            print(
-                "Slack user:",
-                slack_user_id
-            )
-
-            print(
-                "Channel:",
-                channel_id
-            )
-
-            print(
-                "Message:",
-                message
-            )
-
-            # ------------------------------------------------
-            # CHANNEL CHECK
-            # ------------------------------------------------
-
-            if not channel_id:
-
-                print(
-                    "ERROR: Channel ID missing"
-                )
-
-                return {
-                    "ok": True
-                }
-
-            # =================================================
-            # FIND USER
-            # =================================================
-
-            user = (
-                db.query(User)
-                .filter(
-                    User.slack_user_id ==
-                    slack_user_id
-                )
-                .first()
-            )
-
-            # =================================================
-            # USER NOT LINKED (FALLBACK TO FIRST ADMIN/USER)
-            # =================================================
-
-            if not user:
-
-                print(
-                    f"Slack user {slack_user_id} not explicitly linked. "
-                    "Falling back to primary system account."
-                )
-
-                # Fetch fallback account so ticket creation succeeds
-                user = db.query(User).first()
-
-                if not user:
-                    print("ERROR: No fallback user found in database.")
-                    try:
-                        slack_client.chat_postMessage(
-                            channel=channel_id,
-                            text="❌ System error: No active user accounts found in IT Service Desk."
-                        )
-                    except SlackApiError as error:
-                        print("Slack API error:", error.response.get("error"))
-
-                    return {"ok": True}
-
-            # =================================================
-            # REMOVE BOT MENTION
-            # =================================================
-
-            clean_message = re.sub(
-                r"<@[A-Z0-9]+>",
-                "",
-                message
-            ).strip()
-
-            print(
-                "Clean message:",
-                clean_message
-            )
-
-            # =================================================
-            # EMPTY MESSAGE
-            # =================================================
-
-            if not clean_message:
-
-                try:
-
-                    slack_client.chat_postMessage(
-                        channel=channel_id,
-                        text=(
-                            "Please describe the issue "
-                            "you want to report.\n\n"
-                            "Example:\n"
-                            "`@Dataeko IT Service Desk "
-                            "My laptop WiFi is not working`"
-                        )
-                    )
-
-                except SlackApiError as error:
-
-                    print(
-                        "Slack API error:",
-                        error.response.get(
-                            "error"
-                        )
-                    )
-
-                return {
-                    "ok": True
-                }
-
-            # =================================================
-            # CREATE TICKET
-            # =================================================
-
-            ticket = Ticket(
-                title=clean_message[:200],
-                description=clean_message,
-                category="general",
-                priority="medium",
+        try:
+            # Create Ticket in DB
+            new_ticket = Ticket(
+                title=title,
+                description=text,
+                category="General",
+                priority="Medium",
                 status="open",
                 source="slack",
-                requester_id=user.id
+                requester_id=requester_id
             )
 
-            db.add(ticket)
-
+            db.add(new_ticket)
             db.commit()
+            db.refresh(new_ticket)
 
-            db.refresh(ticket)
-
-            print(
-                "Ticket created:",
-                ticket.id
-            )
-
-            # =================================================
-            # CREATE ACTIVITY
-            # =================================================
-
-            activity = TicketActivity(
-                ticket_id=ticket.id,
-                user_id=user.id,
-                action="created",
-                comment="Ticket created from Slack"
-            )
-
-            db.add(activity)
-
-            db.commit()
-
-            print(
-                "Ticket activity created"
-            )
-
-            # =================================================
-            # SLACK RESPONSE
-            # =================================================
-
-            response_text = (
-                "🎫 *Ticket created successfully!*\n\n"
-                f"*Ticket ID:* #{ticket.id}\n"
-                f"*Title:* {ticket.title}\n"
-                f"*Category:* {ticket.category}\n"
-                f"*Priority:* {ticket.priority}\n"
-                f"*Status:* {ticket.status}\n"
+            # 3. Post Confirmation Message back to Slack channel
+            confirmation_msg = (
+                f"🎫 *Ticket created successfully!*\n\n"
+                f"*Ticket ID:* #{new_ticket.id}\n"
+                f"*Title:* {new_ticket.title}\n"
+                f"*Category:* {new_ticket.category}\n"
+                f"*Priority:* {new_ticket.priority}\n"
+                f"*Status:* {new_ticket.status}\n"
                 f"*Source:* Slack"
             )
+            send_slack_message(confirmation_msg)
 
-            try:
+            logger.info(f"Successfully created Ticket #{new_ticket.id} via Slack Event")
+            return {"status": "ok", "ticket_id": new_ticket.id}
 
-                response = slack_client.chat_postMessage(
-                    channel=channel_id,
-                    text=response_text
-                )
-
-                print(
-                    "Slack reply sent successfully"
-                )
-
-                print(
-                    "Message timestamp:",
-                    response.get("ts")
-                )
-
-            except SlackApiError as error:
-
-                print(
-                    "Slack API error:",
-                    error.response.get(
-                        "error"
-                    )
-                )
-
-        # ====================================================
-        # OTHER EVENTS
-        # ====================================================
-
-        else:
-
-            print(
-                "Ignoring event type:",
-                event_type
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Failed to create ticket from Slack event: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Slack ticket creation failed: {str(e)}"
             )
 
-    # ========================================================
-    # FINAL RESPONSE
-    # ========================================================
-
-    return JSONResponse(
-        status_code=200,
-        content={
-            "ok": True
-        }
-    )
+    return {"status": "ok"}

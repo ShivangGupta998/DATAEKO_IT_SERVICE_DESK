@@ -1,57 +1,56 @@
 import { apiClient } from '../api/client';
-import { Offboarding, OffboardingCreate, OffboardingUpdate } from '../types/offboarding';
+import { Offboarding } from '../types/offboarding';
+
+export interface InitiateOffboardingPayload {
+  user_id: number;
+  departure_date?: string;
+  notes?: string;
+}
+
+export interface UpdateOffboardingPayload {
+  assets_returned?: boolean;
+  access_revoked?: boolean;
+  status?: string;
+  notes?: string;
+}
 
 export const offboardingService = {
   /**
-   * Get all offboarding cases (Admin / Manager)
+   * Get all offboarding records (Admin / Manager view)
    */
-  async getAllOffboardings(): Promise<Offboarding[]> {
+  async getAllOffboarding(): Promise<Offboarding[]> {
     const response = await apiClient.get<Offboarding[]>('/offboarding');
     return response.data;
   },
 
-  async getAllOffboarding(): Promise<Offboarding[]> {
-    return this.getAllOffboardings();
-  },
-
   /**
-   * Get user's offboarding record if any
+   * Get offboarding record for currently logged in employee
    */
   async getMyOffboarding(): Promise<Offboarding | null> {
     try {
-      // ✅ FIX: Backend returns list[OffboardingResponse], get array and take first item
-      const response = await apiClient.get<Offboarding[]>('/offboarding/my');
-      return Array.isArray(response.data) && response.data.length > 0 ? response.data[0] : null;
-    } catch {
-      return null;
+      const response = await apiClient.get<Offboarding>('/offboarding/me');
+      return response.data;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return null;
+      }
+      throw error;
     }
   },
 
   /**
-   * Get single offboarding record
+   * Initiate offboarding process for an employee
    */
-  async getOffboardingById(id: number | string): Promise<Offboarding> {
-    const response = await apiClient.get<Offboarding>(`/offboarding/${id}`);
+  async initiateOffboarding(payload: InitiateOffboardingPayload): Promise<Offboarding> {
+    const response = await apiClient.post<Offboarding>('/offboarding', payload);
     return response.data;
   },
 
   /**
-   * Initiate employee offboarding
+   * Update asset returns, access revocation, or status for an offboarding workflow
    */
-  async createOffboarding(data: OffboardingCreate): Promise<Offboarding> {
-    const response = await apiClient.post<Offboarding>('/offboarding', data);
-    return response.data;
-  },
-
-  async initiateOffboarding(data: OffboardingCreate): Promise<Offboarding> {
-    return this.createOffboarding(data);
-  },
-
-  /**
-   * Update offboarding progress (assets returned, access revoked, status)
-   */
-  async updateOffboarding(id: number | string, data: OffboardingUpdate): Promise<Offboarding> {
-    const response = await apiClient.patch<Offboarding>(`/offboarding/${id}`, data);
+  async updateOffboarding(id: number | string, payload: UpdateOffboardingPayload): Promise<Offboarding> {
+    const response = await apiClient.patch<Offboarding>(`/offboarding/${id}`, payload);
     return response.data;
   },
 };

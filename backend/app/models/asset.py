@@ -1,21 +1,20 @@
+from datetime import datetime
 from sqlalchemy import (
     Column,
     Integer,
     String,
     Date,
     DateTime,
+    Float,
     ForeignKey
 )
-
 from sqlalchemy.orm import relationship
-
-from datetime import datetime
-
 from app.database.base import Base
 
 
 class Asset(Base):
     __tablename__ = "assets"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(
         Integer,
@@ -48,6 +47,12 @@ class Asset(Base):
         String(100),
         unique=True,
         nullable=False
+    )
+
+    cost = Column(
+        Float,
+        nullable=True,
+        default=0.0
     )
 
     assigned_to = Column(

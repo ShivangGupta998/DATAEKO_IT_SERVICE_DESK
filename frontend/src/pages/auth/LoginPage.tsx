@@ -1,26 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Layers, Lock, User, Server, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, AlertCircle, Eye, EyeOff, Info } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useTheme } from '../../context/ThemeContext';
+import { ThemeToggle } from '../../components/common/ThemeToggle';
 import { parseApiError } from '../../api/client';
 
 export const LoginPage: React.FC = () => {
-  const { login, backendUrl, setBackendUrl } = useAuth();
+  const { login } = useAuth();
   const { success, error: toastError } = useToast();
+  const { theme } = useTheme();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showDemoInfo, setShowDemoInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showServerConfig, setShowServerConfig] = useState(false);
-  const [customApiUrl, setCustomApiUrl] = useState(backendUrl);
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // High-Contrast Particle Wave Animation
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    const numRows = 32;
+    const numCols = 55;
+    const separation = 45;
+    let count = 0;
+
+    const render = () => {
+      ctx.fillStyle = theme === 'dark' ? '#090d16' : '#f1f5f9';
+      ctx.fillRect(0, 0, width, height);
+
+      count += 0.025;
+      const startX = (width - numCols * separation) / 2;
+      const startY = height / 3.2;
+
+      for (let ix = 0; ix < numCols; ix++) {
+        for (let iy = 0; iy < numRows; iy++) {
+          const yOffset =
+            Math.sin((ix + count) * 0.3) * 45 + Math.sin((iy + count) * 0.4) * 45;
+
+          const perspective = 0.4 + (iy / numRows) * 0.8;
+          const px = startX + ix * separation * perspective + (width / 2 - startX) * (1 - perspective);
+          const py = startY + iy * 22 + yOffset * perspective;
+          const radius = Math.max(0.8, 2.2 * perspective);
+
+          const alpha = Math.min(0.9, Math.max(0.2, (iy / numRows) * 0.85));
+          
+          ctx.beginPath();
+          ctx.arc(px, py, radius, 0, Math.PI * 2);
+
+          ctx.fillStyle = theme === 'dark' 
+            ? `rgba(129, 140, 248, ${alpha})` 
+            : `rgba(79, 70, 229, ${alpha * 0.75})`;
+          ctx.fill();
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [theme]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim() || !password) {
-      setErrorMessage('Please enter both username and password.');
+    if (!usernameOrEmail.trim() || !password) {
+      setErrorMessage('Please enter both username/email and password.');
       return;
     }
 
@@ -28,8 +98,8 @@ export const LoginPage: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      const user = await login(username, password);
-      success('Welcome back!', `Logged in as ${user.full_name || user.username}`);
+      await login(usernameOrEmail.trim(), password);
+      success('Welcome back!', 'Successfully signed in.');
       navigate('/dashboard');
     } catch (err: any) {
       const parsed = parseApiError(err);
@@ -40,171 +110,133 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleApplyServerUrl = () => {
-    setBackendUrl(customApiUrl);
-    setShowServerConfig(false);
-    success('Backend URL updated', customApiUrl);
-  };
-
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Subtle Background Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col justify-center py-10 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">
+      {/* Top Left Branding */}
+      <div className="absolute top-6 left-8 z-20 flex items-center gap-2.5 select-none">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+        <span className="text-xl font-black tracking-[0.35em] text-indigo-600 dark:text-[#4d7cff]">
+          DATAEKO AI
+        </span>
+      </div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="flex justify-center">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
-            <Layers className="w-7 h-7" />
-          </div>
+      {/* Top Right Controls */}
+      <div className="absolute top-6 right-8 z-20">
+        <ThemeToggle />
+      </div>
+
+      {/* Background Canvas */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0" />
+
+      {/* Page Title & Subtitle */}
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center">
+        <div className="inline-flex w-12 h-12 rounded-2xl bg-indigo-600 text-white items-center justify-center shadow-lg shadow-indigo-500/30 mb-3">
+          <ShieldCheck className="w-7 h-7" />
         </div>
-        <h2 className="mt-4 text-center text-2xl font-bold tracking-tight text-white">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           IT Service Desk
         </h2>
-        <p className="mt-1 text-center text-xs text-slate-400">
+        <p className="text-xs text-slate-700 dark:text-slate-400 mt-1 font-semibold">
           Enterprise ITSM with Role-Based Access Control
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4 sm:px-0">
-        <div className="bg-slate-800/90 backdrop-blur-md py-8 px-6 sm:px-10 shadow-2xl rounded-2xl border border-slate-700/80">
+      {/* Main Form Card */}
+      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4 sm:px-0">
+        <div className="bg-white/95 dark:bg-slate-900/90 backdrop-blur-md py-8 px-6 sm:px-10 shadow-2xl rounded-2xl border border-slate-200/90 dark:border-slate-800 transition-colors duration-300">
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
-              <span className="leading-relaxed">{errorMessage}</span>
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+              <span className="leading-relaxed font-medium">{errorMessage}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Username or Email
+              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                Username or Email *
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <User className="w-4 h-4" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                  <Mail className="w-4 h-4" />
                 </div>
                 <input
-                  id="username"
-                  name="username"
                   type="text"
-                  autoComplete="username"
                   required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="admin / employee"
-                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                  value={usernameOrEmail}
+                  onChange={(e) => setUsernameOrEmail(e.target.value)}
+                  placeholder="name@company.com"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all font-medium"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Password
+              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                Password *
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                  className="w-full pl-10 pr-10 py-2.5 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all font-medium"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors focus:outline-none"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
             <div className="pt-2">
               <button
                 type="submit"
-                id="login-submit-btn"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 transition-all shadow-md shadow-indigo-600/30"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600/50 disabled:opacity-50 transition-all shadow-md shadow-indigo-600/20"
               >
-                {isLoading ? (
-                  <span>Authenticating...</span>
-                ) : (
-                  <>
-                    <span>Sign In</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
+                {isLoading ? <span>Signing In...</span> : <span>Sign In</span>}
               </button>
             </div>
           </form>
 
-          {/* Quick RBAC Role Reference for Test/Evaluation */}
-          <div className="mt-6 pt-5 border-t border-slate-700/60">
-            <p className="text-[11px] font-medium text-slate-400 mb-2">Supported Roles:</p>
-            <div className="grid grid-cols-2 gap-2 text-[10px]">
-              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-700/50 text-slate-300">
-                <span className="font-bold text-purple-400">Role 1: Admin</span>
-                <p className="text-slate-400 text-[9px] mt-0.5">Full System Access</p>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-700/50 text-slate-300">
-                <span className="font-bold text-indigo-400">Role 2: Manager</span>
-                <p className="text-slate-400 text-[9px] mt-0.5">Tickets & Assets</p>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-700/50 text-slate-300">
-                <span className="font-bold text-blue-400">Role 3: Technician</span>
-                <p className="text-slate-400 text-[9px] mt-0.5">Assigned Resolution</p>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-700/50 text-slate-300">
-                <span className="font-bold text-emerald-400">Role 4: Employee</span>
-                <p className="text-slate-400 text-[9px] mt-0.5">Self-Service Portal</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Register Link */}
-          <div className="mt-5 text-center text-xs text-slate-400">
+          <div className="mt-5 text-center text-xs text-slate-700 dark:text-slate-400 font-semibold">
             Don't have an account?{' '}
-            <Link to="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold">
-              Register here
+            <Link to="/register" className="text-indigo-600 dark:text-indigo-400 hover:underline font-bold transition-colors">
+              Create Account
             </Link>
           </div>
-
-          {/* Backend Connection Config Drawer */}
-          <div className="mt-5 pt-4 border-t border-slate-700/40 text-center">
-            <button
-              type="button"
-              onClick={() => setShowServerConfig(!showServerConfig)}
-              className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-slate-200 transition-colors"
-            >
-              <Server className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Backend API: {backendUrl}</span>
-            </button>
-
-            {showServerConfig && (
-              <div className="mt-3 p-3 rounded-xl bg-slate-900/80 border border-slate-700 text-left">
-                <label className="block text-[11px] font-medium text-slate-300 mb-1">
-                  FastAPI Server URL
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={customApiUrl}
-                    onChange={(e) => setCustomApiUrl(e.target.value)}
-                    className="flex-1 px-2.5 py-1.5 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white font-mono"
-                    placeholder="http://127.0.0.1:8000"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleApplyServerUrl}
-                    className="px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
+      </div>
+
+      {/* Floating Demo Access Toggle */}
+      <div className="absolute bottom-6 right-6 z-20">
+        <button
+          onClick={() => setShowDemoInfo(!showDemoInfo)}
+          className="p-2.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors shadow-lg"
+          title="Demo Access Info"
+        >
+          <Info className="w-4 h-4" />
+        </button>
+        {showDemoInfo && (
+          <div className="absolute bottom-12 right-0 w-64 p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-200 shadow-2xl">
+            <span className="font-bold text-indigo-600 dark:text-indigo-400 block mb-1.5">Demo Credentials:</span>
+            <ul className="space-y-1 text-[11px] text-slate-700 dark:text-slate-400 font-medium">
+              <li>• Admin: <code className="text-slate-900 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">admin</code></li>
+              <li>• Manager: <code className="text-slate-900 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">manager</code></li>
+              <li>• Tech: <code className="text-slate-900 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">tech</code></li>
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
