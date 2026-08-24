@@ -31,10 +31,11 @@ import {
 import { CardSkeleton } from '../../components/common/LoadingState';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { parseApiError } from '../../api/client';
+import { useTheme } from '../../context/ThemeContext'; // <-- Import Theme hook
 
 const STATUS_COLORS: Record<string, string> = {
   OPEN: '#3b82f6',
-  'IN_PROGRESS': '#f59e0b',
+  IN_PROGRESS: '#f59e0b',
   RESOLVED: '#10b981',
   CLOSED: '#64748b',
 };
@@ -47,6 +48,9 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 export const ReportsPage: React.FC = () => {
+  const { theme } = useTheme(); // Get current active theme
+  const isDark = theme === 'dark';
+
   const [summary, setSummary] = useState<TicketSummaryReport | null>(null);
   const [statusData, setStatusData] = useState<StatusReportItem[]>([]);
   const [priorityData, setPriorityData] = useState<PriorityReportItem[]>([]);
@@ -79,6 +83,11 @@ export const ReportsPage: React.FC = () => {
   useEffect(() => {
     fetchReports();
   }, []);
+
+  const chartTickColor = isDark ? '#94a3b8' : '#64748b';
+  const tooltipBg = isDark ? '#0f172a' : '#ffffff';
+  const tooltipTextColor = isDark ? '#f8fafc' : '#0f172a';
+  const tooltipBorder = isDark ? '#334155' : '#e2e8f0';
 
   return (
     <div className="space-y-6">
@@ -113,7 +122,7 @@ export const ReportsPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
               <span className="text-xs font-semibold">Total Volume</span>
               <TrendingUp className="w-4 h-4 text-indigo-500" />
             </div>
@@ -126,7 +135,7 @@ export const ReportsPage: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
               <span className="text-xs font-semibold">Active In-Flight</span>
               <Clock className="w-4 h-4 text-blue-500" />
             </div>
@@ -139,7 +148,7 @@ export const ReportsPage: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
               <span className="text-xs font-semibold">Resolved Rate</span>
               <CheckCircle2 className="w-4 h-4 text-emerald-500" />
             </div>
@@ -152,7 +161,7 @@ export const ReportsPage: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center justify-between text-slate-500">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
               <span className="text-xs font-semibold">SLA Health</span>
               <AlertTriangle className="w-4 h-4 text-orange-500" />
             </div>
@@ -166,12 +175,12 @@ export const ReportsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Visual Analytics Row: Pie + Bar Chart */}
+      {/* Visual Analytics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Status Distribution */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
           <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
-            <PieIcon className="w-4 h-4 text-indigo-600" />
+            <PieIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             <span>Ticket Status Breakdown</span>
           </h3>
 
@@ -202,13 +211,14 @@ export const ReportsPage: React.FC = () => {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#0f172a',
+                      backgroundColor: tooltipBg,
+                      borderColor: tooltipBorder,
                       borderRadius: '12px',
-                      color: '#fff',
+                      color: tooltipTextColor,
                       fontSize: '12px',
                     }}
                   />
-                  <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+                  <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px', color: chartTickColor }} />
                 </PieChart>
               </ResponsiveContainer>
             )}
@@ -218,7 +228,7 @@ export const ReportsPage: React.FC = () => {
         {/* Priority Distribution */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
           <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
-            <BarChart3 className="w-4 h-4 text-indigo-600" />
+            <BarChart3 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             <span>Priority Distribution</span>
           </h3>
 
@@ -230,13 +240,14 @@ export const ReportsPage: React.FC = () => {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={priorityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="priority" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
+                  <XAxis dataKey="priority" tick={{ fill: chartTickColor, fontSize: 11 }} />
+                  <YAxis tick={{ fill: chartTickColor, fontSize: 11 }} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#0f172a',
+                      backgroundColor: tooltipBg,
+                      borderColor: tooltipBorder,
                       borderRadius: '12px',
-                      color: '#fff',
+                      color: tooltipTextColor,
                       fontSize: '12px',
                     }}
                   />
@@ -260,7 +271,7 @@ export const ReportsPage: React.FC = () => {
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Users className="w-4 h-4 text-indigo-600" />
+              <Users className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               <span>Technician & Agent Workload Performance</span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

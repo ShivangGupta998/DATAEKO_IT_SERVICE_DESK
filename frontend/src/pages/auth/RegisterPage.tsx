@@ -247,10 +247,10 @@ export const RegisterPage: React.FC = () => {
                   onChange={(e) => setRoleId(parseInt(e.target.value, 10))}
                   className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all font-medium"
                 >
-                  <option value={UserRole.ADMIN}>Admin (1)</option>
-                  <option value={UserRole.MANAGER}>Manager (2)</option>
-                  <option value={UserRole.TECHNICIAN}>Technician (3)</option>
-                  <option value={UserRole.EMPLOYEE}>Employee (4)</option>
+                  <option value={UserRole.ADMIN}>Admin</option>
+                  <option value={UserRole.MANAGER}>Manager</option>
+                  <option value={UserRole.TECHNICIAN}>Technician</option>
+                  <option value={UserRole.EMPLOYEE}>Employee</option>
                 </select>
               </div>
 
