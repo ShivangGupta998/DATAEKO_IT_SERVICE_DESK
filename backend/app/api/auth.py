@@ -1,9 +1,12 @@
+from typing import Union
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.user import User
+from app.models.role import Role
+from app.models.department import Department
 from app.schemas.user import UserCreate
 
 from app.core.security import (
@@ -31,7 +34,6 @@ def register(
     db: Session = Depends(get_db)
 ):
 
-    # Check duplicate email
     existing_email = db.query(User).filter(
         User.email == user.email
     ).first()
@@ -42,7 +44,6 @@ def register(
             detail="Email already registered"
         )
 
-    # Check duplicate username
     existing_username = db.query(User).filter(
         User.username == user.username
     ).first()
@@ -53,7 +54,6 @@ def register(
             detail="Username already registered"
         )
 
-    # Create user
     new_user = User(
         username=user.username,
         email=user.email,
@@ -87,26 +87,22 @@ def login(
     db: Session = Depends(get_db)
 ):
 
-    # Swagger's "username" field contains the EMAIL
     user = db.query(User).filter(
         User.email == form_data.username
     ).first()
 
-    # Do not reveal whether the email exists
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
 
-    # Check account status
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User account is inactive"
         )
 
-    # Verify password
     if not verify_password(
         form_data.password,
         user.hashed_password
@@ -116,17 +112,31 @@ def login(
             detail="Invalid email or password"
         )
 
-    # Create JWT
+    # Fetch role name from Role table
+    role_name = "Employee"
+    if hasattr(user, "role") and user.role:
+        role_name = user.role.name
+    else:
+        role_record = db.query(Role).filter(Role.id == user.role_id).first()
+        if role_record:
+            role_name = role_record.name
+
     access_token = create_access_token(
         {
             "user_id": user.id,
-            "role_id": user.role_id
+            "role_id": user.role_id,
+            "role": role_name
         }
     )
 
     return {
         "access_token": access_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "user_id": user.id,
+        "role_id": user.role_id,
+        "role": role_name,
+        "username": user.username,
+        "email": user.email
     }
 
 
@@ -136,10 +146,44 @@ def login(
 
 @router.get("/me")
 def get_profile(
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
+    # Retrieve user ID safely whether current_user is a dict or a User model instance
+    if isinstance(current_user, dict):
+        user_id = current_user.get("user_id") or current_user.get("id") or current_user.get("sub")
+    else:
+        user_id = getattr(current_user, "id", None)
+
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user token payload"
+        )
+
+    # Fetch fresh user record from database
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User profile not found"
+        )
+
+    # Fetch role name
+    role_name = "Employee"
+    if hasattr(user, "role") and user.role:
+        role_name = user.role.name
+    else:
+        role_record = db.query(Role).filter(Role.id == user.role_id).first()
+        if role_record:
+            role_name = role_record.name
 
     return {
-        "message": "Protected route accessed",
-        "user": current_user
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "role_id": user.role_id,
+        "role": role_name,
+        "department_id": user.department_id,
+        "is_active": user.is_active
     }

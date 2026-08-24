@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -18,7 +20,19 @@ from app.core.dependencies import (
     require_roles
 )
 
-from app.services.slack_service import send_slack_message
+from app.services.notification_service import (
+    create_notification
+)
+
+from app.services.slack_service import (
+    send_slack_message
+)
+
+from app.services.sla_service import (
+    calculate_sla_due,
+    get_sla_status,
+    get_remaining_minutes
+)
 
 
 router = APIRouter(
@@ -28,7 +42,7 @@ router = APIRouter(
 
 
 # ============================================================
-# ROLE IDs
+# ROLE IDS
 # ============================================================
 
 ADMIN = 1
@@ -38,8 +52,32 @@ EMPLOYEE = 4
 
 
 # ============================================================
+# SLA HELPER
+# ============================================================
+
+def add_sla_details(ticket):
+
+    if ticket.sla_due:
+
+        ticket.sla_status = get_sla_status(
+            ticket.sla_due,
+            ticket.resolved_at
+        )
+
+        ticket.remaining_minutes = get_remaining_minutes(
+            ticket.sla_due
+        )
+
+    else:
+
+        ticket.sla_status = None
+        ticket.remaining_minutes = None
+
+    return ticket
+
+
+# ============================================================
 # CREATE TICKET
-# ALL AUTHENTICATED USERS
 # ============================================================
 
 @router.post(
@@ -50,10 +88,9 @@ EMPLOYEE = 4
 def create_ticket(
     ticket_data: TicketCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-
-    user_id = current_user["user_id"]
+    user_id = current_user.id
 
     user = (
         db.query(User)
@@ -63,9 +100,13 @@ def create_ticket(
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Logged-in user not found"
+            status_code=404,
+            detail="User not found"
         )
+
+    sla_due = calculate_sla_due(
+        ticket_data.priority
+    )
 
     ticket = Ticket(
         title=ticket_data.title,
@@ -74,13 +115,15 @@ def create_ticket(
         priority=ticket_data.priority,
         status="open",
         source="web",
-        requester_id=user_id
+        requester_id=user_id,
+        sla_due=sla_due
     )
 
     db.add(ticket)
     db.commit()
     db.refresh(ticket)
 
+    # Activity
     activity = TicketActivity(
         ticket_id=ticket.id,
         user_id=user_id,
@@ -89,14 +132,24 @@ def create_ticket(
     )
 
     db.add(activity)
+
+    # Notification to ticket creator
+    create_notification(
+        db=db,
+        user_id=user_id,
+        title="Ticket Created",
+        message=f"Your ticket #{ticket.id} has been created",
+        notification_type="Ticket"
+    )
+
     db.commit()
 
-    return ticket
+    return add_sla_details(ticket)
 
 
 # ============================================================
 # GET ALL TICKETS
-# ADMIN / MANAGER / TECHNICIAN ONLY
+# ADMIN / MANAGER / TECHNICIAN
 # ============================================================
 
 @router.get(
@@ -105,7 +158,7 @@ def create_ticket(
 )
 def get_tickets(
     db: Session = Depends(get_db),
-    current_user: dict = Depends(
+    current_user: User = Depends(
         require_roles(
             ADMIN,
             MANAGER,
@@ -113,21 +166,21 @@ def get_tickets(
         )
     )
 ):
-
     tickets = (
         db.query(Ticket)
-        .order_by(
-            Ticket.created_at.desc()
-        )
+        .order_by(Ticket.created_at.desc())
         .all()
     )
 
-    return tickets
+    return [
+        add_sla_details(ticket)
+        for ticket in tickets
+    ]
 
 
 # ============================================================
 # GET MY TICKETS
-# ALL AUTHENTICATED USERS
+# EMPLOYEE
 # ============================================================
 
 @router.get(
@@ -136,10 +189,9 @@ def get_tickets(
 )
 def get_my_tickets(
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-
-    user_id = current_user["user_id"]
+    user_id = current_user.id
 
     tickets = (
         db.query(Ticket)
@@ -152,12 +204,15 @@ def get_my_tickets(
         .all()
     )
 
-    return tickets
+    return [
+        add_sla_details(ticket)
+        for ticket in tickets
+    ]
 
 
 # ============================================================
 # GET ASSIGNED TICKETS
-# TECHNICIAN ONLY
+# TECHNICIAN
 # ============================================================
 
 @router.get(
@@ -166,12 +221,11 @@ def get_my_tickets(
 )
 def get_assigned_tickets(
     db: Session = Depends(get_db),
-    current_user: dict = Depends(
+    current_user: User = Depends(
         require_roles(TECHNICIAN)
     )
 ):
-
-    user_id = current_user["user_id"]
+    user_id = current_user.id
 
     tickets = (
         db.query(Ticket)
@@ -184,26 +238,26 @@ def get_assigned_tickets(
         .all()
     )
 
-    return tickets
+    return [
+        add_sla_details(ticket)
+        for ticket in tickets
+    ]
 
 
 # ============================================================
-# GET SINGLE TICKET
-# ALL AUTHENTICATED USERS
+# GET TICKET HISTORY
 # ============================================================
 
 @router.get(
-    "/{ticket_id}",
-    response_model=TicketResponse
+    "/{ticket_id}/history"
 )
-def get_ticket(
+def get_ticket_history(
     ticket_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-
-    user_id = current_user["user_id"]
-    role_id = current_user["role_id"]
+    user_id = current_user.id
+    role_id = current_user.role_id
 
     ticket = (
         db.query(Ticket)
@@ -215,26 +269,92 @@ def get_ticket(
 
     if not ticket:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=404,
             detail="Ticket not found"
         )
 
-    # Employees can only view their own tickets
+    # Employee can only see own history
     if role_id == EMPLOYEE:
-
         if ticket.requester_id != user_id:
-
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
+                status_code=403,
+                detail="You can only view your own ticket history"
+            )
+
+    # Technician can only see assigned history
+    if role_id == TECHNICIAN:
+        if ticket.assignee_id != user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="You can only view assigned ticket history"
+            )
+
+    activities = (
+        db.query(TicketActivity)
+        .filter(
+            TicketActivity.ticket_id == ticket_id
+        )
+        .order_by(
+            TicketActivity.created_at.asc()
+        )
+        .all()
+    )
+
+    return activities
+
+
+# ============================================================
+# GET SINGLE TICKET
+# ============================================================
+
+@router.get(
+    "/{ticket_id}",
+    response_model=TicketResponse
+)
+def get_ticket(
+    ticket_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    user_id = current_user.id
+    role_id = current_user.role_id
+
+    ticket = (
+        db.query(Ticket)
+        .filter(
+            Ticket.id == ticket_id
+        )
+        .first()
+    )
+
+    if not ticket:
+        raise HTTPException(
+            status_code=404,
+            detail="Ticket not found"
+        )
+
+    # Employee access
+    if role_id == EMPLOYEE:
+        if ticket.requester_id != user_id:
+            raise HTTPException(
+                status_code=403,
                 detail="You can only view your own tickets"
             )
 
-    return ticket
+    # Technician access
+    if role_id == TECHNICIAN:
+        if ticket.assignee_id != user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="You can only view assigned tickets"
+            )
+
+    return add_sla_details(ticket)
 
 
 # ============================================================
 # UPDATE TICKET
-# ADMIN / MANAGER / TECHNICIAN ONLY
+# ADMIN / MANAGER / TECHNICIAN
 # ============================================================
 
 @router.patch(
@@ -245,7 +365,7 @@ def update_ticket(
     ticket_id: int,
     ticket_data: TicketUpdate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(
+    current_user: User = Depends(
         require_roles(
             ADMIN,
             MANAGER,
@@ -253,13 +373,12 @@ def update_ticket(
         )
     )
 ):
+    user_id = current_user.id
+    role_id = current_user.role_id
 
-    user_id = current_user["user_id"]
-    role_id = current_user["role_id"]
-
-    # ========================================================
+    # --------------------------------------------------------
     # FIND TICKET
-    # ========================================================
+    # --------------------------------------------------------
 
     ticket = (
         db.query(Ticket)
@@ -271,29 +390,24 @@ def update_ticket(
 
     if not ticket:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=404,
             detail="Ticket not found"
         )
 
-    # ========================================================
+    # --------------------------------------------------------
     # TECHNICIAN OWNERSHIP CHECK
-    # ========================================================
+    # --------------------------------------------------------
 
     if role_id == TECHNICIAN:
-
         if ticket.assignee_id != user_id:
-
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    "Technician can only update "
-                    "tickets assigned to them"
-                )
+                status_code=403,
+                detail="Technician can only update assigned tickets"
             )
 
-    # ========================================================
+    # --------------------------------------------------------
     # TRACK CHANGES
-    # ========================================================
+    # --------------------------------------------------------
 
     changes = []
 
@@ -301,71 +415,67 @@ def update_ticket(
     priority_changed = False
     assignment_happened = False
 
+    agent = None
+
     # ========================================================
-    # STATUS
+    # STATUS UPDATE
     # ========================================================
 
     if ticket_data.status is not None:
-
         old_status = ticket.status
 
         if old_status != ticket_data.status:
-
             ticket.status = ticket_data.status
-
             status_changed = True
 
             changes.append(
-                f"Status changed from "
-                f"{old_status} to "
-                f"{ticket_data.status}"
+                f"Status changed from {old_status} to {ticket.status}"
             )
 
+            if ticket.status == "resolved":
+                ticket.resolved_at = datetime.now(
+                    timezone.utc
+                )
+            elif ticket.status in [
+                "open",
+                "in_progress"
+            ]:
+                ticket.resolved_at = None
+
     # ========================================================
-    # PRIORITY
+    # PRIORITY UPDATE
     # ========================================================
 
     if ticket_data.priority is not None:
-
         old_priority = ticket.priority
 
         if old_priority != ticket_data.priority:
-
             ticket.priority = ticket_data.priority
-
             priority_changed = True
+
+            ticket.sla_due = calculate_sla_due(
+                ticket.priority
+            )
 
             changes.append(
                 f"Priority changed from "
-                f"{old_priority} to "
-                f"{ticket_data.priority}"
+                f"{old_priority} to {ticket.priority}"
             )
 
     # ========================================================
-    # ASSIGN TICKET
-    # ADMIN / MANAGER ONLY
+    # ASSIGN TECHNICIAN
     # ========================================================
 
-    agent = None
-
     if ticket_data.assignee_id is not None:
-
+        # Only Admin / Manager can assign
         if role_id not in [
             ADMIN,
             MANAGER
         ]:
-
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    "Only Admin or Manager "
-                    "can assign tickets"
-                )
+                status_code=403,
+                detail="Only Admin or Manager can assign tickets"
             )
-
-        # ----------------------------------------------------
-        # FIND ASSIGNEE
-        # ----------------------------------------------------
 
         agent = (
             db.query(User)
@@ -376,38 +486,25 @@ def update_ticket(
         )
 
         if not agent:
-
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Assignee not found"
+                status_code=404,
+                detail="Technician not found"
             )
 
-        # ----------------------------------------------------
-        # VERIFY ASSIGNEE IS TECHNICIAN
-        # ----------------------------------------------------
-
+        # Must be technician
         if agent.role_id != TECHNICIAN:
-
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    "Tickets can only be assigned "
-                    "to Technicians"
-                )
+                status_code=400,
+                detail="Ticket can only be assigned to Technician"
             )
 
-        old_assignee = ticket.assignee_id
-
-        if old_assignee != ticket_data.assignee_id:
-
+        # Check if assignment actually changed
+        if ticket.assignee_id != ticket_data.assignee_id:
             ticket.assignee_id = ticket_data.assignee_id
-
             assignment_happened = True
 
             changes.append(
-                f"Ticket assigned from "
-                f"{old_assignee} to "
-                f"{ticket_data.assignee_id}"
+                f"Assigned to technician {agent.username}"
             )
 
     # ========================================================
@@ -415,24 +512,15 @@ def update_ticket(
     # ========================================================
 
     if ticket_data.comment:
-
         changes.append(
             f"Comment: {ticket_data.comment}"
         )
 
     # ========================================================
-    # SAVE TICKET
-    # ========================================================
-
-    db.commit()
-    db.refresh(ticket)
-
-    # ========================================================
-    # SAVE ACTIVITY HISTORY
+    # ACTIVITY LOG
     # ========================================================
 
     if changes:
-
         activity = TicketActivity(
             ticket_id=ticket.id,
             user_id=user_id,
@@ -441,10 +529,42 @@ def update_ticket(
         )
 
         db.add(activity)
-        db.commit()
 
     # ========================================================
-    # FIND CURRENT USER
+    # NOTIFY TICKET REQUESTER
+    # ========================================================
+
+    if changes:
+        create_notification(
+            db=db,
+            user_id=ticket.requester_id,
+            title="Ticket Updated",
+            message=f"Your ticket #{ticket.id} has been updated",
+            notification_type="Ticket"
+        )
+
+    # ========================================================
+    # NOTIFY TECHNICIAN
+    # ========================================================
+
+    if assignment_happened:
+        create_notification(
+            db=db,
+            user_id=ticket.assignee_id,
+            title="Ticket Assigned",
+            message=f"Ticket #{ticket.id} has been assigned to you.",
+            notification_type="Ticket"
+        )
+
+    # ========================================================
+    # SAVE DATABASE CHANGES
+    # ========================================================
+
+    db.commit()
+    db.refresh(ticket)
+
+    # ========================================================
+    # UPDATED USER
     # ========================================================
 
     updater = (
@@ -458,188 +578,72 @@ def update_ticket(
     updater_name = (
         updater.username
         if updater
-        else "Unknown User"
+        else "Unknown"
     )
 
     # ========================================================
-    # SLACK NOTIFICATION
-    # ASSIGNMENT
+    # SLACK - ASSIGNMENT
     # ========================================================
 
     if assignment_happened:
+        send_slack_message(
+            f"""
+🎫 *Ticket Assigned*
 
-        technician_name = (
-            agent.username
-            if agent
-            else "Unknown Technician"
+Ticket ID: #{ticket.id}
+
+Title: {ticket.title}
+
+Priority: {ticket.priority}
+
+Assigned To: {agent.username}
+
+Status: {ticket.status}
+
+Please check IT Service Desk.
+"""
         )
-
-        slack_message = (
-            "🎫 *New Ticket Assigned*\n\n"
-            f"*Ticket ID:* #{ticket.id}\n"
-            f"*Title:* {ticket.title}\n"
-            f"*Priority:* {ticket.priority}\n"
-            f"*Status:* {ticket.status}\n"
-            f"*Assigned To:* {technician_name}\n\n"
-            "Please check the IT Service Desk."
-        )
-
-        success = send_slack_message(
-            slack_message
-        )
-
-        if success:
-
-            print(
-                f"Slack assignment notification "
-                f"sent for ticket #{ticket.id}"
-            )
-
-        else:
-
-            print(
-                f"Slack assignment notification "
-                f"failed for ticket #{ticket.id}"
-            )
 
     # ========================================================
-    # SLACK NOTIFICATION
-    # STATUS UPDATE
+    # SLACK - STATUS
     # ========================================================
 
     if status_changed:
+        send_slack_message(
+            f"""
+🎫 *Ticket Status Updated*
 
-        slack_message = (
-            "🎫 *Ticket Status Updated*\n\n"
-            f"*Ticket ID:* #{ticket.id}\n"
-            f"*Title:* {ticket.title}\n"
-            f"*Status:* {ticket.status}\n"
-            f"*Priority:* {ticket.priority}\n"
-            f"*Updated By:* {updater_name}\n\n"
-            "Please check the IT Service Desk."
+Ticket ID: #{ticket.id}
+
+Title: {ticket.title}
+
+Status: {ticket.status}
+
+Updated By: {updater_name}
+
+Please check IT Service Desk.
+"""
         )
-
-        success = send_slack_message(
-            slack_message
-        )
-
-        if success:
-
-            print(
-                f"Slack status notification "
-                f"sent for ticket #{ticket.id}"
-            )
-
-        else:
-
-            print(
-                f"Slack status notification "
-                f"failed for ticket #{ticket.id}"
-            )
 
     # ========================================================
-    # SLACK NOTIFICATION
-    # PRIORITY UPDATE
+    # SLACK - PRIORITY
     # ========================================================
 
     if priority_changed:
+        send_slack_message(
+            f"""
+🎫 *Ticket Priority Updated*
 
-        slack_message = (
-            "🎫 *Ticket Priority Updated*\n\n"
-            f"*Ticket ID:* #{ticket.id}\n"
-            f"*Title:* {ticket.title}\n"
-            f"*Priority:* {ticket.priority}\n"
-            f"*Status:* {ticket.status}\n"
-            f"*Updated By:* {updater_name}\n\n"
-            "Please check the IT Service Desk."
+Ticket ID: #{ticket.id}
+
+Title: {ticket.title}
+
+Priority: {ticket.priority}
+
+Updated By: {updater_name}
+
+Please check IT Service Desk.
+"""
         )
 
-        success = send_slack_message(
-            slack_message
-        )
-
-        if success:
-
-            print(
-                f"Slack priority notification "
-                f"sent for ticket #{ticket.id}"
-            )
-
-        else:
-
-            print(
-                f"Slack priority notification "
-                f"failed for ticket #{ticket.id}"
-            )
-
-    return ticket
-
-
-# ============================================================
-# GET TICKET HISTORY
-# ============================================================
-
-@router.get(
-    "/{ticket_id}/history"
-)
-def get_ticket_history(
-    ticket_id: int,
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
-):
-
-    user_id = current_user["user_id"]
-    role_id = current_user["role_id"]
-
-    # ========================================================
-    # FIND TICKET
-    # ========================================================
-
-    ticket = (
-        db.query(Ticket)
-        .filter(
-            Ticket.id == ticket_id
-        )
-        .first()
-    )
-
-    if not ticket:
-
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Ticket not found"
-        )
-
-    # ========================================================
-    # EMPLOYEE ACCESS CONTROL
-    # ========================================================
-
-    if role_id == EMPLOYEE:
-
-        if ticket.requester_id != user_id:
-
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    "You can only view "
-                    "history of your own tickets"
-                )
-            )
-
-    # ========================================================
-    # GET ACTIVITIES
-    # ========================================================
-
-    activities = (
-        db.query(TicketActivity)
-        .filter(
-            TicketActivity.ticket_id ==
-            ticket_id
-        )
-        .order_by(
-            TicketActivity.created_at.asc()
-        )
-        .all()
-    )
-
-    return activities
+    return add_sla_details(ticket)

@@ -1,17 +1,23 @@
-cat > .gitignore <<'EOF'
-# Python
-backend/venv/
-__pycache__/
-*.py[cod]
-
 # Environment / secrets
 backend/.env
-.env
+backend/venv/
+frontend/.env
 
-# Node
-frontend/node_modules/
-frontend/dist/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # macOS
 .DS_Store
-EOFbackend/.env
+
+# Frontend dependencies
+frontend/node_modules/
+
+# Frontend build output
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/

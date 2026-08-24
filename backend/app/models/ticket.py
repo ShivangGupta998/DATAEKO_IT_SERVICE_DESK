@@ -22,7 +22,22 @@ class Ticket(Base):
     requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     assignee_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
+    # ==========================
+    # SLA FIELDS
+    # ==========================
+
+    sla_due = Column(
+        DateTime,
+        nullable=True
+    )
+
+    resolved_at = Column(
+        DateTime,
+        nullable=True
+    )
+
     created_at = Column(DateTime, default=datetime.utcnow)
+
     updated_at = Column(
         DateTime,
         default=datetime.utcnow,
@@ -44,4 +59,3 @@ class Ticket(Base):
         back_populates="ticket",
         cascade="all, delete-orphan"
     )
-    

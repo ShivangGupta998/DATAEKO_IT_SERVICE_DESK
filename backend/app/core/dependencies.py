@@ -1,9 +1,11 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
-
+from app.database.database import get_db
+from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/auth/login"
@@ -11,51 +13,52 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme)
-):
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
     try:
-
         payload = jwt.decode(
             token,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM]
         )
 
-        user_id = payload.get("user_id")
-        role_id = payload.get("role_id")
+        # Support both 'user_id' and standard JWT 'sub' payload fields
+        user_id = payload.get("user_id") or payload.get("sub")
 
         if user_id is None:
-            raise HTTPException(
-                status_code=401,
-                detail="Invalid token"
-            )
+            raise credentials_exception
 
-        return {
-            "user_id": user_id,
-            "role_id": role_id
-        }
+    except (JWTError, ValueError):
+        raise credentials_exception
 
-    except JWTError:
+    # Query the user model directly from the database
+    user = db.query(User).filter(User.id == int(user_id)).first()
+    if user is None:
+        raise credentials_exception
 
+    if not user.is_active:
         raise HTTPException(
-            status_code=401,
-            detail="Invalid token"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is inactive"
         )
+
+    return user
 
 
 def require_roles(*allowed_roles: int):
-
     def role_checker(
-        current_user: dict = Depends(get_current_user)
+        current_user: User = Depends(get_current_user)
     ):
-
-        role_id = current_user.get("role_id")
-
-        if role_id not in allowed_roles:
-
+        if current_user.role_id not in allowed_roles:
             raise HTTPException(
-                status_code=403,
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have permission to perform this action"
             )
 

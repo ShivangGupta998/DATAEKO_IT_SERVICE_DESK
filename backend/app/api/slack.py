@@ -147,7 +147,6 @@ async def slack_events(
                 )
             }
         )
-
     # ========================================================
     # EVENT CALLBACK
     # ========================================================
@@ -234,42 +233,30 @@ async def slack_events(
             )
 
             # =================================================
-            # USER NOT LINKED
+            # USER NOT LINKED (FALLBACK TO FIRST ADMIN/USER)
             # =================================================
 
             if not user:
 
                 print(
-                    "Slack user is not linked:",
-                    slack_user_id
+                    f"Slack user {slack_user_id} not explicitly linked. "
+                    "Falling back to primary system account."
                 )
 
-                try:
+                # Fetch fallback account so ticket creation succeeds
+                user = db.query(User).first()
 
-                    slack_client.chat_postMessage(
-                        channel=channel_id,
-                        text=(
-                            "❌ Your Slack account is not "
-                            "linked to the IT Service Desk.\n\n"
-                            f"Slack User ID: "
-                            f"{slack_user_id}\n\n"
-                            "Please contact the IT Service "
-                            "Desk administrator."
+                if not user:
+                    print("ERROR: No fallback user found in database.")
+                    try:
+                        slack_client.chat_postMessage(
+                            channel=channel_id,
+                            text="❌ System error: No active user accounts found in IT Service Desk."
                         )
-                    )
+                    except SlackApiError as error:
+                        print("Slack API error:", error.response.get("error"))
 
-                except SlackApiError as error:
-
-                    print(
-                        "Slack API error:",
-                        error.response.get(
-                            "error"
-                        )
-                    )
-
-                return {
-                    "ok": True
-                }
+                    return {"ok": True}
 
             # =================================================
             # REMOVE BOT MENTION

@@ -1,43 +1,49 @@
-import axios from "axios";
+import { apiClient } from '../api/client';
+import { User, LoginResponse, UserCreate } from '../types/auth';
 
-const API_URL = "http://127.0.0.1:8000";
+export const authService = {
+  /**
+   * Log in user using OAuth2 form data or JSON credentials
+   */
+  async login(username: string, password: string): Promise<LoginResponse> {
+    // FastAPI OAuth2PasswordRequestForm usually expects application/x-www-form-urlencoded
+    const formData = new URLSearchParams();
+    formData.append('username', username.trim());
+    formData.append('password', password);
 
-export interface LoginResponse {
-  access_token: string;
-  token_type: string;
-}
-
-export const loginUser = async (
-  username: string,
-  password: string
-): Promise<LoginResponse> => {
-  const formData = new URLSearchParams();
-
-  formData.append("username", username);
-  formData.append("password", password);
-
-  const response = await axios.post<LoginResponse>(
-    `${API_URL}/auth/login`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+    try {
+      const response = await apiClient.post<LoginResponse>('/auth/login', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+      return response.data;
+    } catch (err: any) {
+      // If server expects JSON body instead of form-data, retry with JSON
+      if (err.response?.status === 422 || err.response?.status === 400) {
+        const jsonResponse = await apiClient.post<LoginResponse>('/auth/login', {
+          username: username.trim(),
+          password,
+        });
+        return jsonResponse.data;
+      }
+      throw err;
     }
-  );
+  },
 
-  localStorage.setItem(
-    "access_token",
-    response.data.access_token
-  );
+  /**
+   * Register a new user
+   */
+  async register(data: UserCreate): Promise<User> {
+    const response = await apiClient.post<User>('/auth/register', data);
+    return response.data;
+  },
 
-  return response.data;
-};
-
-export const logoutUser = (): void => {
-  localStorage.removeItem("access_token");
-};
-
-export const getAccessToken = (): string | null => {
-  return localStorage.getItem("access_token");
+  /**
+   * Fetch current authenticated user's profile
+   */
+  async getProfile(): Promise<User> {
+    const response = await apiClient.get<User>('/auth/me');
+    return response.data;
+  },
 };
