@@ -1,0 +1,23 @@
+# Environment / secrets
+backend/.env
+backend/venv/
+frontend/.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# macOS
+.DS_Store
+
+# Frontend dependencies
+frontend/node_modules/
+
+# Frontend build output
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
