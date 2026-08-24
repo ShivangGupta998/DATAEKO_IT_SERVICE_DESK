@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict awraMwQd7gwy2UYHvysTcapmGi1LWfgr3TAXl6Sxx82vdn1sfleSloZvW6bHS28
+\restrict w3jprtqdHg1kGsKuhtPDCJ9gS7kxWwa7MeW7daLtcPndh4eAh4SUidQ1QTvegAi
 
 -- Dumped from database version 18.4
 -- Dumped by pg_dump version 18.4
@@ -727,6 +727,7 @@ COPY public.users (id, username, email, hashed_password, is_active, role_id, dep
 8	technician1	technician@itservicedesk.com	$2b$12$fSJHJBy42NTK3MSNavynm.Mn8VUkOfJZmilkZBK1NzH1qpWqXNQVG	t	3	1	\N
 9	employee1	employee@test.com	$2b$12$emuxWvXzkzvTpy6V2hb7p.rtddn97dWWOY8H3htr/Ck1WUAiNjXO2	t	4	1	\N
 10	testemployee	testemployee@gmail.com	$2b$12$Ux70HXK/WmZt1VtegDGFtuw0TM8E.wzorJjhw2J6RsUkw9wYkFTAy	t	4	1	\N
+12	Shivang_sg	s.gupta@dataeko.ai	$2b$12$AaACy7Zf/6igPmxHSXSzrOIMIgPS.CtGM01b3BokrVNrVo.QBh8hC	t	1	1	\N
 \.
 
 
@@ -811,7 +812,7 @@ SELECT pg_catalog.setval('public.tickets_id_seq', 10, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 10, true);
+SELECT pg_catalog.setval('public.users_id_seq', 12, true);
 
 
 --
@@ -1189,5 +1190,5 @@ ALTER TABLE ONLY public.users
 -- PostgreSQL database dump complete
 --
 
-\unrestrict awraMwQd7gwy2UYHvysTcapmGi1LWfgr3TAXl6Sxx82vdn1sfleSloZvW6bHS28
+\unrestrict w3jprtqdHg1kGsKuhtPDCJ9gS7kxWwa7MeW7daLtcPndh4eAh4SUidQ1QTvegAi
 
