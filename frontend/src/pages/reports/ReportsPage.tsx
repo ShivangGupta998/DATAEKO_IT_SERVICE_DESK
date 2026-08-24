@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   RefreshCw,
-  Award,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -34,17 +33,17 @@ import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { parseApiError } from '../../api/client';
 
 const STATUS_COLORS: Record<string, string> = {
-  Open: '#3b82f6',
-  'In Progress': '#f59e0b',
-  Resolved: '#10b981',
-  Closed: '#64748b',
+  OPEN: '#3b82f6',
+  'IN_PROGRESS': '#f59e0b',
+  RESOLVED: '#10b981',
+  CLOSED: '#64748b',
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  Low: '#10b981',
-  Medium: '#3b82f6',
-  High: '#f97316',
-  Critical: '#ef4444',
+  LOW: '#10b981',
+  MEDIUM: '#3b82f6',
+  HIGH: '#f97316',
+  CRITICAL: '#ef4444',
 };
 
 export const ReportsPage: React.FC = () => {
@@ -133,7 +132,7 @@ export const ReportsPage: React.FC = () => {
             </div>
             <div className="mt-3">
               <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                {summary?.open_tickets ?? '—'}
+                {(summary?.open_tickets ?? 0) + (summary?.in_progress_tickets ?? 0)}
               </span>
               <p className="text-[11px] text-slate-400 mt-0.5">Open & In Progress</p>
             </div>
@@ -146,7 +145,7 @@ export const ReportsPage: React.FC = () => {
             </div>
             <div className="mt-3">
               <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                {summary?.resolved_tickets ?? '—'}
+                {(summary?.resolved_tickets ?? 0) + (summary?.closed_tickets ?? 0)}
               </span>
               <p className="text-[11px] text-slate-400 mt-0.5">Closed/Resolved</p>
             </div>
@@ -197,7 +196,7 @@ export const ReportsPage: React.FC = () => {
                     {statusData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={STATUS_COLORS[entry.status] || '#6366f1'}
+                        fill={STATUS_COLORS[entry.status?.toUpperCase()] || '#6366f1'}
                       />
                     ))}
                   </Pie>
@@ -245,7 +244,7 @@ export const ReportsPage: React.FC = () => {
                     {priorityData.map((entry, index) => (
                       <Cell
                         key={`bar-${index}`}
-                        fill={PRIORITY_COLORS[entry.priority] || '#818cf8'}
+                        fill={PRIORITY_COLORS[entry.priority?.toUpperCase()] || '#818cf8'}
                       />
                     ))}
                   </Bar>
@@ -287,25 +286,33 @@ export const ReportsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
-                {userActivity.map((item, idx) => (
-                  <tr key={item.user_id || idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                    <td className="py-3.5 px-4 font-mono font-semibold text-indigo-600 dark:text-indigo-400">
-                      #{item.user_id}
-                    </td>
-                    <td className="py-3.5 px-4 font-medium text-slate-900 dark:text-white">
-                      {item.username || item.full_name || `Agent ${item.user_id}`}
-                    </td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200">
-                      {item.assigned_count ?? item.ticket_count ?? 0}
-                    </td>
-                    <td className="py-3.5 px-4 font-semibold text-emerald-600 dark:text-emerald-400">
-                      {item.resolved_count ?? 0}
-                    </td>
-                    <td className="py-3.5 px-4 font-semibold text-amber-600 dark:text-amber-400">
-                      {(item.assigned_count || item.ticket_count || 0) - (item.resolved_count || 0)}
-                    </td>
-                  </tr>
-                ))}
+                {userActivity.map((item: any, idx: number) => {
+                  const userId = item.user_id || item.id || idx + 1;
+                  const displayName = item.user || item.username || item.agent_name || item.full_name || 'Agent';
+                  const totalAssigned = item.total_assigned ?? item.total_tickets ?? item.assigned_count ?? 0;
+                  const resolved = item.resolved_tickets ?? item.resolved_count ?? 0;
+                  const pending = item.pending_queue ?? (totalAssigned - resolved);
+
+                  return (
+                    <tr key={userId} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                      <td className="py-3.5 px-4 font-mono font-semibold text-indigo-600 dark:text-indigo-400">
+                        #{userId}
+                      </td>
+                      <td className="py-3.5 px-4 font-medium text-slate-900 dark:text-white">
+                        {displayName}
+                      </td>
+                      <td className="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200">
+                        {totalAssigned}
+                      </td>
+                      <td className="py-3.5 px-4 font-semibold text-emerald-600 dark:text-emerald-400">
+                        {resolved}
+                      </td>
+                      <td className="py-3.5 px-4 font-semibold text-amber-600 dark:text-amber-400">
+                        {pending}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
