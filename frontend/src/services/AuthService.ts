@@ -6,7 +6,6 @@ export const authService = {
    * Log in user using OAuth2 form data or JSON credentials
    */
   async login(username: string, password: string): Promise<LoginResponse> {
-    // FastAPI OAuth2PasswordRequestForm usually expects application/x-www-form-urlencoded
     const formData = new URLSearchParams();
     formData.append('username', username.trim());
     formData.append('password', password);
@@ -19,7 +18,6 @@ export const authService = {
       });
       return response.data;
     } catch (err: any) {
-      // If server expects JSON body instead of form-data, retry with JSON
       if (err.response?.status === 422 || err.response?.status === 400) {
         const jsonResponse = await apiClient.post<LoginResponse>('/auth/login', {
           username: username.trim(),
