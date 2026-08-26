@@ -1,33 +1,25 @@
+import os
+import bcrypt
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
 
 # ============================================================
-# API ROUTERS
+# HELPER FOR SAFE BCRYPT HASHING (Python 3.14 Compatible)
 # ============================================================
-
-from app.api import auth
-from app.api import tickets
-from app.api import slack
-from app.api import asset
-from app.api import access_request
-from app.api import offboarding
-from app.api import knowledge_base
-from app.api import report
-from app.api import notification
-
+def hash_password_direct(password: str) -> str:
+    # Truncate password to 72 bytes max for bcrypt compatibility
+    password_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password_bytes, salt).decode('utf-8')
 
 # ============================================================
-# DATABASE
+# DATABASE & MODELS
 # ============================================================
-
-from app.database.database import engine
+from app.database.database import engine, SessionLocal
 from app.database.base import Base
-
-
-# ============================================================
-# MODELS
-# Import all models so SQLAlchemy knows them
-# ============================================================
 
 from app.models.asset import Asset
 from app.models.role import Role
@@ -42,41 +34,110 @@ from app.models.offboarding import OffboardingRequest
 from app.models.knowledge_base import KnowledgeArticle
 from app.models.notification import Notification
 
-
-# ============================================================
-# CREATE DATABASE TABLES
-# ============================================================
-
+# Create database tables if they do not exist
 Base.metadata.create_all(bind=engine)
-
 
 # ============================================================
 # FASTAPI APPLICATION
 # ============================================================
-
 app = FastAPI(
     title="IT Service Desk API",
     version="0.1.0"
 )
 
-
 # ============================================================
 # CORS CONFIGURATION
-# Allow wildcard "*" or explicitly include the new IP network addresses
 # ============================================================
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows requests from any IP address (e.g. 10.171.40.185, 172.31.30.73, localhost)
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows GET, POST, OPTIONS, PUT, PATCH, DELETE
-    allow_headers=["*"],  # Allows Authorization, Content-Type, etc.
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
+# ============================================================
+# DATABASE AUTO-SEEDER (Runs on Startup)
+# ============================================================
+@app.on_event("startup")
+def seed_database():
+    db: Session = SessionLocal()
+    try:
+        # 1. Ensure Default Roles Exist
+        admin_role = db.query(Role).filter(Role.name == "Admin").first()
+        if not admin_role:
+            admin_role = Role(name="Admin", description="System Administrator")
+            db.add(admin_role)
+            db.commit()
+            db.refresh(admin_role)
+
+        for role_name in ["Agent", "Employee"]:
+            if not db.query(Role).filter(Role.name == role_name).first():
+                db.add(Role(name=role_name, description=f"Default {role_name} Role"))
+        db.commit()
+
+        # 2. Hash Password Safely
+        hashed_pw = hash_password_direct("password123")
+
+        # 3. Upsert Admin User (Creates or forces password reset)
+        user = db.query(User).filter(User.email == "abhi@itservicedesk.com").first()
+
+        if not user:
+            user = User(
+                username="abhi",
+                email="abhi@itservicedesk.com",
+                hashed_password=hashed_pw,
+                is_active=True,
+                role_id=admin_role.id
+            )
+            db.add(user)
+        else:
+            user.hashed_password = hashed_pw
+            user.is_active = True
+            user.role_id = admin_role.id
+
+        db.commit()
+        print("--> SEED SUCCESS: User abhi@itservicedesk.com ready with password 'password123'")
+    except Exception as e:
+        print(f"--> SEED ERROR: {e}")
+        db.rollback()
+    finally:
+        db.close()
 
 # ============================================================
-# REGISTER ROUTERS
+# 1. FRONTEND STATIC ASSETS (Mounted before API routers)
 # ============================================================
+FRONTEND_DIST_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../../frontend/dist")
+)
+
+if os.path.exists(FRONTEND_DIST_DIR):
+    assets_path = os.path.join(FRONTEND_DIST_DIR, "assets")
+    if os.path.exists(assets_path):
+        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+
+# ============================================================
+# 2. SUPPRESS BROWSER ICON LOGS
+# ============================================================
+@app.get("/apple-touch-icon{path:path}.png", include_in_schema=False)
+@app.get("/favicon.ico", include_in_schema=False)
+async def ignore_icon_requests():
+    return Response(status_code=204)
+
+# ============================================================
+# 3. REGISTER API ROUTERS
+# ============================================================
+from app.api import (
+    auth,
+    tickets,
+    slack,
+    asset,
+    access_request,
+    offboarding,
+    knowledge_base,
+    report,
+    notification,
+)
 
 app.include_router(auth.router)
 app.include_router(tickets.router)
@@ -88,24 +149,17 @@ app.include_router(knowledge_base.router)
 app.include_router(report.router)
 app.include_router(notification.router)
 
-
 # ============================================================
-# SUPPRESS BROWSER ICON 404 LOGS
-# Intercepts automatic favicon and Apple touch icon probes
+# 4. SPA CATCH-ALL ROUTE (Must be at the very end)
 # ============================================================
+if os.path.exists(FRONTEND_DIST_DIR):
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_react_app(full_path: str):
+        if full_path in ["docs", "redoc", "openapi.json"] or full_path.startswith("api/"):
+            return Response(status_code=404)
 
-@app.get("/apple-touch-icon{path:path}.png", include_in_schema=False)
-@app.get("/favicon.ico", include_in_schema=False)
-async def ignore_icon_requests():
-    return Response(status_code=204)
+        file_path = os.path.join(FRONTEND_DIST_DIR, full_path)
+        if full_path and os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
 
-
-# ============================================================
-# ROOT ENDPOINT
-# ============================================================
-
-@app.get("/")
-def root():
-    return {
-        "message": "IT Service Desk API is running"
-    }
+        return FileResponse(os.path.join(FRONTEND_DIST_DIR, "index.html"))

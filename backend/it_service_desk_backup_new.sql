@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict w3jprtqdHg1kGsKuhtPDCJ9gS7kxWwa7MeW7daLtcPndh4eAh4SUidQ1QTvegAi
+\restrict rdbvUlYKoodS71woQpfIr6RVAWbrmRekowX8YN7socEhEWhfdbkLSo0OkLN7BKf
 
 -- Dumped from database version 18.4
 -- Dumped by pg_dump version 18.4
@@ -80,7 +80,7 @@ CREATE TABLE public.assets (
     status character varying(30) NOT NULL,
     purchase_date date,
     created_at timestamp without time zone,
-    cost numeric(10,2) DEFAULT 0.00
+    cost numeric(10,2)
 );
 
 
@@ -422,10 +422,10 @@ CREATE TABLE public.tickets (
     source character varying(50) NOT NULL,
     requester_id integer NOT NULL,
     assignee_id integer,
-    sla_due timestamp without time zone,
-    resolved_at timestamp without time zone,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    sla_due timestamp without time zone,
+    resolved_at timestamp without time zone
 );
 
 
@@ -582,7 +582,9 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY public.access_requests (id, requester_id, access_type, resource_name, reason, status, approved_by, approval_comment, created_at, updated_at) FROM stdin;
-1	6	Standard Read/Write	GitHub Enterprise	Required for project repository access and deployment pipelines.	Approved	6	\N	2026-08-19 09:12:28.92719	2026-08-19 10:08:00.952363
+1	6	VPN	Production VPN	Need access for deployment work	Approved	4	Approved for deployment work	2026-08-07 06:59:18.470893	2026-08-07 07:02:45.636082
+2	4	Software	Jira	Admin RBAC testing	Rejected	4	Rejected during testing	2026-08-16 09:50:06.584183	2026-08-16 09:51:42.161068
+3	6	Read/Write	GitHub Enterprise	azxdtfcygvuhbjnmcgvhbn	Approved	4	\N	2026-08-26 06:32:51.840813	2026-08-26 10:27:51.705362
 \.
 
 
@@ -591,7 +593,8 @@ COPY public.access_requests (id, requester_id, access_type, resource_name, reaso
 --
 
 COPY public.assets (id, asset_tag, asset_type, manufacturer, model, serial_number, assigned_to, status, purchase_date, created_at, cost) FROM stdin;
-1	HW-MAC-2026-001	Hardware	Apple	A2991	C02G1234MD6R	9	Assigned	\N	2026-08-19 09:08:07.588846	0.00
+1	LAP-001	Laptop	HP	EliteBook 840 G11	SN123456	6	Assigned	2026-08-07	2026-08-07 06:08:29.894981	\N
+2	dfgh	Hardware	Apple	fight	xdfcgvhbjk	6	Assigned	\N	2026-08-26 06:45:23.273346	12000.00
 \.
 
 
@@ -601,7 +604,7 @@ COPY public.assets (id, asset_tag, asset_type, manufacturer, model, serial_numbe
 
 COPY public.departments (id, name) FROM stdin;
 1	IT
-2	Human Resources
+2	HR
 3	Finance
 4	Operations
 \.
@@ -612,11 +615,8 @@ COPY public.departments (id, name) FROM stdin;
 --
 
 COPY public.knowledge_articles (id, title, content, category, created_by, is_published, created_at, updated_at) FROM stdin;
-1	How to Setup Corporate VPN Access	### Overview\nFollow these steps to configure your corporate VPN client.\n\n### Instructions\n1. Download the approved VPN client software.\n2. Import your configuration profile provided by IT.\n3. Authenticate using your Single Sign-On (SSO) credentials.	Hardware	6	f	2026-08-19 09:32:31.677531	2026-08-19 09:32:31.677532
-2	How to Connect to Corporate VPN using OpenVPN	### Overview\nFollow this guide to securely connect to the corporate network using OpenVPN from remote locations.\n\n### Prerequisites\n* Active employee credentials (SSO username and password)\n* Dual-factor authentication (2FA) configured on your mobile device\n\n### Setup Instructions\n1. Download and install the latest OpenVPN Connect client for your operating system.\n2. Download your personalized `.ovpn` configuration profile from the IT Portal.\n3. Import the `.ovpn` profile into the OpenVPN client interface.\n4. Click **Connect** and enter your SSO credentials when prompted.	Hardware	6	f	2026-08-19 09:44:31.524179	2026-08-19 09:44:31.524181
-3	How to Connect to Corporate VPN using OpenVPN	### Overview\nFollow this guide to securely connect to the corporate network using OpenVPN from remote locations.\n\n### Prerequisites\n* Active employee credentials (SSO username and password)\n* Dual-factor authentication (2FA) configured on your mobile device\n\n### Setup Instructions\n1. Download and install the latest OpenVPN Connect client for your operating system.\n2. Download your personalized `.ovpn` configuration profile from the IT Portal.\n3. Import the `.ovpn` profile into the OpenVPN client interface.\n4. Click **Connect** and enter your SSO credentials when prompted.	Hardware	6	f	2026-08-19 09:52:14.619222	2026-08-19 09:52:14.619224
-4	How to Connect to Corporate VPN using OpenVPN	### Overview\nFollow this guide to securely connect to the corporate network using OpenVPN from remote locations.\n\n### Prerequisites\n* Active employee credentials (SSO username and password)\n* Dual-factor authentication (2FA) configured on your mobile device\n\n### Setup Instructions\n1. Download and install the latest OpenVPN Connect client for your operating system.\n2. Download your personalized `.ovpn` configuration profile from the IT Portal.\n3. Import the `.ovpn` profile into the OpenVPN client interface.\n4. Click **Connect** and enter your SSO credentials when prompted.	Hardware	6	f	2026-08-19 09:56:20.847823	2026-08-19 09:56:20.847827
-5	How to Connect to Corporate VPN using OpenVPN	## Overview\nFollow this guide to securely connect to the corporate network using OpenVPN from remote locations.\n\n### Prerequisites\n* Active employee credentials (SSO username and password)\n* Dual-factor authentication (2FA) configured on your mobile device\n\n### Setup Instructions\n1. Download and install the latest OpenVPN Connect client for your operating system.\n2. Download your personalized `.ovpn` configuration profile from the IT Portal.\n3. Import the `.ovpn` profile into the OpenVPN client interface.\n4. Click **Connect** and enter your SSO credentials when prompted.	Hardware	6	t	2026-08-19 10:01:34.152374	2026-08-19 10:01:34.152376
+1	VPN Connection Issue	If VPN is not connecting, restart the VPN client and login again.	VPN	4	t	2026-08-07 07:38:01.978333	2026-08-07 07:38:01.978334
+3	Persistent Test Article	Testing persistent storage directly in PostgreSQL.	General	3	t	2026-08-26 12:48:23.413811	2026-08-26 12:48:23.413811
 \.
 
 
@@ -625,20 +625,32 @@ COPY public.knowledge_articles (id, title, content, category, created_by, is_pub
 --
 
 COPY public.notifications (id, user_id, title, message, notification_type, is_read, created_at) FROM stdin;
-1	6	Ticket Created	Your ticket #1 has been created	Ticket	t	2026-08-17 19:48:09.313834+05:30
-4	8	Ticket Assigned	Ticket #1 has been assigned to you.	Ticket	f	2026-08-17 19:53:50.515855+05:30
-3	6	Ticket Updated	Your ticket #1 has been updated	Ticket	t	2026-08-17 19:53:50.489301+05:30
-2	9	Ticket Created	Your ticket #2 has been created	Ticket	t	2026-08-17 19:49:34.20209+05:30
-7	8	Ticket Assigned	Ticket #3 has been assigned to you.	ticket	f	2026-08-20 11:18:37.366648+05:30
-6	6	Ticket Updated	Your ticket #3 has been updated	ticket	t	2026-08-20 11:18:37.355931+05:30
-10	8	Ticket Assigned	Ticket #5 has been assigned to you.	ticket	f	2026-08-20 11:39:34.843465+05:30
-9	6	Ticket Updated	Your ticket #5 has been updated	ticket	t	2026-08-20 11:39:34.836485+05:30
-8	6	Ticket Created	Your ticket #4 has been created	ticket	t	2026-08-20 11:33:56.227378+05:30
-5	6	Ticket Created	Your ticket #3 has been created	ticket	t	2026-08-20 11:17:23.286+05:30
-12	8	Ticket Assigned	Ticket #6 has been assigned to you.	ticket	f	2026-08-20 11:44:13.328876+05:30
-11	6	Ticket Updated	Your ticket #6 has been updated	ticket	t	2026-08-20 11:44:13.321094+05:30
-14	8	Ticket Assigned	Ticket #10 has been assigned to you.	ticket	f	2026-08-24 11:59:34.00021+05:30
-13	6	Ticket Updated	Your ticket #10 has been updated	ticket	t	2026-08-24 11:59:33.992086+05:30
+2	6	Ticket Created	Your ticket #16 has been created	Ticket	t	2026-08-07 18:09:41.212025+05:30
+1	4	Ticket Created	Your ticket #15 has been created	Ticket	t	2026-08-07 15:13:23.530022+05:30
+4	6	Ticket Updated	Your ticket #17 has been updated	Ticket	t	2026-08-12 11:11:18.787602+05:30
+3	6	Ticket Created	Your ticket #17 has been created	Ticket	t	2026-08-12 11:05:22.619548+05:30
+5	6	Ticket Created	Your ticket #18 has been created	Ticket	t	2026-08-12 11:51:12.990542+05:30
+7	5	Ticket Assigned	Ticket #18 has been assigned to you.	Ticket	t	2026-08-12 12:02:22.452281+05:30
+8	6	Ticket Updated	Your ticket #18 has been updated	Ticket	t	2026-08-12 12:21:32.28198+05:30
+6	6	Ticket Updated	Your ticket #18 has been updated	Ticket	t	2026-08-12 12:02:22.427987+05:30
+19	6	Ticket Created	Your ticket #22 has been created	Ticket	t	2026-08-16 16:02:43.804052+05:30
+18	6	Ticket Updated	Your ticket #21 has been updated	Ticket	t	2026-08-16 15:55:43.885619+05:30
+17	6	Ticket Updated	Your ticket #21 has been updated	Ticket	t	2026-08-16 15:52:25.156142+05:30
+15	6	Ticket Updated	Your ticket #21 has been updated	Ticket	t	2026-08-16 15:51:15.632207+05:30
+14	6	Ticket Created	Your ticket #21 has been created	Ticket	t	2026-08-16 15:49:16.191239+05:30
+9	4	Ticket Created	Your ticket #19 has been created	Ticket	t	2026-08-16 14:27:31.964827+05:30
+10	4	Ticket Created	Your ticket #20 has been created	Ticket	t	2026-08-16 15:11:27.826691+05:30
+11	4	Ticket Updated	Your ticket #20 has been updated	Ticket	t	2026-08-16 15:12:12.733085+05:30
+12	4	Ticket Updated	Your ticket #20 has been updated	Ticket	t	2026-08-16 15:15:21.275235+05:30
+20	6	Ticket Updated	Your ticket #22 has been updated	Ticket	t	2026-08-16 16:04:21.994466+05:30
+21	5	Ticket Assigned	Ticket #22 has been assigned to you.	Ticket	t	2026-08-16 16:04:21.999489+05:30
+16	5	Ticket Assigned	Ticket #21 has been assigned to you.	Ticket	t	2026-08-16 15:51:15.649539+05:30
+13	5	Ticket Assigned	Ticket #20 has been assigned to you.	Ticket	t	2026-08-16 15:15:21.285426+05:30
+22	6	Ticket Created	Your ticket #23 has been created	Ticket	t	2026-08-16 20:44:34.120945+05:30
+23	6	Ticket Updated	Your ticket #23 has been updated	Ticket	t	2026-08-16 21:56:15.298197+05:30
+24	5	Ticket Assigned	Ticket #23 has been assigned to you.	Ticket	t	2026-08-16 21:56:15.32771+05:30
+25	4	Ticket Updated	Your ticket #25 has been updated	Ticket	t	2026-08-17 15:08:12.142323+05:30
+26	5	Ticket Assigned	Ticket #25 has been assigned to you.	Ticket	t	2026-08-17 15:08:12.162493+05:30
 \.
 
 
@@ -647,7 +659,8 @@ COPY public.notifications (id, user_id, title, message, notification_type, is_re
 --
 
 COPY public.offboarding_requests (id, employee_id, initiated_by, last_working_date, reason, status, asset_returned, access_revoked, completed_by, completion_comment, created_at, updated_at) FROM stdin;
-4	6	6	2026-08-19	Employee departure and deprovisioning	Completed	f	f	6	\N	2026-08-19 09:30:34.97027	2026-08-19 10:10:21.051829
+1	6	4	2026-08-30	Resignation	Completed	t	t	4	Laptop collected and all accounts disabled	2026-08-07 07:22:50.449164	2026-08-07 07:27:31.975938
+2	6	4	2026-08-30	Admin RBAC testing	In Progress	f	f	\N	Process started	2026-08-16 09:52:17.375107	2026-08-16 09:53:29.420828
 \.
 
 
@@ -656,6 +669,12 @@ COPY public.offboarding_requests (id, employee_id, initiated_by, last_working_da
 --
 
 COPY public.permissions (id, name, description) FROM stdin;
+1	manage_users	Create, update and delete users
+2	manage_settings	Manage application settings
+3	view_reports	View reports and analytics
+4	manage_tickets	Manage all tickets
+5	update_ticket	Update assigned tickets
+6	create_ticket	Create new tickets
 \.
 
 
@@ -664,6 +683,13 @@ COPY public.permissions (id, name, description) FROM stdin;
 --
 
 COPY public.role_permissions (id, role_id, permission_id) FROM stdin;
+1	1	1
+2	1	2
+3	1	3
+4	1	4
+5	1	5
+6	1	6
+7	4	6
 \.
 
 
@@ -672,10 +698,10 @@ COPY public.role_permissions (id, role_id, permission_id) FROM stdin;
 --
 
 COPY public.roles (id, name, description) FROM stdin;
-1	Admin	Full System Access
-2	Manager	Tickets & Assets Management
-3	Technician	Support & Operations
-4	Employee	Standard User Access
+1	Admin	System Administrator
+2	Manager	Department Manager
+3	Technician	IT Support Technician
+4	Employee	End User
 \.
 
 
@@ -684,18 +710,59 @@ COPY public.roles (id, name, description) FROM stdin;
 --
 
 COPY public.ticket_activities (id, ticket_id, user_id, action, comment, created_at) FROM stdin;
-1	1	6	created	Ticket created	2026-08-17 14:18:09.31523
-2	2	9	created	Ticket created	2026-08-17 14:19:34.202609
-3	1	6	updated	Assigned to technician technician1 | Comment: 3ef3r4frfr	2026-08-17 14:23:50.502652
-4	3	6	created	Ticket created	2026-08-20 05:47:23.287871
-5	3	6	updated	Assigned to technician technician1 | Comment: ftdasdfghjk	2026-08-20 05:48:37.362275
-6	4	6	created	Ticket created	2026-08-20 06:03:56.229043
-7	5	6	created	Ticket created from Slack	2026-08-20 06:08:58.479242
-8	5	6	updated	Assigned to technician technician1 | Comment: sdfghertyuiksdfghjkwertyuizxcvbnm,	2026-08-20 06:09:34.840241
-9	6	6	created	Ticket created from Slack	2026-08-20 06:13:21.68371
-10	6	6	updated	Assigned to technician technician1 | Comment: asdfghjkqwertyuizxcvbnmasdfghj	2026-08-20 06:14:13.324905
-11	7	6	created	Ticket created from Slack	2026-08-24 05:17:24.324736
-12	10	6	updated	Status changed from open to in_progress | Priority changed from Medium to medium | Assigned to technician technician1 | Comment: asdfghjqwertyuizxcvbnm,	2026-08-24 06:29:33.996921
+1	1	4	created	Ticket created	2026-07-31 08:16:49.23081
+2	2	4	created	Ticket created	2026-07-31 08:16:50.072909
+3	2	4	updated	Ticket assigned to user 3	2026-08-02 09:11:29.243711
+4	2	4	updated	Status changed to in_progress | IT agent started investigating the issue.	2026-08-02 09:12:49.974001
+5	2	4	updated	Status changed to resolved | Wi-Fi driver was repaired and connection restored.	2026-08-02 09:13:33.700406
+6	2	4	updated	Status changed to resolved | Wi-Fi driver was repaired and connection restored.	2026-08-02 09:13:39.435033
+7	2	4	updated	Status changed to closed | Employee confirmed that the issue is resolved.	2026-08-02 09:14:12.118275
+8	3	4	created	Ticket created	2026-08-02 11:29:37.007287
+9	1	4	updated	Ticket assigned to user 4	2026-08-02 11:38:26.739533
+10	4	4	created	Ticket created from Slack	2026-08-02 11:49:22.990037
+11	5	4	created	Ticket created	2026-08-03 11:52:29.88611
+12	6	4	created	Ticket created	2026-08-03 12:02:17.675707
+13	6	4	updated	Status changed from open to in_progress | Priority changed from high to high | Comment: Technician started investigating the VPN issue.	2026-08-04 05:44:38.407711
+14	6	4	updated	Ticket assigned from None to 5	2026-08-04 06:23:49.70222
+15	6	5	updated	Status changed from in_progress to resolved | Comment: VPN configuration was fixed and connectivity was restored.	2026-08-04 06:34:13.91837
+16	6	5	updated	Status changed from resolved to in_progress | Comment: Technician is continuing investigation.	2026-08-04 06:38:46.145805
+17	7	4	created	Ticket created from Slack	2026-08-04 06:50:25.253823
+18	8	4	created	Ticket created from Slack	2026-08-04 06:52:25.960168
+19	9	4	created	Ticket created from Slack	2026-08-04 07:06:12.379545
+20	10	4	created	Ticket created from Slack	2026-08-04 07:08:03.394209
+21	9	4	updated	Ticket assigned from None to 5	2026-08-04 07:09:12.294643
+22	9	5	updated	Status changed from open to in_progress | Comment: Technician started investigating the VPN issue.	2026-08-04 09:06:59.315567
+23	9	5	updated	Status changed from in_progress to in_progress | Comment: Technician started investigating the VPN issue.	2026-08-04 09:07:00.631978
+24	9	5	updated	Status changed from in_progress to resolved | Comment: VPN configuration was fixed and connectivity was restored.	2026-08-04 11:39:53.225981
+25	11	4	created	Ticket created from Slack	2026-08-04 11:54:17.478811
+26	11	4	updated	Ticket assigned from None to 5	2026-08-04 12:20:16.793287
+27	11	5	updated	Status changed from open to in_progress	2026-08-05 05:02:40.857373
+28	12	4	created	Ticket created	2026-08-06 09:32:28.157203
+29	13	4	created	Ticket created	2026-08-06 09:36:20.614972
+30	14	4	created	Ticket created	2026-08-06 10:12:00.090127
+31	14	4	updated	Status changed from open to resolved	2026-08-06 10:26:29.049732
+32	15	4	created	Ticket created	2026-08-07 09:43:23.53391
+33	16	6	created	Ticket created	2026-08-07 12:39:41.214725
+34	17	6	created	Ticket created	2026-08-12 05:35:22.622659
+35	17	4	updated	Assigned to technician technician1	2026-08-12 05:41:18.807438
+36	18	6	created	Ticket created	2026-08-12 06:21:12.993751
+37	18	4	updated	Assigned to technician technician1	2026-08-12 06:32:22.446214
+38	18	5	updated	Status changed from open to in_progress | Comment: soon will done	2026-08-12 06:51:32.312787
+39	19	4	created	Ticket created	2026-08-16 08:57:31.968512
+40	20	4	created	Ticket created	2026-08-16 09:41:27.828606
+41	20	4	updated	Priority changed from medium to high	2026-08-16 09:42:12.738647
+42	20	4	updated	Assigned to technician technician1	2026-08-16 09:45:21.279457
+43	21	6	created	Ticket created	2026-08-16 10:19:16.196241
+44	21	4	updated	Assigned to technician technician1	2026-08-16 10:21:15.646065
+45	21	4	updated	Status changed from open to closed | Priority changed from medium to critical | Comment: done bro	2026-08-16 10:22:25.160633
+46	21	5	updated	Status changed from closed to resolved | Priority changed from critical to high | Comment: done	2026-08-16 10:25:43.900021
+47	22	6	created	Ticket created	2026-08-16 10:32:43.80464
+48	22	4	updated	Assigned to technician technician1	2026-08-16 10:34:21.995694
+49	23	6	created	Ticket created	2026-08-16 15:14:34.123663
+50	23	7	updated	Assigned to technician technician1 | Comment: fgv4ferf34rf	2026-08-16 16:26:15.316084
+51	24	4	created	Ticket created from Slack	2026-08-17 09:30:10.14314
+52	25	4	created	Ticket created from Slack	2026-08-17 09:34:26.822947
+53	25	7	updated	Status changed from open to in_progress | Assigned to technician technician1 | Comment: go to safari and go to setting	2026-08-17 09:38:12.160088
 \.
 
 
@@ -703,17 +770,32 @@ COPY public.ticket_activities (id, ticket_id, user_id, action, comment, created_
 -- Data for Name: tickets; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.tickets (id, title, description, category, priority, status, source, requester_id, assignee_id, sla_due, resolved_at, created_at, updated_at) FROM stdin;
-2	technical prob in lapi	dvhcvcogfrfhr3ifhrjfbhrbfhifojbjbchvchee	hardware	high	open	web	9	\N	2026-08-17 22:19:34.19924	\N	2026-08-17 14:19:34.199792	2026-08-17 14:19:34.199793
-1	vpn not connecting	hdweufwihfwihvdihwevhijcbdjcbojdwbcdvfhivwhfv	hardware	medium	open	web	6	8	2026-08-18 14:18:09.306942	\N	2026-08-17 14:18:09.308383	2026-08-17 14:23:50.4993
-3	wifi not working	zxcvbnm,asdfghjklqwertyuioasdfghjklzxcvbnm,	hardware	medium	open	web	6	8	2026-08-21 05:47:23.271612	\N	2026-08-20 05:47:23.274372	2026-08-20 05:48:37.358752
-4	net not working	asdfghjkwertyuiosdfghjkertyui	hardware	medium	open	web	6	\N	2026-08-21 06:03:56.21665	\N	2026-08-20 06:03:56.218481	2026-08-20 06:03:56.218483
-5	Unable to access the company portal on Safari	Unable to access the company portal on Safari	general	medium	open	slack	6	8	\N	\N	2026-08-20 06:08:58.469699	2026-08-20 06:09:34.838489
-6	Unable to access the company portal on Safari	Unable to access the company portal on Safari	general	medium	open	slack	6	8	\N	\N	2026-08-20 06:13:21.675543	2026-08-20 06:14:13.32253
-7	Unable to access the company portal on Safari	Unable to access the company portal on Safari	general	medium	open	slack	6	\N	\N	\N	2026-08-24 05:17:24.313617	2026-08-24 05:17:24.313624
-8	<@U0BMFNGF329> Unable to access the company wifi	<@U0BMFNGF329> Unable to access the company wifi	General	Medium	open	slack	6	\N	\N	\N	2026-08-24 06:26:05.85359	2026-08-24 06:26:05.853606
-9	<@U0BMFNGF329> Unable to access the company wifi	<@U0BMFNGF329> Unable to access the company wifi	General	Medium	open	slack	6	\N	\N	\N	2026-08-24 06:26:35.374145	2026-08-24 06:26:35.374147
-10	<@U0BMFNGF329> Unable to access the company wifi	<@U0BMFNGF329> Unable to access the company wifi	General	medium	in_progress	slack	6	8	2026-08-26 17:00:00	\N	2026-08-24 06:28:41.578785	2026-08-24 06:29:33.993962
+COPY public.tickets (id, title, description, category, priority, status, source, requester_id, assignee_id, created_at, updated_at, sla_due, resolved_at) FROM stdin;
+25	Unable to access the company portal on Safari	Unable to access the company portal on Safari	general	medium	in_progress	slack	4	5	2026-08-17 09:34:26.798173	2026-08-17 09:38:12.155459	\N	\N
+2	Laptop Wi-Fi is not working	My laptop cannot connect to the office Wi-Fi network.	Hardware	high	closed	web	4	3	2026-07-31 08:16:50.070525	2026-08-02 09:14:12.115536	\N	\N
+3	Laptop WiFi issue	My laptop cannot connect to the office WiFi network.	network	high	open	web	4	\N	2026-08-02 11:29:36.992767	2026-08-02 11:29:36.99277	\N	\N
+1	Laptop Wi-Fi is not working	My laptop cannot connect to the office Wi-Fi network.	Hardware	high	open	web	4	4	2026-07-31 08:16:49.179945	2026-08-02 11:38:26.726009	\N	\N
+4	My laptop WiFi is not working	My laptop WiFi is not working	general	medium	open	slack	4	\N	2026-08-02 11:49:22.959569	2026-08-02 11:49:22.959575	\N	\N
+5	VPN is not working	I cannot connect to the company VPN from my laptop.	Network	high	open	web	4	\N	2026-08-03 11:52:29.840099	2026-08-03 11:52:29.840101	\N	\N
+6	VPN is not working	I cannot connect to the company VPN from my laptop.	Network	high	in_progress	web	4	5	2026-08-03 12:02:17.642252	2026-08-04 06:38:46.137343	\N	\N
+7	My laptop WiFi is not working	My laptop WiFi is not working	general	medium	open	slack	4	\N	2026-08-04 06:50:25.205359	2026-08-04 06:50:25.205361	\N	\N
+8	My laptop WiFi is not working	My laptop WiFi is not working	general	medium	open	slack	4	\N	2026-08-04 06:52:25.954095	2026-08-04 06:52:25.954099	\N	\N
+10	hello boy	hello boy	general	medium	open	slack	4	\N	2026-08-04 07:08:03.342519	2026-08-04 07:08:03.342521	\N	\N
+9	My laptop VPN is not working	My laptop VPN is not working	general	medium	resolved	slack	4	5	2026-08-04 07:06:12.365667	2026-08-04 11:39:53.208776	\N	\N
+11	test	test	general	medium	in_progress	slack	4	5	2026-08-04 11:54:17.46861	2026-08-05 05:02:40.831937	\N	\N
+12	VPN not working	Unable to connect to company VPN	Network	critical	open	web	4	\N	2026-08-06 09:32:27.973507	2026-08-06 09:32:27.973508	2026-08-06 11:32:27.970787	\N
+13	VPN not working	Unable to connect to company VPN	Network	critical	open	web	4	\N	2026-08-06 09:36:20.607994	2026-08-06 09:36:20.607995	2026-08-06 11:36:20.606983	\N
+14	Laptop not working	System is not booting	Hardware	high	resolved	web	4	\N	2026-08-06 10:12:00.047586	2026-08-06 10:26:29.030682	2026-08-06 18:12:00.043846	2026-08-06 10:26:29.026198
+15	VPN issue	VPN is not connecting	Network	high	open	web	4	\N	2026-08-07 09:43:23.516953	2026-08-07 09:43:23.516954	2026-08-07 17:43:23.515721	\N
+16	Unable to access company VPN	I am unable to connect to the company VPN since this morning. It shows "Connection timed out". I have restarted my laptop and internet connection, but the issue still exists. Please investigate.	network	medium	open	web	6	\N	2026-08-07 12:39:41.192538	2026-08-07 12:39:41.19254	2026-08-08 12:39:41.187868	\N
+17	VPN is not working	I cannot connect to the company VPN	network	medium	open	web	6	5	2026-08-12 05:35:22.598728	2026-08-12 05:41:18.802743	2026-08-13 05:35:22.589482	\N
+18	tic tic	tooooo  foooooo.  looooo	hardware	low	in_progress	web	6	5	2026-08-12 06:21:12.982069	2026-08-12 06:51:32.308316	2026-08-15 06:21:12.980923	\N
+19	RBAC Admin Test Ticket	Testing ticket creation using Admin role	hardware	low	open	web	4	\N	2026-08-16 08:57:31.935999	2026-08-16 08:57:31.936002	2026-08-19 08:57:31.934109	\N
+20	Admin RBAC Test	Testing administrator permissions	IT	high	open	web	4	5	2026-08-16 09:41:27.799609	2026-08-16 09:45:21.277784	2026-08-16 17:42:12.732473	\N
+21	Laptop not connecting to WiFi	My office laptop cannot connect to the company WiFi.	hardware	high	resolved	web	6	5	2026-08-16 10:19:16.174095	2026-08-16 10:25:43.895133	2026-08-16 18:25:43.883164	2026-08-16 15:55:43.883119
+22	Notification Test	Testing notification	hardware	high	open	web	6	5	2026-08-16 10:32:43.788587	2026-08-16 10:34:21.995306	2026-08-16 18:32:43.787372	\N
+23	heloo brp	oooooojbhedvchvcuhvwdhibihvchwevdcihbvwjcbxjwdbc	hardware	medium	open	web	6	5	2026-08-16 15:14:34.104031	2026-08-16 16:26:15.311579	2026-08-17 15:14:34.097647	\N
+24	Unable to access the company portal on Safari	Unable to access the company portal on Safari	general	medium	open	slack	4	\N	2026-08-17 09:30:10.116878	2026-08-17 09:30:10.116884	\N	\N
 \.
 
 
@@ -722,12 +804,13 @@ COPY public.tickets (id, title, description, category, priority, status, source,
 --
 
 COPY public.users (id, username, email, hashed_password, is_active, role_id, department_id, slack_user_id) FROM stdin;
-6	abhi	abhi@itservicedesk.com	$2b$12$yyrYmG0yigvxhkbtZpUdXuq09LJlOfE2fZHVlNprTlOn36c1Fiiki	t	1	1	\N
-7	manager1	manager1@itservicedesk.com	$2b$12$f3JpkAmyFybrslD8dJJs9eEzoHEDfSoIgE31OhndfIUVBzwQCDo3K	t	2	1	\N
-8	technician1	technician@itservicedesk.com	$2b$12$fSJHJBy42NTK3MSNavynm.Mn8VUkOfJZmilkZBK1NzH1qpWqXNQVG	t	3	1	\N
-9	employee1	employee@test.com	$2b$12$emuxWvXzkzvTpy6V2hb7p.rtddn97dWWOY8H3htr/Ck1WUAiNjXO2	t	4	1	\N
-10	testemployee	testemployee@gmail.com	$2b$12$Ux70HXK/WmZt1VtegDGFtuw0TM8E.wzorJjhw2J6RsUkw9wYkFTAy	t	4	1	\N
-12	Shivang_sg	s.gupta@dataeko.ai	$2b$12$AaACy7Zf/6igPmxHSXSzrOIMIgPS.CtGM01b3BokrVNrVo.QBh8hC	t	1	1	\N
+3	admin	admin@test.com	$2b$12$8NEGnEG/Yk85aZGpNEvj4uMDgjpyGWTYp289PGmLqmTbxNgsObuDS	t	1	1	\N
+5	technician1	technician@itservicedesk.com	$2b$12$BSiPUN3ujJqxCm8EvBs4S.T04vr4xy1fw/aaAGhKS5dcRzNaT/pIW	t	3	1	\N
+4	abhi	abhi@itservicedesk.com	$2b$12$9N52Lmma62v0bI.UYesOSeeceQP.AIkZSWy8QnGfuH/tE2UpeJHFm	t	1	1	U0BBD6HR2JC
+6	employee1	employee@test.com	$2b$12$TfSC.MuiuJ.AP/9eqvrf2uNXgeo81Htbo9qrSdWxvcOgfKzFGwAOG	t	4	1	\N
+7	manager1	manager1@itservicedesk.com	$2b$12$RhF1bLOHO.TmphvBwNsKL.WNA62X1RygTfFPBStCSjv3tP9KcB30.	t	2	1	\N
+10	S.Gupta	s.gupta@dataeko.ai	$2b$12$ywnXvy5kJoas5rnw2pEB0erq7J42O4bUVQXeyf1mthUPNAvXrNwyO	t	2	2	\N
+11	Prasanna.ch	p.chettu@dataeko.ai	$2b$12$R0CC9wVfu0qH/2FLcpu3reCwPNwquWjbN9LuBQBT/fEFNRO/h7mWC	t	3	2	\N
 \.
 
 
@@ -735,14 +818,14 @@ COPY public.users (id, username, email, hashed_password, is_active, role_id, dep
 -- Name: access_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.access_requests_id_seq', 1, true);
+SELECT pg_catalog.setval('public.access_requests_id_seq', 3, true);
 
 
 --
 -- Name: assets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.assets_id_seq', 1, true);
+SELECT pg_catalog.setval('public.assets_id_seq', 2, true);
 
 
 --
@@ -756,35 +839,35 @@ SELECT pg_catalog.setval('public.departments_id_seq', 4, true);
 -- Name: knowledge_articles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.knowledge_articles_id_seq', 5, true);
+SELECT pg_catalog.setval('public.knowledge_articles_id_seq', 3, true);
 
 
 --
 -- Name: notifications_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.notifications_id_seq', 14, true);
+SELECT pg_catalog.setval('public.notifications_id_seq', 26, true);
 
 
 --
 -- Name: offboarding_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.offboarding_requests_id_seq', 4, true);
+SELECT pg_catalog.setval('public.offboarding_requests_id_seq', 2, true);
 
 
 --
 -- Name: permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.permissions_id_seq', 1, false);
+SELECT pg_catalog.setval('public.permissions_id_seq', 6, true);
 
 
 --
 -- Name: role_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_permissions_id_seq', 1, false);
+SELECT pg_catalog.setval('public.role_permissions_id_seq', 7, true);
 
 
 --
@@ -798,21 +881,21 @@ SELECT pg_catalog.setval('public.roles_id_seq', 4, true);
 -- Name: ticket_activities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.ticket_activities_id_seq', 12, true);
+SELECT pg_catalog.setval('public.ticket_activities_id_seq', 53, true);
 
 
 --
 -- Name: tickets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tickets_id_seq', 10, true);
+SELECT pg_catalog.setval('public.tickets_id_seq', 25, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 12, true);
+SELECT pg_catalog.setval('public.users_id_seq', 11, true);
 
 
 --
@@ -960,6 +1043,14 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: users users_slack_user_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_slack_user_id_key UNIQUE (slack_user_id);
+
+
+--
 -- Name: users users_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1049,13 +1140,6 @@ CREATE INDEX ix_tickets_id ON public.tickets USING btree (id);
 --
 
 CREATE INDEX ix_users_id ON public.users USING btree (id);
-
-
---
--- Name: ix_users_slack_user_id; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE UNIQUE INDEX ix_users_slack_user_id ON public.users USING btree (slack_user_id);
 
 
 --
@@ -1190,5 +1274,5 @@ ALTER TABLE ONLY public.users
 -- PostgreSQL database dump complete
 --
 
-\unrestrict w3jprtqdHg1kGsKuhtPDCJ9gS7kxWwa7MeW7daLtcPndh4eAh4SUidQ1QTvegAi
+\unrestrict rdbvUlYKoodS71woQpfIr6RVAWbrmRekowX8YN7socEhEWhfdbkLSo0OkLN7BKf
 
