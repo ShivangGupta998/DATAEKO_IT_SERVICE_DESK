@@ -1,13 +1,19 @@
 import os
+import bcrypt
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 
-# Crypt context for initial user seeding
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# ============================================================
+# HELPER FOR SAFE BCRYPT HASHING (Python 3.14 Compatible)
+# ============================================================
+def hash_password_direct(password: str) -> str:
+    # Truncate password to 72 bytes max for bcrypt compatibility
+    password_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password_bytes, salt).decode('utf-8')
 
 # ============================================================
 # DATABASE & MODELS
@@ -70,9 +76,11 @@ def seed_database():
                 db.add(Role(name=role_name, description=f"Default {role_name} Role"))
         db.commit()
 
-        # 2. Upsert Admin User (Creates or overwrites password to match password123)
+        # 2. Hash Password Safely
+        hashed_pw = hash_password_direct("password123")
+
+        # 3. Upsert Admin User (Creates or forces password reset)
         user = db.query(User).filter(User.email == "abhi@itservicedesk.com").first()
-        hashed_pw = pwd_context.hash("password123")
 
         if not user:
             user = User(
