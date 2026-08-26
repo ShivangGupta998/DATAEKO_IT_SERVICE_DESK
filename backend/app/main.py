@@ -57,30 +57,41 @@ app.add_middleware(
 def seed_database():
     db: Session = SessionLocal()
     try:
-        # 1. Create Default Roles if missing
-        roles_to_create = ["Admin", "Agent", "Employee"]
-        for role_name in roles_to_create:
-            existing_role = db.query(Role).filter(Role.name == role_name).first()
-            if not existing_role:
+        # 1. Ensure Default Roles Exist
+        admin_role = db.query(Role).filter(Role.name == "Admin").first()
+        if not admin_role:
+            admin_role = Role(name="Admin", description="System Administrator")
+            db.add(admin_role)
+            db.commit()
+            db.refresh(admin_role)
+
+        for role_name in ["Agent", "Employee"]:
+            if not db.query(Role).filter(Role.name == role_name).first():
                 db.add(Role(name=role_name, description=f"Default {role_name} Role"))
         db.commit()
 
-        # 2. Ensure Admin User exists
-        admin_role = db.query(Role).filter(Role.name == "Admin").first()
+        # 2. Upsert Admin User (Creates or overwrites password to match password123)
         user = db.query(User).filter(User.email == "abhi@itservicedesk.com").first()
+        hashed_pw = pwd_context.hash("password123")
 
         if not user:
-            default_admin = User(
+            user = User(
                 username="abhi",
                 email="abhi@itservicedesk.com",
-                hashed_password=pwd_context.hash("password123"),
+                hashed_password=hashed_pw,
                 is_active=True,
-                role_id=admin_role.id if admin_role else None
+                role_id=admin_role.id
             )
-            db.add(default_admin)
-            db.commit()
+            db.add(user)
+        else:
+            user.hashed_password = hashed_pw
+            user.is_active = True
+            user.role_id = admin_role.id
+
+        db.commit()
+        print("--> SEED SUCCESS: User abhi@itservicedesk.com ready with password 'password123'")
     except Exception as e:
-        print(f"Startup Seeding Exception: {e}")
+        print(f"--> SEED ERROR: {e}")
         db.rollback()
     finally:
         db.close()
