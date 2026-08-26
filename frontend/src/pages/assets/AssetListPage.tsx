@@ -22,7 +22,7 @@ import { Pagination } from '../../components/common/Pagination';
 import { parseApiError } from '../../api/client';
 
 export const AssetListPage: React.FC = () => {
-  const { isAdmin, isManager, isEmployee } = useAuth();
+  const { isAdmin, isManager, isTechnician, isEmployee } = useAuth();
   const { success, error: toastError } = useToast();
 
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -56,12 +56,15 @@ export const AssetListPage: React.FC = () => {
   const [assigneeUserId, setAssigneeUserId] = useState('');
   const [assignNotes, setAssignNotes] = useState('');
 
+  // Admin, Manager, and Technician can create, assign, and retire assets
+  const canManageAssets = isAdmin || isManager || isTechnician;
+
   const fetchAssets = async () => {
     setIsLoading(true);
     setError(null);
     try {
       let data: Asset[] = [];
-      if (isAdmin || isManager) {
+      if (canManageAssets) {
         data = await assetService.getAllAssets();
       } else {
         data = await assetService.getMyAssets();
@@ -76,7 +79,7 @@ export const AssetListPage: React.FC = () => {
 
   useEffect(() => {
     fetchAssets();
-  }, [isAdmin, isManager, isEmployee]);
+  }, [isAdmin, isManager, isTechnician, isEmployee]);
 
   const handleCreateAsset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -205,7 +208,7 @@ export const AssetListPage: React.FC = () => {
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
 
-          {(isAdmin || isManager) && (
+          {canManageAssets && (
             <button
               type="button"
               onClick={() => setShowCreateModal(true)}
@@ -256,14 +259,14 @@ export const AssetListPage: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         {isLoading ? (
           <div className="p-6">
-            <TableSkeleton rows={5} columns={7} />
+            <TableSkeleton rows={5} columns={canManageAssets ? 9 : 8} />
           </div>
         ) : filteredAssets.length === 0 ? (
           <EmptyState
             title="No assets found"
             description="No asset records match your criteria."
-            actionLabel={isAdmin || isManager ? 'Add Asset' : undefined}
-            onAction={isAdmin || isManager ? () => setShowCreateModal(true) : undefined}
+            actionLabel={canManageAssets ? 'Add Asset' : undefined}
+            onAction={canManageAssets ? () => setShowCreateModal(true) : undefined}
           />
         ) : (
           <>
@@ -279,7 +282,7 @@ export const AssetListPage: React.FC = () => {
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4">Assigned To</th>
                     <th className="py-3 px-4">Location</th>
-                    {(isAdmin || isManager) && <th className="py-3 px-4 text-right">Actions</th>}
+                    {canManageAssets && <th className="py-3 px-4 text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
@@ -313,7 +316,7 @@ export const AssetListPage: React.FC = () => {
                       </td>
                       <td className="py-3.5 px-4 text-slate-500">{asset.location || 'N/A'}</td>
 
-                      {(isAdmin || isManager) && (
+                      {canManageAssets && (
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             {asset.status !== 'Retired' && (

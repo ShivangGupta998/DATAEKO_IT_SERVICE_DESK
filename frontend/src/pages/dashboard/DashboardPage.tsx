@@ -299,7 +299,7 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-6 transition-colors">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col transition-colors">
             <div>
               <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
                 Technician Workload
@@ -337,13 +337,6 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div className="bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/50 rounded-xl p-4 transition-colors">
-              <p className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider">SYSTEM STATUS</p>
-              <p className="text-xs text-indigo-900 dark:text-indigo-200 mt-1 leading-relaxed">
-                FastAPI backend connected. All operational services active.
-              </p>
             </div>
           </div>
         )}

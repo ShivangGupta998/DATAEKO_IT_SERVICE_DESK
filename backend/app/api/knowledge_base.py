@@ -56,10 +56,7 @@ def search_articles(
     if category:
         query = query.filter(KnowledgeArticle.category.ilike(f"%{category}%"))
 
-    # Employees only see published articles
-    if current_user.role_id == EMPLOYEE:
-        query = query.filter(KnowledgeArticle.is_published == True)
-
+    # Return all matching articles regardless of role or draft status
     return query.order_by(KnowledgeArticle.created_at.desc()).all()
 
 
@@ -104,9 +101,7 @@ def get_articles(
 ):
     query = db.query(KnowledgeArticle)
 
-    if current_user.role_id == EMPLOYEE:
-        query = query.filter(KnowledgeArticle.is_published == True)
-
+    # Return all articles so employees can see all KB content
     return query.order_by(KnowledgeArticle.created_at.desc()).all()
 
 
@@ -125,12 +120,6 @@ def get_article(
         raise HTTPException(
             status_code=404,
             detail="Knowledge base article not found"
-        )
-
-    if current_user.role_id == EMPLOYEE and not article.is_published:
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to view unpublished articles"
         )
 
     # Increment view count on read

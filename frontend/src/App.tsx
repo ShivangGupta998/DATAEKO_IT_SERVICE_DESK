@@ -87,18 +87,18 @@ export default function App() {
                       <Route path="/tickets/new" element={<TicketCreatePage />} />
                     </Route>
 
-                    {/* Assets (Admin:1, Manager:2, Employee:4) */}
-                    <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
+                    {/* Assets (Admin:1, Manager:2, Technician:3, Employee:4) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2, 3, 4]} />}>
                       <Route path="/assets" element={<AssetListPage />} />
                     </Route>
 
-                    {/* Access Requests (Admin:1, Manager:2, Employee:4) */}
-                    <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
+                    {/* Access Requests (Admin:1, Manager:2, Technician:3, Employee:4) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2, 3, 4]} />}>
                       <Route path="/access-requests" element={<AccessRequestListPage />} />
                     </Route>
 
-                    {/* Offboarding (Admin:1, Manager:2, Employee:4) */}
-                    <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
+                    {/* Offboarding Checklist (Admin:1, Manager:2) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2]} />}>
                       <Route path="/offboarding" element={<OffboardingListPage />} />
                     </Route>
 

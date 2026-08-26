@@ -24,7 +24,8 @@ import { Pagination } from '../../components/common/Pagination';
 import { parseApiError } from '../../api/client';
 
 export const AccessRequestListPage: React.FC = () => {
-  const { user, isAdmin, isManager, isEmployee } = useAuth();
+  // Destructure isTechnician alongside other user roles
+  const { user, isAdmin, isManager, isTechnician, isEmployee } = useAuth();
   const { success, error: toastError } = useToast();
 
   const [requests, setRequests] = useState<AccessRequest[]>([]);
@@ -55,9 +56,11 @@ export const AccessRequestListPage: React.FC = () => {
     setError(null);
     try {
       let data: AccessRequest[] = [];
-      if (isAdmin || isManager) {
+      // Admins, Managers, and Technicians retrieve all access requests
+      if (isAdmin || isManager || isTechnician) {
         data = await accessRequestService.getAllRequests();
       } else {
+        // Regular employees fetch only their own submitted requests
         data = await accessRequestService.getMyRequests();
       }
       setRequests(Array.isArray(data) ? data : []);
@@ -70,7 +73,7 @@ export const AccessRequestListPage: React.FC = () => {
 
   useEffect(() => {
     fetchRequests();
-  }, [isAdmin, isManager, isEmployee]);
+  }, [isAdmin, isManager, isTechnician, isEmployee]);
 
   const handleCreateRequest = async (e: React.FormEvent) => {
     e.preventDefault();
