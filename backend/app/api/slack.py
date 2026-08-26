@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 import logging
+import re
 
 from app.database.database import get_db
 from app.models.ticket import Ticket
@@ -30,35 +31,37 @@ async def handle_slack_events(request: Request, db: Session = Depends(get_db)):
 
     # 2. Process message or app_mention events
     if event_type in ["message", "app_mention"]:
-        # Avoid reacting to bot's own messages
+        # Avoid reacting to bot's own messages or sub-bot events
         if event.get("bot_id") or event.get("subtype") == "bot_message":
             return {"status": "ok", "message": "Ignored bot event"}
 
         text = event.get("text", "")
         slack_user_id = event.get("user")
+        channel_id = event.get("channel")
+        thread_ts = event.get("ts")  # Posts reply directly in thread
 
         if not text:
             return {"status": "ok", "message": "Empty message ignored"}
 
-        # Clean mention tags from text if app_mention
-        cleaned_text = text.replace("<@U", "").replace(">", "").strip()
+        # Clean Slack mention tags (<@U123456>) from title/text
+        cleaned_text = re.sub(r'<@U[A-Z0-9]+>', '', text).strip()
 
-        # Find matching internal user by slack_user_id or fallback to default user
+        # Find matching internal user by slack_user_id; fallback to first system user
         user = db.query(User).filter(User.slack_user_id == slack_user_id).first()
         if not user:
             user = db.query(User).first()
 
         requester_id = user.id if user else 1
 
-        # Truncate first line for ticket title
-        lines = text.strip().split("\n")
-        title = lines[0][:100] if lines else "Ticket from Slack"
+        # Truncate first line for ticket title using cleaned text
+        lines = cleaned_text.split("\n")
+        title = lines[0][:100] if lines and lines[0] else "Ticket from Slack"
 
         try:
             # Create Ticket in DB
             new_ticket = Ticket(
                 title=title,
-                description=text,
+                description=cleaned_text,
                 category="General",
                 priority="Medium",
                 status="open",
@@ -70,7 +73,7 @@ async def handle_slack_events(request: Request, db: Session = Depends(get_db)):
             db.commit()
             db.refresh(new_ticket)
 
-            # 3. Post Confirmation Message back to Slack channel
+            # 3. Post Confirmation Message back to Slack channel/thread
             confirmation_msg = (
                 f"🎫 *Ticket created successfully!*\n\n"
                 f"*Ticket ID:* #{new_ticket.id}\n"
@@ -80,7 +83,17 @@ async def handle_slack_events(request: Request, db: Session = Depends(get_db)):
                 f"*Status:* {new_ticket.status}\n"
                 f"*Source:* Slack"
             )
-            send_slack_message(confirmation_msg)
+            
+            # Send to Slack with channel/thread parameters if supported by send_slack_message
+            try:
+                send_slack_message(
+                    message=confirmation_msg,
+                    channel=channel_id,
+                    thread_ts=thread_ts
+                )
+            except TypeError:
+                # Fallback if your helper only takes a single message argument
+                send_slack_message(confirmation_msg)
 
             logger.info(f"Successfully created Ticket #{new_ticket.id} via Slack Event")
             return {"status": "ok", "ticket_id": new_ticket.id}

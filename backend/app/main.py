@@ -38,7 +38,7 @@ from app.models.notification import Notification
 Base.metadata.create_all(bind=engine)
 
 # ============================================================
-# FASTAPI APPLICATION
+# FASTAPI APPLICATION INITIALIZATION
 # ============================================================
 app = FastAPI(
     title="IT Service Desk API",
@@ -76,13 +76,11 @@ def seed_database():
                 db.add(Role(name=role_name, description=f"Default {role_name} Role"))
         db.commit()
 
-        # 2. Hash Password Safely
-        hashed_pw = hash_password_direct("password123")
-
-        # 3. Upsert Admin User (Creates or forces password reset)
+        # 2. Create Admin User ONLY if missing (Preserves custom passwords on restart)
         user = db.query(User).filter(User.email == "abhi@itservicedesk.com").first()
 
         if not user:
+            hashed_pw = hash_password_direct("abhi@123")
             user = User(
                 username="abhi",
                 email="abhi@itservicedesk.com",
@@ -91,13 +89,11 @@ def seed_database():
                 role_id=admin_role.id
             )
             db.add(user)
+            db.commit()
+            print("--> SEED SUCCESS: User abhi@itservicedesk.com initialized with password 'abhi@123'")
         else:
-            user.hashed_password = hashed_pw
-            user.is_active = True
-            user.role_id = admin_role.id
+            print("--> SEED SKIPPED: User abhi@itservicedesk.com already exists (password preserved)")
 
-        db.commit()
-        print("--> SEED SUCCESS: User abhi@itservicedesk.com ready with password 'password123'")
     except Exception as e:
         print(f"--> SEED ERROR: {e}")
         db.rollback()
