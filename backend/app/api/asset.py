@@ -83,13 +83,14 @@ def create_asset(
             detail="Serial number already exists"
         )
 
-    # Create asset
+    # Create asset (INCLUDING COST)
     asset = Asset(
         asset_tag=asset_data.asset_tag,
         asset_type=asset_data.asset_type,
         manufacturer=asset_data.manufacturer,
         model=asset_data.model,
         serial_number=asset_data.serial_number,
+        cost=asset_data.cost,  # <--- PASS COST TO ORM MODEL
         purchase_date=asset_data.purchase_date,
         status="Available"
     )
@@ -144,7 +145,6 @@ def get_my_assets(
     current_user: User = Depends(get_current_user)
 ):
 
-    # FIXED: Attribute access for ORM model object
     user_id = current_user.id
 
     assets = (
@@ -171,7 +171,6 @@ def get_asset(
     current_user: User = Depends(get_current_user)
 ):
 
-    # FIXED: Attribute access for ORM model object
     user_id = current_user.id
     role_id = current_user.role_id
 
@@ -279,6 +278,9 @@ def update_asset(
 
     if asset_data.model is not None:
         asset.model = asset_data.model
+
+    if asset_data.cost is not None:
+        asset.cost = asset_data.cost  # <--- UPDATE COST FIELD
 
     if asset_data.status is not None:
         asset.status = asset_data.status

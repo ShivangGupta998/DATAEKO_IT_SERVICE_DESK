@@ -43,32 +43,30 @@ export const AssetListPage: React.FC = () => {
 
   // Create form state
   const [assetTag, setAssetTag] = useState('');
-  const [assetName, setAssetName] = useState('');
-  const [category, setCategory] = useState('Laptop');
+  const [category, setCategory] = useState('Hardware');
+  const [manufacturer, setManufacturer] = useState('Apple');
   const [model, setModel] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
   const [cost, setCost] = useState<string>('');
-  const [location, setLocation] = useState('HQ - 3rd Floor');
-  const [notes, setNotes] = useState('');
+  const [purchaseDate, setPurchaseDate] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Assign form state
   const [assigneeUserId, setAssigneeUserId] = useState('');
   const [assignNotes, setAssignNotes] = useState('');
 
-  // Admin, Manager, and Technician can create, assign, and retire assets
+  // Access rights check
   const canManageAssets = isAdmin || isManager || isTechnician;
 
   const fetchAssets = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      let data: Asset[] = [];
-      if (canManageAssets) {
-        data = await assetService.getAllAssets();
-      } else {
-        data = await assetService.getMyAssets();
-      }
+      // Role-aware fetch: Managers/Admins get full inventory, standard employees get assigned assets
+      const data = canManageAssets
+        ? await assetService.getAllAssets()
+        : await assetService.getMyAssets();
+
       setAssets(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(parseApiError(err));
@@ -83,30 +81,35 @@ export const AssetListPage: React.FC = () => {
 
   const handleCreateAsset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!assetTag.trim() || !assetName.trim()) return;
+    if (!assetTag.trim() || !model.trim() || !serialNumber.trim()) return;
 
     setIsSubmitting(true);
     try {
+      const computedName = manufacturer.trim() 
+        ? `${manufacturer.trim()} ${model.trim()}` 
+        : model.trim();
+
       await assetService.createAsset({
         asset_tag: assetTag.trim(),
-        name: assetName.trim(),
-        category,
-        model: model.trim() || undefined,
-        serial_number: serialNumber.trim() || undefined,
-        cost: cost !== '' ? parseFloat(cost) : undefined,
-        location: location.trim() || undefined,
-        notes: notes.trim() || undefined,
+        name: computedName,
+        category: category,
+        model: model.trim(),
+        serial_number: serialNumber.trim(),
+        cost: cost !== '' ? parseFloat(cost) : 0.0,
+        purchase_date: purchaseDate || undefined,
       });
 
       success('Asset Created', `${assetTag} registered successfully.`);
       setShowCreateModal(false);
+      
       // Reset form
       setAssetTag('');
-      setAssetName('');
+      setCategory('Hardware');
+      setManufacturer('Apple');
       setModel('');
       setSerialNumber('');
       setCost('');
-      setNotes('');
+      setPurchaseDate('');
       fetchAssets();
     } catch (err: any) {
       const parsed = parseApiError(err);
@@ -126,7 +129,7 @@ export const AssetListPage: React.FC = () => {
         assigned_to: parseInt(assigneeUserId.trim(), 10),
         notes: assignNotes.trim() || undefined,
       });
-      success('Asset Assigned', `${selectedAsset.asset_tag} assigned to User #${assigneeUserId}.`);
+      success('Asset Assigned', `${selectedAsset.asset_tag} assigned successfully.`);
       setShowAssignModal(false);
       setSelectedAsset(null);
       setAssigneeUserId('');
@@ -163,10 +166,10 @@ export const AssetListPage: React.FC = () => {
         const q = searchQuery.toLowerCase();
         const matchesTag = (a.asset_tag || '').toLowerCase().includes(q);
         const matchesName = (a.name || '').toLowerCase().includes(q);
-        const matchesSerial = (a.serial_number || '').toLowerCase().includes(q);
         const matchesModel = (a.model || '').toLowerCase().includes(q);
-        const matchesAssignee = (a.assigned_to?.username || a.assigned_to_name || '').toLowerCase().includes(q);
-        if (!matchesTag && !matchesName && !matchesSerial && !matchesModel && !matchesAssignee) {
+        const matchesSerial = (a.serial_number || '').toLowerCase().includes(q);
+        const matchesCategory = (a.category || '').toLowerCase().includes(q);
+        if (!matchesTag && !matchesName && !matchesModel && !matchesSerial && !matchesCategory) {
           return false;
         }
       }
@@ -234,7 +237,7 @@ export const AssetListPage: React.FC = () => {
               setSearchQuery(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="Search by tag, name, model, serial number, assignee..."
+            placeholder="Search by tag, name, model, serial number, category..."
             className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
           />
         </div>
@@ -259,7 +262,7 @@ export const AssetListPage: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         {isLoading ? (
           <div className="p-6">
-            <TableSkeleton rows={5} columns={canManageAssets ? 9 : 8} />
+            <TableSkeleton rows={5} columns={canManageAssets ? 8 : 7} />
           </div>
         ) : filteredAssets.length === 0 ? (
           <EmptyState
@@ -275,13 +278,12 @@ export const AssetListPage: React.FC = () => {
                 <thead className="bg-slate-50/80 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-100 dark:border-slate-800">
                   <tr>
                     <th className="py-3 px-4">Asset Tag</th>
-                    <th className="py-3 px-4">Name & Model</th>
+                    <th className="py-3 px-4">Name / Model</th>
                     <th className="py-3 px-4">Category</th>
                     <th className="py-3 px-4">Serial Number</th>
                     <th className="py-3 px-4">Cost</th>
                     <th className="py-3 px-4">Status</th>
                     <th className="py-3 px-4">Assigned To</th>
-                    <th className="py-3 px-4">Location</th>
                     {canManageAssets && <th className="py-3 px-4 text-right">Actions</th>}
                   </tr>
                 </thead>
@@ -293,14 +295,18 @@ export const AssetListPage: React.FC = () => {
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="font-semibold text-slate-900 dark:text-white">{asset.name}</div>
-                        {asset.model && <div className="text-[10px] text-slate-400">{asset.model}</div>}
+                        {asset.model && asset.model !== asset.name && (
+                          <div className="text-[10px] text-slate-400">{asset.model}</div>
+                        )}
                       </td>
                       <td className="py-3.5 px-4">{asset.category || 'General'}</td>
                       <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500">
                         {asset.serial_number || 'N/A'}
                       </td>
                       <td className="py-3.5 px-4 font-mono font-semibold text-slate-900 dark:text-white">
-                        {asset.cost !== undefined && asset.cost !== null ? `$${asset.cost.toLocaleString()}` : '$0.00'}
+                        {asset.cost !== undefined && asset.cost !== null && !isNaN(Number(asset.cost))
+                          ? `$${Number(asset.cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                          : '$0.00'}
                       </td>
                       <td className="py-3.5 px-4">
                         <StatusBadge status={asset.status} />
@@ -308,13 +314,22 @@ export const AssetListPage: React.FC = () => {
                       <td className="py-3.5 px-4">
                         {asset.assigned_to ? (
                           <div className="font-medium text-slate-900 dark:text-white">
-                            {asset.assigned_to.full_name || asset.assigned_to.username}
+                            {typeof asset.assigned_to === 'object'
+                              ? asset.assigned_to.full_name || asset.assigned_to.username || `User #${asset.assigned_to.id}`
+                              : `User #${asset.assigned_to}`}
+                          </div>
+                        ) : asset.assigned_to_name ? (
+                          <div className="font-medium text-slate-900 dark:text-white">
+                            {asset.assigned_to_name}
+                          </div>
+                        ) : asset.assigned_to_id ? (
+                          <div className="font-medium text-slate-900 dark:text-white">
+                            User #{asset.assigned_to_id}
                           </div>
                         ) : (
                           <span className="text-slate-400 italic">Unassigned</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-500">{asset.location || 'N/A'}</td>
 
                       {canManageAssets && (
                         <td className="py-3.5 px-4 text-right">
@@ -383,7 +398,7 @@ export const AssetListPage: React.FC = () => {
                 required
                 value={assetTag}
                 onChange={(e) => setAssetTag(e.target.value)}
-                placeholder="e.g. AST-2026-09"
+                placeholder="e.g. LAP-002"
                 className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-mono"
               />
             </div>
@@ -397,53 +412,56 @@ export const AssetListPage: React.FC = () => {
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500"
               >
-                <option value="Laptop">Laptop / Workstation</option>
-                <option value="Monitor">Monitor / Display</option>
-                <option value="Phone">Mobile Device / Phone</option>
-                <option value="Peripheral">Peripheral / Dock</option>
-                <option value="Network">Networking Device</option>
-                <option value="Server">Server Unit</option>
+                <option value="Hardware">Hardware</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Desktop">Desktop</option>
+                <option value="Software">Software</option>
+                <option value="Network">Network</option>
+                <option value="Peripheral">Peripheral</option>
               </select>
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Asset Name / Title *
-            </label>
-            <input
-              type="text"
-              required
-              value={assetName}
-              onChange={(e) => setAssetName(e.target.value)}
-              placeholder="e.g. MacBook Pro 16-inch M3 Max"
-              className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Model
+                Manufacturer
               </label>
               <input
                 type="text"
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                placeholder="A2991"
+                value={manufacturer}
+                onChange={(e) => setManufacturer(e.target.value)}
+                placeholder="e.g. Apple / Dell / HP"
                 className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Serial Number
+                Model Name *
               </label>
               <input
                 type="text"
+                required
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                placeholder="e.g. MacBook Pro 16"
+                className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Serial Number *
+              </label>
+              <input
+                type="text"
+                required
                 value={serialNumber}
                 onChange={(e) => setSerialNumber(e.target.value)}
-                placeholder="C02XXXXXXXX"
+                placeholder="SN123456"
                 className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-mono"
               />
             </div>
@@ -465,19 +483,18 @@ export const AssetListPage: React.FC = () => {
                 />
               </div>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Physical Location
-            </label>
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="e.g. IT Storage Room B"
-              className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500"
-            />
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Purchase Date
+              </label>
+              <input
+                type="date"
+                value={purchaseDate}
+                onChange={(e) => setPurchaseDate(e.target.value)}
+                className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
@@ -516,22 +533,22 @@ export const AssetListPage: React.FC = () => {
               required
               value={assigneeUserId}
               onChange={(e) => setAssigneeUserId(e.target.value)}
-              placeholder="e.g. 5"
+              placeholder="e.g. 4"
               className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-mono"
             />
-            <p className="text-[10px] text-slate-400 mt-1">Enter the recipient employee's user ID.</p>
+            <p className="text-[10px] text-slate-400 mt-1">Enter the recipient employee's numerical user ID.</p>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Assignment Notes / Handover Details
+              Notes
             </label>
             <textarea
-              rows={3}
+              rows={2}
               value={assignNotes}
               onChange={(e) => setAssignNotes(e.target.value)}
-              placeholder="e.g. Handed over on first day with power adapter and security lock."
-              className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 resize-none"
+              placeholder="Optional assignment details or device condition notes..."
+              className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 

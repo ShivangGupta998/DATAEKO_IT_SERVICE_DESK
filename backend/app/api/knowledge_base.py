@@ -14,7 +14,7 @@ from app.schemas.knowledge_base import (
 from app.core.dependencies import get_current_user, require_roles
 
 # ============================================================
-# ROUTER DEFINITION (Defined first to prevent initialization NameErrors)
+# ROUTER DEFINITION
 # ============================================================
 
 router = APIRouter(
@@ -48,7 +48,6 @@ def search_articles(
             or_(
                 KnowledgeArticle.title.ilike(search_pattern),
                 KnowledgeArticle.content.ilike(search_pattern),
-                KnowledgeArticle.tags.ilike(search_pattern),
                 KnowledgeArticle.category.ilike(search_pattern)
             )
         )
@@ -56,7 +55,6 @@ def search_articles(
     if category:
         query = query.filter(KnowledgeArticle.category.ilike(f"%{category}%"))
 
-    # Return all matching articles regardless of role or draft status
     return query.order_by(KnowledgeArticle.created_at.desc()).all()
 
 
@@ -79,9 +77,8 @@ def create_article(
         title=article_data.title,
         content=article_data.content,
         category=article_data.category,
-        tags=article_data.tags,
         is_published=article_data.is_published if article_data.is_published is not None else True,
-        author_id=current_user.id
+        created_by=current_user.id
     )
 
     db.add(article)
@@ -100,8 +97,6 @@ def get_articles(
     current_user: User = Depends(get_current_user)
 ):
     query = db.query(KnowledgeArticle)
-
-    # Return all articles so employees can see all KB content
     return query.order_by(KnowledgeArticle.created_at.desc()).all()
 
 
@@ -121,11 +116,6 @@ def get_article(
             status_code=404,
             detail="Knowledge base article not found"
         )
-
-    # Increment view count on read
-    article.views = (article.views or 0) + 1
-    db.commit()
-    db.refresh(article)
 
     return article
 
@@ -155,8 +145,6 @@ def update_article(
         article.content = article_data.content
     if article_data.category is not None:
         article.category = article_data.category
-    if article_data.tags is not None:
-        article.tags = article_data.tags
     if article_data.is_published is not None:
         article.is_published = article_data.is_published
 
