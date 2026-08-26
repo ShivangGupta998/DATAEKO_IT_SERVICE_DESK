@@ -78,7 +78,7 @@ def register(
 
 
 # ============================================================
-# LOGIN USER
+# LOGIN USER (WITH DEBUG LOGGING)
 # ============================================================
 
 @router.post("/login")
@@ -86,27 +86,33 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-
+    # Look up user by Email OR Username
     user = db.query(User).filter(
-        User.email == form_data.username
+        (User.email == form_data.username) | (User.username == form_data.username)
     ).first()
 
     if not user:
+        print("DEBUG: User not found in database!")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
 
+    print(f"DEBUG: Found user -> {user.email} (Username: {user.username})")
+    print(f"DEBUG: Incoming password -> {form_data.password}")
+    print(f"DEBUG: Stored hash -> {user.hashed_password}")
+
     if not user.is_active:
+        print("DEBUG: User account is inactive!")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User account is inactive"
         )
 
-    if not verify_password(
-        form_data.password,
-        user.hashed_password
-    ):
+    is_valid = verify_password(form_data.password, user.hashed_password)
+    print(f"DEBUG: Password match result -> {is_valid}")
+
+    if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
@@ -149,7 +155,6 @@ def get_profile(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Retrieve user ID safely whether current_user is a dict or a User model instance
     if isinstance(current_user, dict):
         user_id = current_user.get("user_id") or current_user.get("id") or current_user.get("sub")
     else:
@@ -161,7 +166,6 @@ def get_profile(
             detail="Invalid user token payload"
         )
 
-    # Fetch fresh user record from database
     user = db.query(User).filter(User.id == int(user_id)).first()
     if not user:
         raise HTTPException(
@@ -169,7 +173,6 @@ def get_profile(
             detail="User profile not found"
         )
 
-    # Fetch role name
     role_name = "Employee"
     if hasattr(user, "role") and user.role:
         role_name = user.role.name
