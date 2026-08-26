@@ -1,5 +1,8 @@
+import os
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 # ============================================================
 # API ROUTERS
@@ -26,7 +29,6 @@ from app.database.base import Base
 
 # ============================================================
 # MODELS
-# Import all models so SQLAlchemy knows them
 # ============================================================
 
 from app.models.asset import Asset
@@ -62,15 +64,14 @@ app = FastAPI(
 
 # ============================================================
 # CORS CONFIGURATION
-# Allow wildcard "*" or explicitly include the new IP network addresses
 # ============================================================
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows requests from any IP address (e.g. 10.171.40.185, 172.31.30.73, localhost)
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows GET, POST, OPTIONS, PUT, PATCH, DELETE
-    allow_headers=["*"],  # Allows Authorization, Content-Type, etc.
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -91,7 +92,6 @@ app.include_router(notification.router)
 
 # ============================================================
 # SUPPRESS BROWSER ICON 404 LOGS
-# Intercepts automatic favicon and Apple touch icon probes
 # ============================================================
 
 @app.get("/apple-touch-icon{path:path}.png", include_in_schema=False)
@@ -101,11 +101,25 @@ async def ignore_icon_requests():
 
 
 # ============================================================
-# ROOT ENDPOINT
+# FRONTEND STATIC FILES & SPA SERVING
 # ============================================================
 
-@app.get("/")
-def root():
-    return {
-        "message": "IT Service Desk API is running"
-    }
+# Path pointing to frontend/dist relative to backend/app/main.py
+FRONTEND_DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend/dist"))
+
+if os.path.exists(FRONTEND_DIST_DIR):
+    assets_path = os.path.join(FRONTEND_DIST_DIR, "assets")
+    if os.path.exists(assets_path):
+        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+
+    # Catch-all route to serve index.html for React SPA routing
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_react_app(full_path: str):
+        # Allow /docs and OpenAPI schemas to pass through to FastAPI
+        if full_path in ["docs", "redoc", "openapi.json"]:
+            return Response(status_code=404)
+
+        file_path = os.path.join(FRONTEND_DIST_DIR, full_path)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(FRONTEND_DIST_DIR, "index.html"))
