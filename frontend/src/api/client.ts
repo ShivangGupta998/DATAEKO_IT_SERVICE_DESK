@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-export const DEFAULT_API_URL = 'http://localhost:8000';
+export const DEFAULT_API_URL = 'https://dataeko-it-service-desk.onrender.com';
 export const STORAGE_KEY_TOKEN = 'itsm_access_token';
 export const STORAGE_KEY_API_URL = 'itsm_api_url';
 export const STORAGE_KEY_USER = 'itsm_user';
@@ -8,22 +8,30 @@ export const STORAGE_KEY_USER = 'itsm_user';
 export function getStoredApiUrl(): string {
   if (typeof window === 'undefined') return DEFAULT_API_URL;
 
-  const currentHostname = window.location.hostname;
-
-  // 1. PRIORITIZE NETWORK IP: If accessing via an explicit IP or network host, dynamically match port 8000
-  if (currentHostname !== 'localhost' && currentHostname !== '127.0.0.1') {
-    return `http://${currentHostname}:8000`;
-  }
-
-  // 2. Check local storage if on localhost
-  const storedUrl = localStorage.getItem(STORAGE_KEY_API_URL);
-
+  // 1. Read Environment Variable first
   const envUrl =
     typeof import.meta !== 'undefined' && (import.meta as any).env
       ? ((import.meta as any).env.VITE_API_BASE_URL || (import.meta as any).env.VITE_API_URL)
       : undefined;
 
-  return storedUrl || envUrl || DEFAULT_API_URL;
+  if (envUrl) return envUrl.trim().replace(/\/+$/, '');
+
+  const currentHostname = window.location.hostname;
+
+  // 2. Only append port 8000 if running on local IP / LAN development
+  if (
+    currentHostname !== 'localhost' &&
+    currentHostname !== '127.0.0.1' &&
+    !currentHostname.includes('onrender.com') &&
+    /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(currentHostname)
+  ) {
+    return `http://${currentHostname}:8000`;
+  }
+
+  // 3. Check local storage
+  const storedUrl = localStorage.getItem(STORAGE_KEY_API_URL);
+
+  return storedUrl || DEFAULT_API_URL;
 }
 
 export function setStoredApiUrl(url: string): void {
