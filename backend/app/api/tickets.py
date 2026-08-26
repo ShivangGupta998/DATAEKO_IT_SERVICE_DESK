@@ -20,12 +20,14 @@ TECHNICIAN = 3
 EMPLOYEE = 4
 
 def add_sla_details(ticket):
-    if hasattr(ticket, 'sla_due_date') and ticket.sla_due_date:
-        ticket.sla_due = ticket.sla_due_date
+    # Safely maps sla_due to dynamic frontend fields
+    sla_target = getattr(ticket, 'sla_due', None) or getattr(ticket, 'sla_due_date', None)
     
-    if getattr(ticket, 'sla_due', None):
-        ticket.sla_status = get_sla_status(ticket.sla_due, ticket.resolved_at, ticket.status)
-        ticket.remaining_minutes = get_remaining_minutes(ticket.sla_due)
+    if sla_target:
+        ticket.sla_due = sla_target
+        ticket.sla_due_date = sla_target
+        ticket.sla_status = get_sla_status(sla_target, ticket.resolved_at, ticket.status)
+        ticket.remaining_minutes = get_remaining_minutes(sla_target)
     else:
         ticket.sla_status = None
         ticket.remaining_minutes = None
@@ -44,6 +46,7 @@ def create_ticket(
 
     sla_due = calculate_sla_due(ticket_data.priority)
 
+    # REMOVED invalid 'sla_due_date' argument
     ticket = Ticket(
         title=ticket_data.title,
         description=ticket_data.description,
@@ -52,8 +55,7 @@ def create_ticket(
         status="open",
         source="web",
         requester_id=user_id,
-        sla_due=sla_due,
-        sla_due_date=sla_due
+        sla_due=sla_due
     )
 
     db.add(ticket)
@@ -184,8 +186,7 @@ def update_ticket(
             ticket.priority = ticket_data.priority
             priority_changed = True
             new_sla = calculate_sla_due(ticket.priority)
-            ticket.sla_due = new_sla
-            ticket.sla_due_date = new_sla
+            ticket.sla_due = new_sla  # REMOVED invalid ticket.sla_due_date assignment
             changes.append(f"Priority changed from {old_priority} to {ticket.priority}")
 
     if ticket_data.assignee_id is not None:

@@ -13,6 +13,10 @@ export const LoginPage: React.FC = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
 
+  // Intro video state
+  const [showIntro, setShowIntro] = useState(true);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -22,8 +26,41 @@ export const LoginPage: React.FC = () => {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  // Programmatic Autoplay Audio Unlocking via Web Audio API
+  useEffect(() => {
+    if (!showIntro) return;
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    // 1. Force unmuted state on DOM video element
+    video.muted = false;
+    video.volume = 1.0;
+
+    // 2. Initialize Web Audio Context to signal active audio engine to browser
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContext) {
+      const audioCtx = new AudioContext();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // 3. Attempt direct autoplay execution
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Fallback to muted execution only if browser engine rejects unmuted stream
+        video.muted = true;
+        video.play();
+      });
+    }
+  }, [showIntro]);
+
   // High-Contrast Particle Wave Animation
   useEffect(() => {
+    if (showIntro) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -85,7 +122,7 @@ export const LoginPage: React.FC = () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [theme]);
+  }, [theme, showIntro]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +146,22 @@ export const LoginPage: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  // Direct Fullscreen Unmuted Intro Video
+  if (showIntro) {
+    return (
+      <div className="fixed inset-0 z-[99999] bg-black flex items-center justify-center pointer-events-none">
+        <video
+          ref={videoRef}
+          src="/VIDEO.mp4"
+          autoPlay
+          playsInline
+          onEnded={() => setShowIntro(false)}
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col justify-center py-10 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">

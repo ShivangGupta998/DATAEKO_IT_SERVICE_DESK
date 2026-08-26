@@ -1,6 +1,5 @@
 from datetime import date, datetime
 from typing import Optional
-
 from pydantic import BaseModel, ConfigDict
 
 
@@ -20,6 +19,8 @@ class AssetCreate(BaseModel):
 
     serial_number: str
 
+    cost: Optional[float] = 0.0  # <--- ADDED COST FIELD
+
     purchase_date: Optional[date] = None
 
 
@@ -38,6 +39,8 @@ class AssetUpdate(BaseModel):
     model: Optional[str] = None
 
     serial_number: Optional[str] = None
+
+    cost: Optional[float] = None  # <--- ADDED COST FIELD
 
     status: Optional[str] = None
 
@@ -70,6 +73,8 @@ class AssetResponse(BaseModel):
     model: str
 
     serial_number: str
+
+    cost: Optional[float] = 0.0  # <--- ADDED COST FIELD TO RESPONSE
 
     assigned_to: Optional[int]
 

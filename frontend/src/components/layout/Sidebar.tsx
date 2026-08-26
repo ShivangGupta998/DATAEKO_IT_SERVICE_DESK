@@ -51,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
         : 'Tickets',
       icon: Ticket,
       roles: [1, 2, 3, 4],
-      end: true, // EXACT MATCH ONLY (Prevents highlighting on /tickets/new)
+      end: true, // EXACT MATCH ONLY
     },
     {
       to: '/tickets/new',
@@ -64,21 +64,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
       to: '/assets',
       label: 'Assets',
       icon: Laptop,
-      roles: [1, 2],
+      roles: [1, 2, 3, 4], // Accessible by all roles
       end: false,
     },
     {
       to: '/access-requests',
       label: 'Access Requests',
       icon: KeyRound,
-      roles: [1, 2],
+      roles: [1, 2, 3, 4], // FIXED: Enabled for all roles
       end: false,
     },
     {
       to: '/offboarding',
       label: 'Offboarding',
       icon: UserX,
-      roles: [1, 2],
+      roles: [1, 2], // Admin & Manager only
       end: false,
     },
     {

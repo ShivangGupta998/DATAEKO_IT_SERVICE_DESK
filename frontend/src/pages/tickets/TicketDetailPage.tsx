@@ -279,85 +279,87 @@ export const TicketDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Action / Management Form Card */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 text-xs">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-indigo-600" />
-              <span>Update Ticket Progress</span>
-            </h3>
+          {/* Action / Management Form Card - Only rendered for privileged roles */}
+          {(isAdmin || isManager || isTechnician) && (
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 text-xs">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-indigo-600" />
+                <span>Update Ticket Progress</span>
+              </h3>
 
-            <form onSubmit={handleUpdateTicket} className="space-y-4">
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  Status
-                </label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value as TicketStatus)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
-                >
-                  <option value="Open">Open</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Resolved">Resolved</option>
-                  <option value="Closed">Closed</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  Priority
-                </label>
-                <select
-                  value={newPriority}
-                  onChange={(e) => setNewPriority(e.target.value as TicketPriority)}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                  <option value="Critical">Critical</option>
-                </select>
-              </div>
-
-              {(isAdmin || isManager) && (
+              <form onSubmit={handleUpdateTicket} className="space-y-4">
                 <div>
                   <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                    Assignee User ID
+                    Status
                   </label>
-                  <input
-                    type="number"
-                    value={assigneeIdInput}
-                    onChange={(e) => setAssigneeIdInput(e.target.value)}
-                    placeholder="Enter technician user ID"
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-mono"
-                  />
-                  <p className="text-[10px] text-slate-400 mt-1">Leave blank to keep unassigned</p>
+                  <select
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value as TicketStatus)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
+                  >
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Closed">Closed</option>
+                  </select>
                 </div>
-              )}
 
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                  Add Comment / Activity Note
-                </label>
-                <textarea
-                  rows={3}
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Describe resolution steps or status change justification..."
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 resize-none"
-                />
-              </div>
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    Priority
+                  </label>
+                  <select
+                    value={newPriority}
+                    onChange={(e) => setNewPriority(e.target.value as TicketPriority)}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                  </select>
+                </div>
 
-              <button
-                type="submit"
-                disabled={isUpdating}
-                className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>{isUpdating ? 'Saving...' : 'Update & Log Event'}</span>
-              </button>
-            </form>
-          </div>
+                {(isAdmin || isManager) && (
+                  <div>
+                    <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                      Assignee User ID
+                    </label>
+                    <input
+                      type="number"
+                      value={assigneeIdInput}
+                      onChange={(e) => setAssigneeIdInput(e.target.value)}
+                      placeholder="Enter technician user ID"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-mono"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">Leave blank to keep unassigned</p>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
+                    Add Comment / Activity Note
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Describe resolution steps or status change justification..."
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{isUpdating ? 'Saving...' : 'Update & Log Event'}</span>
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </div>
