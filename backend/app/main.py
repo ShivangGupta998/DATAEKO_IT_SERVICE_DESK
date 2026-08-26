@@ -3,11 +3,12 @@ from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
 
 # ============================================================
 # DATABASE & MODELS
 # ============================================================
-from app.database.database import engine
+from app.database.database import engine, SessionLocal
 from app.database.base import Base
 
 from app.models.asset import Asset
@@ -23,6 +24,9 @@ from app.models.offboarding import OffboardingRequest
 from app.models.knowledge_base import KnowledgeArticle
 from app.models.notification import Notification
 
+from app.api.auth import get_password_hash
+
+# Create tables if they don't exist
 Base.metadata.create_all(bind=engine)
 
 # ============================================================
@@ -45,7 +49,42 @@ app.add_middleware(
 )
 
 # ============================================================
-# 1. FRONTEND STATIC ASSETS (MOUNT FIRST TO BYPASS API AUTH)
+# DATABASE AUTO-SEEDER (Runs on Startup)
+# ============================================================
+@app.on_event("startup")
+def seed_database():
+    db: Session = SessionLocal()
+    try:
+        # 1. Create Default Roles if missing
+        roles_to_create = ["Admin", "Agent", "Employee"]
+        for role_name in roles_to_create:
+            existing_role = db.query(Role).filter(Role.name == role_name).first()
+            if not existing_role:
+                db.add(Role(name=role_name, description=f"Default {role_name} Role"))
+        db.commit()
+
+        # 2. Ensure Admin User exists
+        admin_role = db.query(Role).filter(Role.name == "Admin").first()
+        user = db.query(User).filter(User.email == "abhi@itservicedesk.com").first()
+        
+        if not user:
+            default_admin = User(
+                username="abhi",
+                email="abhi@itservicedesk.com",
+                hashed_password=get_password_hash("password123"),
+                is_active=True,
+                role_id=admin_role.id if admin_role else None
+            )
+            db.add(default_admin)
+            db.commit()
+    except Exception as e:
+        print(f"Startup Seeding Exception: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+# ============================================================
+# 1. FRONTEND STATIC ASSETS (Mounted before API routers)
 # ============================================================
 FRONTEND_DIST_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "../../frontend/dist")
@@ -67,7 +106,17 @@ async def ignore_icon_requests():
 # ============================================================
 # 3. REGISTER API ROUTERS
 # ============================================================
-from app.api import auth, tickets, slack, asset, access_request, offboarding, knowledge_base, report, notification
+from app.api import (
+    auth,
+    tickets,
+    slack,
+    asset,
+    access_request,
+    offboarding,
+    knowledge_base,
+    report,
+    notification,
+)
 
 app.include_router(auth.router)
 app.include_router(tickets.router)
@@ -80,7 +129,7 @@ app.include_router(report.router)
 app.include_router(notification.router)
 
 # ============================================================
-# 4. SPA CATCH-ALL ROUTE (MUST BE VERY LAST)
+# 4. SPA CATCH-ALL ROUTE (Must be at the very end)
 # ============================================================
 if os.path.exists(FRONTEND_DIST_DIR):
     @app.get("/{full_path:path}", include_in_schema=False)
