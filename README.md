@@ -1,4 +1,1 @@
 # DATAEKO_IT_SERVICE_DESK
-lovely
-hero
-poooop
