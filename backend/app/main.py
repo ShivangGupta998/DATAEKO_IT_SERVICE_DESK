@@ -4,6 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+
+# Crypt context for initial user seeding
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ============================================================
 # DATABASE & MODELS
@@ -24,9 +28,7 @@ from app.models.offboarding import OffboardingRequest
 from app.models.knowledge_base import KnowledgeArticle
 from app.models.notification import Notification
 
-from app.api.auth import get_password_hash
-
-# Create tables if they don't exist
+# Create database tables if they do not exist
 Base.metadata.create_all(bind=engine)
 
 # ============================================================
@@ -66,12 +68,12 @@ def seed_database():
         # 2. Ensure Admin User exists
         admin_role = db.query(Role).filter(Role.name == "Admin").first()
         user = db.query(User).filter(User.email == "abhi@itservicedesk.com").first()
-        
+
         if not user:
             default_admin = User(
                 username="abhi",
                 email="abhi@itservicedesk.com",
-                hashed_password=get_password_hash("password123"),
+                hashed_password=pwd_context.hash("password123"),
                 is_active=True,
                 role_id=admin_role.id if admin_role else None
             )
