@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { User, UserRole, UserCreate } from '../types/auth';
-import { authService } from '../services/authService';
+import { authService } from '../services/AuthService';
 import { STORAGE_KEY_TOKEN, STORAGE_KEY_USER, getStoredApiUrl, setStoredApiUrl, parseApiError } from '../api/client';
 
 interface AuthContextType {
@@ -81,7 +81,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return profile;
     } catch (err) {
       console.warn('Failed to refresh profile:', parseApiError(err).message);
-      // If the profile fails to load due to token invalidation, trigger logout
       logout();
       return null;
     } finally {

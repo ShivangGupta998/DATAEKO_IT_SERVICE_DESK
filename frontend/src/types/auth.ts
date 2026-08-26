@@ -21,5 +21,12 @@ export interface UserCreate {
   password: string;
   full_name?: string;
   role_id: number;
-  department_id: number; // Updated from department to department_id
+  department_id: number;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  user?: User;
+  role?: string | { id: number; name: string };
 }
