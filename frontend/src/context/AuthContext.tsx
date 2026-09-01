@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import { User, UserRole, UserCreate } from '../types/auth';
 import { authService } from '../services/AuthService';
 import { STORAGE_KEY_TOKEN, STORAGE_KEY_USER, getStoredApiUrl, setStoredApiUrl, parseApiError } from '../api/client';
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   token: string | null;
   roleId: number | null;
@@ -30,7 +30,7 @@ interface AuthContextType {
   refreshProfile: () => Promise<User | null>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(STORAGE_KEY_TOKEN));
@@ -210,7 +210,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
