@@ -1,6 +1,20 @@
 from datetime import datetime
 from typing import Literal, Optional
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_serializer, validator
+
+# ============================================================
+# USER NESTED SCHEMA
+# ============================================================
+
+class UserMinResponse(BaseModel):
+    id: int
+    username: str
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
 
 # ============================================================
 # ENUM TYPES
@@ -31,7 +45,7 @@ class TicketCreate(BaseModel):
     category: str = Field(..., min_length=2, max_length=100)
     priority: TicketPriority = "medium"
     requester_id: Optional[int] = None
-    assigned_to: Optional[int] = Field(None, alias="assignee_id")
+    assignee_id: Optional[int] = Field(None, alias="assigned_to")
 
     @validator("priority", pre=True)
     def normalize_priority(cls, v):
@@ -87,6 +101,14 @@ class TicketResponse(BaseModel):
     requester_id: int
     assignee_id: Optional[int] = Field(None, alias="assigned_to")
 
+    # Relationship Objects
+    requester: Optional[UserMinResponse] = None
+    assignee: Optional[UserMinResponse] = None
+
+    # Dynamic/Fallback Name Fields
+    requester_name: Optional[str] = None
+    assignee_name: Optional[str] = None
+
     # SLA Details
     sla_due: Optional[datetime] = None
     resolved_at: Optional[datetime] = None
@@ -96,6 +118,13 @@ class TicketResponse(BaseModel):
     # Timestamps
     created_at: datetime
     updated_at: datetime
+
+    # Appends Z timezone indicator to ensure frontend parses timestamps as UTC
+    @field_serializer("created_at", "updated_at", "sla_due", "resolved_at")
+    def serialize_dt(self, dt: Optional[datetime], _info):
+        if dt is None:
+            return None
+        return dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     class Config:
         from_attributes = True

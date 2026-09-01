@@ -16,7 +16,7 @@ import {
   FileText,
   UserCheck,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../context/ToastContext';
 import { ticketService } from '../../services/ticketService';
 import { Ticket, TicketHistoryItem, TicketStatus, TicketPriority } from '../../types/ticket';
@@ -116,6 +116,20 @@ export const TicketDetailPage: React.FC = () => {
     }
   };
 
+  // Converts UTC API strings cleanly into local browser time
+  const formatFullDate = (d?: string) => {
+    if (!d) return 'N/A';
+    try {
+      const isoString = d.endsWith('Z') || d.includes('+') ? d : `${d}Z`;
+      return new Date(isoString).toLocaleString('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+    } catch {
+      return d;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="py-20 flex justify-center">
@@ -139,18 +153,6 @@ export const TicketDetailPage: React.FC = () => {
       </div>
     );
   }
-
-  const formatFullDate = (d?: string) => {
-    if (!d) return 'N/A';
-    try {
-      return new Date(d).toLocaleString(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      });
-    } catch {
-      return d;
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -295,7 +297,7 @@ export const TicketDetailPage: React.FC = () => {
                   <select
                     value={newStatus}
                     onChange={(e) => setNewStatus(e.target.value as TicketStatus)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
                   >
                     <option value="Open">Open</option>
                     <option value="In Progress">In Progress</option>
@@ -311,7 +313,7 @@ export const TicketDetailPage: React.FC = () => {
                   <select
                     value={newPriority}
                     onChange={(e) => setNewPriority(e.target.value as TicketPriority)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
                   >
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
@@ -326,36 +328,39 @@ export const TicketDetailPage: React.FC = () => {
                       Assignee User ID
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       value={assigneeIdInput}
                       onChange={(e) => setAssigneeIdInput(e.target.value)}
-                      placeholder="Enter technician user ID"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-mono"
+                      placeholder="e.g. 3 (leave empty for unassigned)"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium"
                     />
-                    <p className="text-[10px] text-slate-400 mt-1">Leave blank to keep unassigned</p>
                   </div>
                 )}
 
                 <div>
                   <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">
-                    Add Comment / Activity Note
+                    Add Internal Note / Comment
                   </label>
                   <textarea
                     rows={3}
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="Describe resolution steps or status change justification..."
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 resize-none"
+                    placeholder="Provide troubleshooting notes or resolution context..."
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 font-medium outline-hidden"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isUpdating}
-                  className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-colors shadow-xs flex items-center justify-center gap-2"
                 >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>{isUpdating ? 'Saving...' : 'Update & Log Event'}</span>
+                  {isUpdating ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                  <span>Save Changes</span>
                 </button>
               </form>
             </div>

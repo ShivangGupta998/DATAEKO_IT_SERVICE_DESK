@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, Plus, Search } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { NotificationBell } from '../notifications/NotificationBell';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { useNavigate, Link } from 'react-router-dom';

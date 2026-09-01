@@ -16,7 +16,7 @@ export const notificationService = {
 
   async getUnreadCount(): Promise<NotificationCount> {
     const token = localStorage.getItem(STORAGE_KEY_TOKEN);
-    
+
     // Return zero immediately if user isn't logged in
     if (!token) {
       return { unread_count: 0 } as NotificationCount;

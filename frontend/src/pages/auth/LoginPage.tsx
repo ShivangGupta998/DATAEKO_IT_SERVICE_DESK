@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, Lock, Mail, AlertCircle, Eye, EyeOff, Info } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../context/ToastContext';
 import { useTheme } from '../../context/ThemeContext';
 import { ThemeToggle } from '../../components/common/ThemeToggle';

@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-export const DEFAULT_API_URL = 'https://dataeko-it-service-desk.onrender.com';
+// Fallback default strictly points to local backend
+export const DEFAULT_API_URL = 'http://localhost:8000';
 export const STORAGE_KEY_TOKEN = 'itsm_access_token';
 export const STORAGE_KEY_API_URL = 'itsm_api_url';
 export const STORAGE_KEY_USER = 'itsm_user';
@@ -22,7 +23,6 @@ export function getStoredApiUrl(): string {
   if (
     currentHostname !== 'localhost' &&
     currentHostname !== '127.0.0.1' &&
-    !currentHostname.includes('onrender.com') &&
     /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(currentHostname)
   ) {
     return `http://${currentHostname}:8000`;
@@ -48,7 +48,7 @@ export const apiClient = axios.create({
   },
 });
 
-// Dynamic Request Interceptor: Ensures current API URL and Bearer token are used
+// Dynamic Request Interceptor: Ensures current API URL and Bearer token are attached
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     config.baseURL = getStoredApiUrl();
@@ -61,7 +61,7 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Unified Error Handling
+// Unified Error Handling Types & Helper
 export interface ApiErrorDetail {
   message: string;
   statusCode?: number;
@@ -153,12 +153,15 @@ export function parseApiError(error: unknown): ApiErrorDetail {
   return { message: 'An unexpected error occurred.' };
 }
 
+// Response Interceptor: Prevents unwanted global logout redirects during notification polling
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const url = error.config?.url || '';
     const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register');
-    const isBackgroundPoll = url.includes('/notifications/count');
+    
+    // Matched across all /notifications routes (e.g., /notifications/ and /notifications/count)
+    const isBackgroundPoll = url.includes('/notifications');
 
     if (axios.isAxiosError(error) && error.response?.status === 401 && !isAuthEndpoint && !isBackgroundPoll) {
       window.dispatchEvent(new CustomEvent('itsm:unauthorized'));
