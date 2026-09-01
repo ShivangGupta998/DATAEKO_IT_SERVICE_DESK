@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database.database import get_db
 from app.models.ticket import Ticket
@@ -19,8 +19,8 @@ MANAGER = 2
 TECHNICIAN = 3
 EMPLOYEE = 4
 
+
 def add_sla_details(ticket):
-    # Safely maps sla_due to dynamic frontend fields
     sla_target = getattr(ticket, 'sla_due', None) or getattr(ticket, 'sla_due_date', None)
     
     if sla_target:
@@ -31,7 +31,17 @@ def add_sla_details(ticket):
     else:
         ticket.sla_status = None
         ticket.remaining_minutes = None
+
+    if getattr(ticket, 'assignee', None):
+        assignee_full_name = getattr(ticket.assignee, 'full_name', None)
+        ticket.assignee_name = assignee_full_name or ticket.assignee.username
+
+    if getattr(ticket, 'requester', None):
+        requester_full_name = getattr(ticket.requester, 'full_name', None)
+        ticket.requester_name = requester_full_name or ticket.requester.username
+
     return ticket
+
 
 @router.post("/", response_model=TicketResponse, status_code=status.HTTP_201_CREATED)
 def create_ticket(
@@ -46,7 +56,6 @@ def create_ticket(
 
     sla_due = calculate_sla_due(ticket_data.priority)
 
-    # REMOVED invalid 'sla_due_date' argument
     ticket = Ticket(
         title=ticket_data.title,
         description=ticket_data.description,
@@ -70,6 +79,7 @@ def create_ticket(
     )
     db.add(activity)
 
+    # Bell icon notification for requester
     create_notification(
         db=db,
         user_id=user_id,
@@ -79,31 +89,78 @@ def create_ticket(
     )
 
     db.commit()
+
+    # Re-fetch ticket with joined relationship objects
+    ticket = db.query(Ticket).options(
+        joinedload(Ticket.assignee),
+        joinedload(Ticket.requester)
+    ).filter(Ticket.id == ticket.id).first()
+
+    # SLACK NOTIFICATION FOR TICKET CREATION
+    requester_name = user.username
+    send_slack_message(
+        f"🎫 *New Ticket Created*\n"
+        f"ID: #{ticket.id}\n"
+        f"Title: {ticket.title}\n"
+        f"Priority: {ticket.priority}\n"
+        f"By: {requester_name}"
+    )
+
     return add_sla_details(ticket)
+
 
 @router.get("/", response_model=list[TicketResponse])
 def get_tickets(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(ADMIN, MANAGER, TECHNICIAN))
 ):
-    tickets = db.query(Ticket).order_by(Ticket.created_at.desc()).all()
+    tickets = (
+        db.query(Ticket)
+        .options(
+            joinedload(Ticket.assignee),
+            joinedload(Ticket.requester)
+        )
+        .order_by(Ticket.created_at.desc())
+        .all()
+    )
     return [add_sla_details(ticket) for ticket in tickets]
+
 
 @router.get("/my", response_model=list[TicketResponse])
 def get_my_tickets(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    tickets = db.query(Ticket).filter(Ticket.requester_id == current_user.id).order_by(Ticket.created_at.desc()).all()
+    tickets = (
+        db.query(Ticket)
+        .options(
+            joinedload(Ticket.assignee),
+            joinedload(Ticket.requester)
+        )
+        .filter(Ticket.requester_id == current_user.id)
+        .order_by(Ticket.created_at.desc())
+        .all()
+    )
     return [add_sla_details(ticket) for ticket in tickets]
+
 
 @router.get("/assigned", response_model=list[TicketResponse])
 def get_assigned_tickets(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(TECHNICIAN))
 ):
-    tickets = db.query(Ticket).filter(Ticket.assignee_id == current_user.id).order_by(Ticket.created_at.desc()).all()
+    tickets = (
+        db.query(Ticket)
+        .options(
+            joinedload(Ticket.assignee),
+            joinedload(Ticket.requester)
+        )
+        .filter(Ticket.assignee_id == current_user.id)
+        .order_by(Ticket.created_at.desc())
+        .all()
+    )
     return [add_sla_details(ticket) for ticket in tickets]
+
 
 @router.get("/{ticket_id}/history")
 def get_ticket_history(
@@ -123,7 +180,13 @@ def get_ticket_history(
     if role_id == TECHNICIAN and ticket.assignee_id != user_id:
         raise HTTPException(status_code=403, detail="Permission denied")
 
-    return db.query(TicketActivity).filter(TicketActivity.ticket_id == ticket_id).order_by(TicketActivity.created_at.asc()).all()
+    return (
+        db.query(TicketActivity)
+        .filter(TicketActivity.ticket_id == ticket_id)
+        .order_by(TicketActivity.created_at.asc())
+        .all()
+    )
+
 
 @router.get("/{ticket_id}", response_model=TicketResponse)
 def get_ticket(
@@ -134,7 +197,15 @@ def get_ticket(
     user_id = current_user.id
     role_id = current_user.role_id
 
-    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    ticket = (
+        db.query(Ticket)
+        .options(
+            joinedload(Ticket.assignee),
+            joinedload(Ticket.requester)
+        )
+        .filter(Ticket.id == ticket_id)
+        .first()
+    )
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
@@ -144,6 +215,7 @@ def get_ticket(
         raise HTTPException(status_code=403, detail="Permission denied")
 
     return add_sla_details(ticket)
+
 
 @router.patch("/{ticket_id}", response_model=TicketResponse)
 def update_ticket(
@@ -186,7 +258,7 @@ def update_ticket(
             ticket.priority = ticket_data.priority
             priority_changed = True
             new_sla = calculate_sla_due(ticket.priority)
-            ticket.sla_due = new_sla  # REMOVED invalid ticket.sla_due_date assignment
+            ticket.sla_due = new_sla
             changes.append(f"Priority changed from {old_priority} to {ticket.priority}")
 
     if ticket_data.assignee_id is not None:
@@ -232,7 +304,16 @@ def update_ticket(
         )
 
     db.commit()
-    db.refresh(ticket)
+
+    ticket = (
+        db.query(Ticket)
+        .options(
+            joinedload(Ticket.assignee),
+            joinedload(Ticket.requester)
+        )
+        .filter(Ticket.id == ticket_id)
+        .first()
+    )
 
     updater = db.query(User).filter(User.id == user_id).first()
     updater_name = updater.username if updater else "Unknown"

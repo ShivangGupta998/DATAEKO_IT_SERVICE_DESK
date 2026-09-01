@@ -9,7 +9,7 @@ import {
   Eye,
   X,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { ticketService } from '../../services/ticketService';
 import { Ticket } from '../../types/ticket';
 import { StatusBadge, PriorityBadge, SLABadge } from '../../components/common/Badge';
@@ -365,81 +365,94 @@ export const TicketListPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
-                  {paginatedTickets.map((ticket) => (
-                    <tr
-                      key={ticket.id}
-                      className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
-                    >
-                      <td className="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                        #{ticket.id}
-                      </td>
+                  {paginatedTickets.map((ticket) => {
+                    const assigneeDisplay =
+                      ticket.assignee?.full_name ||
+                      ticket.assignee?.username ||
+                      ticket.assignee_name;
 
-                      <td className="py-3.5 px-4 max-w-[260px]">
-                        <Link
-                          to={`/tickets/${ticket.id}`}
-                          className="font-semibold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 line-clamp-1"
-                        >
-                          {ticket.title}
-                        </Link>
-                        {ticket.category && (
-                          <span className="text-[10px] text-slate-400 mt-0.5 inline-block">
-                            Category: {ticket.category}
-                          </span>
-                        )}
-                      </td>
+                    const requesterDisplay =
+                      ticket.requester?.full_name ||
+                      ticket.requester?.username ||
+                      ticket.requester_name ||
+                      'Requester';
 
-                      <td className="py-3.5 px-4">
-                        <PriorityBadge priority={ticket.priority} />
-                      </td>
+                    return (
+                      <tr
+                        key={ticket.id}
+                        className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
+                      >
+                        <td className="py-3.5 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                          #{ticket.id}
+                        </td>
 
-                      <td className="py-3.5 px-4">
-                        <StatusBadge status={ticket.status} />
-                      </td>
+                        <td className="py-3.5 px-4 max-w-[260px]">
+                          <Link
+                            to={`/tickets/${ticket.id}`}
+                            className="font-semibold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 line-clamp-1"
+                          >
+                            {ticket.title}
+                          </Link>
+                          {ticket.category && (
+                            <span className="text-[10px] text-slate-400 mt-0.5 inline-block">
+                              Category: {ticket.category}
+                            </span>
+                          )}
+                        </td>
 
-                      <td className="py-3.5 px-4">
-                        <div className="font-medium text-slate-900 dark:text-white">
-                          {ticket.requester?.full_name || ticket.requester?.username || ticket.requester_name || 'Requester'}
-                        </div>
-                        {ticket.requester?.email && (
-                          <div className="text-[10px] text-slate-400 truncate max-w-[140px]">
-                            {ticket.requester.email}
+                        <td className="py-3.5 px-4">
+                          <PriorityBadge priority={ticket.priority} />
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          <StatusBadge status={ticket.status} />
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          <div className="font-medium text-slate-900 dark:text-white">
+                            {requesterDisplay}
                           </div>
-                        )}
-                      </td>
+                          {ticket.requester?.email && (
+                            <div className="text-[10px] text-slate-400 truncate max-w-[140px]">
+                              {ticket.requester.email}
+                            </div>
+                          )}
+                        </td>
 
-                      <td className="py-3.5 px-4">
-                        {ticket.assignee ? (
-                          <div className="font-medium text-slate-800 dark:text-slate-200">
-                            {ticket.assignee.full_name || ticket.assignee.username || ticket.assignee_name}
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 italic text-[11px]">Unassigned</span>
-                        )}
-                      </td>
+                        <td className="py-3.5 px-4">
+                          {assigneeDisplay ? (
+                            <div className="font-medium text-slate-800 dark:text-slate-200">
+                              {assigneeDisplay}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px]">Unassigned</span>
+                          )}
+                        </td>
 
-                      <td className="py-3.5 px-4">
-                        <SLABadge
-                          status={ticket.sla?.status || ticket.sla_status}
-                          remainingMinutes={ticket.sla?.remaining_minutes ?? ticket.remaining_minutes}
-                          isBreached={ticket.sla?.is_breached}
-                        />
-                      </td>
+                        <td className="py-3.5 px-4">
+                          <SLABadge
+                            status={ticket.sla?.status || ticket.sla_status}
+                            remainingMinutes={ticket.sla?.remaining_minutes ?? ticket.remaining_minutes}
+                            isBreached={ticket.sla?.is_breached}
+                          />
+                        </td>
 
-                      <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                        {formatDate(ticket.created_at)}
-                      </td>
+                        <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                          {formatDate(ticket.created_at)}
+                        </td>
 
-                      <td className="py-3.5 px-4 text-right">
-                        <Link
-                          to={`/tickets/${ticket.id}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/60 dark:hover:text-indigo-400 transition-colors"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>View</span>
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="py-3.5 px-4 text-right">
+                          <Link
+                            to={`/tickets/${ticket.id}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/60 dark:hover:text-indigo-400 transition-colors"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>View</span>
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -15,7 +15,7 @@ import {
   RefreshCw,
   Search,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { ticketService } from '../../services/ticketService';
 import { Ticket } from '../../types/ticket';
 import { StatusBadge, PriorityBadge } from '../../components/common/Badge';
@@ -279,63 +279,72 @@ export const DashboardPage: React.FC = () => {
                 </Link>
 
                 <Link
+                  to="/access-requests"
+                  className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
+                >
+                  <div className="flex items-center gap-3">
+                    <KeyRound className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">Request System Access</span>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                </Link>
+
+                <Link
                   to="/knowledge-base"
                   className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
                 >
                   <div className="flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">Search Knowledge Base</span>
+                    <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">Browse Knowledge Base</span>
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-slate-400" />
                 </Link>
               </div>
             </div>
-
-            <div className="bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/50 rounded-xl p-4 transition-colors">
-              <p className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider">SUPPORT HOURS</p>
-              <p className="text-xs text-indigo-900 dark:text-indigo-200 mt-1 leading-relaxed">
-                IT Service Desk is online 24/7. Standard SLA response time is within 2 hours.
-              </p>
-            </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col transition-colors">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-6 transition-colors">
             <div>
               <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
-                Technician Workload
+                Operations
               </p>
-              <h4 className="text-xl font-bold mt-1 tracking-tight text-slate-900 dark:text-white">Capacity Review</h4>
+              <h4 className="text-xl font-bold mt-1 tracking-tight text-slate-900 dark:text-white">Quick Links</h4>
 
-              <div className="mt-6 space-y-4">
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-slate-700 dark:text-slate-300">Tier 1 Support Queue</span>
-                    <span className="text-rose-600 dark:text-rose-400">88%</span>
+              <div className="mt-6 space-y-3">
+                <Link
+                  to="/tickets"
+                  className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
+                >
+                  <div className="flex items-center gap-3">
+                    <TicketIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">Manage Ticket Queue</span>
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div className="bg-rose-500 h-full w-[88%]" />
-                  </div>
-                </div>
+                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                </Link>
 
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-slate-700 dark:text-slate-300">Network & Infrastructure</span>
-                    <span className="text-indigo-600 dark:text-indigo-400">64%</span>
+                <Link
+                  to="/assets"
+                  className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
+                >
+                  <div className="flex items-center gap-3">
+                    <Laptop className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">Asset Inventory</span>
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div className="bg-indigo-500 h-full w-[64%]" />
-                  </div>
-                </div>
+                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                </Link>
 
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-slate-700 dark:text-slate-300">Access Management</span>
-                    <span className="text-emerald-600 dark:text-emerald-400">40%</span>
-                  </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div className="bg-emerald-500 h-full w-[40%]" />
-                  </div>
-                </div>
+                {(isAdmin || isManager) && (
+                  <Link
+                    to="/reports"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
+                  >
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">Analytics & Reports</span>
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                  </Link>
+                )}
               </div>
             </div>
           </div>

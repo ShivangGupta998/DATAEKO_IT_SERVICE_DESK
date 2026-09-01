@@ -35,11 +35,14 @@ def get_current_user(
         if user_id is None:
             raise credentials_exception
 
-    except (JWTError, ValueError):
+        # Safely parse user ID to integer
+        parsed_user_id = int(user_id)
+
+    except (JWTError, ValueError, TypeError):
         raise credentials_exception
 
     # Query the user model directly from the database
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    user = db.query(User).filter(User.id == parsed_user_id).first()
     if user is None:
         raise credentials_exception
 
@@ -53,9 +56,10 @@ def get_current_user(
 
 
 def require_roles(*allowed_roles: int):
+    """Dependency wrapper for Role-Based Access Control (RBAC)."""
     def role_checker(
         current_user: User = Depends(get_current_user)
-    ):
+    ) -> User:
         if current_user.role_id not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
