@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { ToastProvider } from './context/ToastContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AppLayout } from './components/layout/AppLayout';
 import { LoadingSpinner } from './components/common/LoadingState';
@@ -22,7 +22,7 @@ import { ReportsPage } from './pages/reports/ReportsPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
-// Route Guards
+// Protected Route Guard
 const ProtectedRoute: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -41,6 +41,7 @@ const ProtectedRoute: React.FC = () => {
   return <Outlet />;
 };
 
+// Role-Based Route Guard
 const RoleRoute: React.FC<{ allowedRoles: number[] }> = ({ allowedRoles }) => {
   const { roleId, isLoading } = useAuth();
 

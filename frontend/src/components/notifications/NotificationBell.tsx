@@ -1,37 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Info, ShieldAlert, Ticket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useNotifications } from '../../context/NotificationContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useNotifications } from '../../hooks/useNotifications';
 import { NotificationItem } from '../../types/notification';
 
 export const NotificationBell: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  const { notifications, unreadCount, refreshNotifications, markAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Load notifications and run 30s polling ONLY if an active token exists
-  useEffect(() => {
-    const token = localStorage.getItem('token'); // match your token key name
-    if (!isAuthenticated || !token) return;
-
-    refreshNotifications();
-
-    const interval = setInterval(() => {
-      const activeToken = localStorage.getItem('token');
-      if (activeToken) {
-        refreshNotifications();
-      } else {
-        clearInterval(interval);
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated, refreshNotifications]);
-
-  // Close dropdown on click outside
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -48,7 +29,11 @@ export const NotificationBell: React.FC = () => {
   // Handle clicking a notification item: mark read & navigate
   const handleNotificationClick = async (item: NotificationItem) => {
     if (!item.is_read) {
-      await markAsRead(item.id);
+      try {
+        await markAsRead(item.id);
+      } catch (err) {
+        console.error('Failed to mark notification as read:', err);
+      }
     }
     setIsOpen(false);
 
@@ -56,7 +41,12 @@ export const NotificationBell: React.FC = () => {
     const title = (item.title || '').toLowerCase();
     const refId = item.reference_id || item.message.match(/#(\d+)/)?.[1];
 
-    if (notificationType === 'ticket' || notificationType === 'sla' || title.includes('ticket') || title.includes('sla')) {
+    if (
+      notificationType === 'ticket' ||
+      notificationType === 'sla' ||
+      title.includes('ticket') ||
+      title.includes('sla')
+    ) {
       if (refId) {
         navigate(`/tickets/${refId}`);
       } else {
@@ -71,7 +61,7 @@ export const NotificationBell: React.FC = () => {
     }
   };
 
-  // Render contextual icon based on type
+  // Render contextual icon based on notification type
   const renderNotificationIcon = (type?: string) => {
     const t = (type || '').toLowerCase();
     if (t === 'sla' || t.includes('breach') || t.includes('urgent')) {
@@ -89,7 +79,7 @@ export const NotificationBell: React.FC = () => {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="relative p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors focus:outline-hidden"
+        className="relative p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors focus:outline-none"
         aria-label="Toggle Notifications"
       >
         <Bell className="w-5 h-5" />
@@ -104,7 +94,9 @@ export const NotificationBell: React.FC = () => {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl z-50 overflow-hidden">
           <div className="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Notifications</h3>
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              Notifications
+            </h3>
             {unreadCount > 0 && (
               <span className="px-2 py-0.5 text-[10px] font-extrabold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">
                 {unreadCount} new
@@ -124,7 +116,7 @@ export const NotificationBell: React.FC = () => {
                   onClick={() => handleNotificationClick(item)}
                   className={`p-3 flex items-start gap-3 cursor-pointer transition-colors ${
                     item.is_read
-                      ? 'bg-slate-900/40 text-slate-400'
+                      ? 'bg-slate-900/40 text-slate-400 hover:bg-slate-800/30'
                       : 'bg-slate-800/50 text-slate-200 hover:bg-slate-800'
                   }`}
                 >
@@ -135,7 +127,7 @@ export const NotificationBell: React.FC = () => {
                         {item.title}
                       </p>
                     )}
-                    <p className="font-medium truncate-2-lines">{item.message}</p>
+                    <p className="font-medium line-clamp-2">{item.message}</p>
                     <span className="text-[10px] text-slate-500 mt-1 block">
                       {item.created_at
                         ? new Date(item.created_at).toLocaleTimeString([], {

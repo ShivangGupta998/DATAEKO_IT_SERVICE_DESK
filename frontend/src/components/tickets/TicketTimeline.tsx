@@ -14,14 +14,17 @@ export const TicketTimeline: React.FC<{ history: TicketHistoryItem[]; className?
     );
   }
 
-  const formatTimestamp = (dateStr: string) => {
+  const formatTimestamp = (dateStr?: string) => {
+    if (!dateStr) return 'N/A';
     try {
-      const d = new Date(dateStr);
-      return d.toLocaleString(undefined, {
+      // Force JS to parse naive ISO strings as pure UTC before converting to local browser time (IST)
+      const isoString = dateStr.endsWith('Z') || dateStr.includes('+') ? dateStr : `${dateStr}Z`;
+      return new Date(isoString).toLocaleString('en-IN', {
         month: 'short',
         day: 'numeric',
-        hour: '2-digit',
+        hour: 'numeric',
         minute: '2-digit',
+        hour12: true,
       });
     } catch {
       return dateStr;

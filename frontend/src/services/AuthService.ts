@@ -1,4 +1,4 @@
-import { apiClient } from '../api/client';
+import { apiClient, STORAGE_KEY_TOKEN, STORAGE_KEY_USER } from '../api/client';
 import { User, LoginResponse, UserCreate } from '../types/auth';
 
 export const authService = {
@@ -10,23 +10,44 @@ export const authService = {
     formData.append('username', username.trim());
     formData.append('password', password);
 
+    let data: LoginResponse;
+
     try {
       const response = await apiClient.post<LoginResponse>('/auth/login', formData, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-      return response.data;
+      data = response.data;
     } catch (err: any) {
       if (err.response?.status === 422 || err.response?.status === 400) {
         const jsonResponse = await apiClient.post<LoginResponse>('/auth/login', {
           username: username.trim(),
           password,
         });
-        return jsonResponse.data;
+        data = jsonResponse.data;
+      } else {
+        throw err;
       }
-      throw err;
     }
+
+    // Save token using the matching storage key expected by client.ts
+    if (data.access_token) {
+      localStorage.setItem(STORAGE_KEY_TOKEN, data.access_token);
+      if (data.user) {
+        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(data.user));
+      }
+    }
+
+    return data;
+  },
+
+  /**
+   * Logout user and clear tokens
+   */
+  logout(): void {
+    localStorage.removeItem(STORAGE_KEY_TOKEN);
+    localStorage.removeItem(STORAGE_KEY_USER);
   },
 
   /**

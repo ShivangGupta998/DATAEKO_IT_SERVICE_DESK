@@ -10,7 +10,7 @@ import {
   BarChart3,
   PlusCircle,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -51,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
         : 'Tickets',
       icon: Ticket,
       roles: [1, 2, 3, 4],
-      end: true, // EXACT MATCH ONLY
+      end: true,
     },
     {
       to: '/tickets/new',
@@ -64,21 +64,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
       to: '/assets',
       label: 'Assets',
       icon: Laptop,
-      roles: [1, 2, 3, 4], // Accessible by all roles
+      roles: [1, 2, 3, 4],
       end: false,
     },
     {
       to: '/access-requests',
       label: 'Access Requests',
       icon: KeyRound,
-      roles: [1, 2, 3, 4], // FIXED: Enabled for all roles
+      roles: [1, 2, 3, 4],
       end: false,
     },
     {
       to: '/offboarding',
       label: 'Offboarding',
       icon: UserX,
-      roles: [1, 2], // Admin & Manager only
+      roles: [1, 2],
       end: false,
     },
     {
