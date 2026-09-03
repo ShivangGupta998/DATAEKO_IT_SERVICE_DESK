@@ -2,7 +2,6 @@ import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { notificationService } from '../services/notificationService';
 import { NotificationItem } from '../types/notification';
-import { STORAGE_KEY_TOKEN } from '../api/client';
 
 export interface NotificationContextType {
   notifications: NotificationItem[];
@@ -11,22 +10,17 @@ export interface NotificationContextType {
   markAsRead: (id: number | string) => Promise<void>;
 }
 
-export const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+// Keep context internal to this module to keep Vite Fast Refresh happy
+const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  const { isAuthenticated, token, isLoading } = useAuth();
-
-  const getValidToken = useCallback(() => {
-    const active = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
-    return active && active.trim() !== '' ? active : null;
-  }, [token]);
+  const { isAuthenticated, isLoading } = useAuth();
 
   const refreshNotifications = useCallback(async () => {
-    const activeToken = getValidToken();
-
-    if (isLoading || !isAuthenticated || !activeToken) {
+    // Strictly prevent any fetch if Auth is loading or user is unauthenticated
+    if (isLoading || !isAuthenticated) {
       setNotifications([]);
       setUnreadCount(0);
       return;
@@ -47,7 +41,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setUnreadCount(0);
       }
     }
-  }, [isAuthenticated, isLoading, getValidToken]);
+  }, [isAuthenticated, isLoading]);
 
   const markAsRead = useCallback(async (id: number | string) => {
     try {
@@ -75,9 +69,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, []);
 
   useEffect(() => {
-    const activeToken = getValidToken();
-
-    if (isLoading || !isAuthenticated || !activeToken) {
+    // Do not poll or trigger requests if Auth is still initializing or user is not logged in
+    if (isLoading || !isAuthenticated) {
       setNotifications([]);
       setUnreadCount(0);
       return;
@@ -86,17 +79,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     refreshNotifications();
 
     const interval = setInterval(() => {
-      const liveToken = getValidToken();
-      if (liveToken && isAuthenticated) {
-        refreshNotifications();
-      } else {
-        setNotifications([]);
-        setUnreadCount(0);
-      }
+      refreshNotifications();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, isLoading, refreshNotifications, getValidToken]);
+  }, [isAuthenticated, isLoading, refreshNotifications]);
 
   return (
     <NotificationContext.Provider
@@ -111,3 +98,5 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     </NotificationContext.Provider>
   );
 };
+
+export { NotificationContext };

@@ -153,18 +153,26 @@ export function parseApiError(error: unknown): ApiErrorDetail {
   return { message: 'An unexpected error occurred.' };
 }
 
-// Response Interceptor: Prevents unwanted global logout redirects during notification polling
+// Response Interceptor: Handles automatic token cleanup & quiet 401 handling
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    const url = error.config?.url || '';
-    const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register');
-    
-    // Matched across all /notifications routes (e.g., /notifications/ and /notifications/count)
-    const isBackgroundPoll = url.includes('/notifications');
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      const url = error.config?.url || '';
+      const isLoginOrRegister = url.includes('/auth/login') || url.includes('/auth/register');
+      const isInitialAuthCheck = url.includes('/auth/me');
+      const isBackgroundPoll = url.includes('/notifications');
 
-    if (axios.isAxiosError(error) && error.response?.status === 401 && !isAuthEndpoint && !isBackgroundPoll) {
-      window.dispatchEvent(new CustomEvent('itsm:unauthorized'));
+      // Clear invalid credentials from storage immediately to stop repeated failed requests
+      if (!isLoginOrRegister) {
+        localStorage.removeItem(STORAGE_KEY_TOKEN);
+        localStorage.removeItem(STORAGE_KEY_USER);
+      }
+
+      // Dispatch global logout event ONLY for active user actions (not background checks or polling)
+      if (!isLoginOrRegister && !isInitialAuthCheck && !isBackgroundPoll) {
+        window.dispatchEvent(new CustomEvent('itsm:unauthorized'));
+      }
     }
     return Promise.reject(error);
   }
