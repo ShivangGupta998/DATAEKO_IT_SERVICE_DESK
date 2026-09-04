@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from './AuthContext';
 import { notificationService } from '../services/notificationService';
 import { NotificationItem } from '../types/notification';
 import { STORAGE_KEY_TOKEN } from '../api/client';
@@ -18,13 +18,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const { isAuthenticated, token, isLoading } = useAuth();
 
-  const getValidToken = useCallback(() => {
-    const active = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
-    return active && active.trim() !== '' ? active : null;
-  }, [token]);
-
   const refreshNotifications = useCallback(async () => {
-    const activeToken = getValidToken();
+    const activeToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
 
     if (isLoading || !isAuthenticated || !activeToken) {
       setNotifications([]);
@@ -47,7 +42,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setUnreadCount(0);
       }
     }
-  }, [isAuthenticated, isLoading, getValidToken]);
+  }, [isAuthenticated, isLoading, token]);
 
   const markAsRead = useCallback(async (id: number | string) => {
     try {
@@ -70,12 +65,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return updated;
       });
     } catch {
-      // Quiet fail
+      // Ignore silently
     }
   }, []);
 
   useEffect(() => {
-    const activeToken = getValidToken();
+    const activeToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
 
     if (isLoading || !isAuthenticated || !activeToken) {
       setNotifications([]);
@@ -86,8 +81,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     refreshNotifications();
 
     const interval = setInterval(() => {
-      const liveToken = getValidToken();
-      if (liveToken && isAuthenticated) {
+      const liveToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
+      if (liveToken && isAuthenticated && !isLoading) {
         refreshNotifications();
       } else {
         setNotifications([]);
@@ -96,7 +91,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, isLoading, refreshNotifications, getValidToken]);
+  }, [isAuthenticated, isLoading, token, refreshNotifications]);
 
   return (
     <NotificationContext.Provider

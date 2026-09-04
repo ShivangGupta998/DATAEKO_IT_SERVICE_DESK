@@ -6,7 +6,7 @@ import { useNotifications } from '../../hooks/useNotifications';
 import { NotificationItem } from '../../types/notification';
 
 export const NotificationBell: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const { notifications, unreadCount, markAsRead } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -24,7 +24,8 @@ export const NotificationBell: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (!isAuthenticated) return null;
+  // Do not render if Auth is loading or user is not authenticated
+  if (isLoading || !isAuthenticated) return null;
 
   // Handle clicking a notification item: mark read & navigate
   const handleNotificationClick = async (item: NotificationItem) => {

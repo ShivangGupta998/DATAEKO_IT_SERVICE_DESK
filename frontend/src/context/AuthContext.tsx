@@ -195,7 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         canManageOffboarding,
         canManageKB,
         canViewReports,
-        isAuthenticated: !!token && !!user,
+        isAuthenticated: !isLoading && !!token && !!user,
         isLoading,
         backendUrl,
         setBackendUrl: updateBackendUrl,
