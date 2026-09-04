@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from './AuthContext';
 import { notificationService } from '../services/notificationService';
 import { NotificationItem } from '../types/notification';
+import { STORAGE_KEY_TOKEN } from '../api/client';
 
 export interface NotificationContextType {
   notifications: NotificationItem[];
@@ -10,17 +11,17 @@ export interface NotificationContextType {
   markAsRead: (id: number | string) => Promise<void>;
 }
 
-// Keep context internal to this module to keep Vite Fast Refresh happy
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+export const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, token, isLoading } = useAuth();
 
   const refreshNotifications = useCallback(async () => {
-    // Strictly prevent any fetch if Auth is loading or user is unauthenticated
-    if (isLoading || !isAuthenticated) {
+    const activeToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
+
+    if (isLoading || !isAuthenticated || !activeToken) {
       setNotifications([]);
       setUnreadCount(0);
       return;
@@ -41,7 +42,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setUnreadCount(0);
       }
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, token]);
 
   const markAsRead = useCallback(async (id: number | string) => {
     try {
@@ -64,13 +65,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return updated;
       });
     } catch {
-      // Quiet fail
+      // Ignore silently
     }
   }, []);
 
   useEffect(() => {
-    // Do not poll or trigger requests if Auth is still initializing or user is not logged in
-    if (isLoading || !isAuthenticated) {
+    const activeToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
+
+    if (isLoading || !isAuthenticated || !activeToken) {
       setNotifications([]);
       setUnreadCount(0);
       return;
@@ -79,11 +81,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     refreshNotifications();
 
     const interval = setInterval(() => {
-      refreshNotifications();
+      const liveToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
+      if (liveToken && isAuthenticated && !isLoading) {
+        refreshNotifications();
+      } else {
+        setNotifications([]);
+        setUnreadCount(0);
+      }
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated, isLoading, refreshNotifications]);
+  }, [isAuthenticated, isLoading, token, refreshNotifications]);
 
   return (
     <NotificationContext.Provider
@@ -98,5 +106,3 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     </NotificationContext.Provider>
   );
 };
-
-export { NotificationContext };
