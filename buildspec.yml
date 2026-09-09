@@ -1,60 +1,41 @@
-version: '3.8'
+version: 0.2
 
-services:
-  db:
-    image: postgres:15-alpine
-    container_name: itsm_db
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
-      POSTGRES_DB: itsm_database
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies..."
 
-  backend:
-    build: ./backend
-    container_name: itsm_backend
-    restart: always
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - SECRET_KEY=${SECRET_KEY}
-      - ALGORITHM=${ALGORITHM}
-      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
-      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
-      - SLACK_CHANNEL_ID=${SLACK_CHANNEL_ID}
-    depends_on:
-      - db
+      # Backend
+      - cd backend
+      - python3 -m pip install --upgrade pip
+      - pip install -r requirements.txt
 
-  frontend:
-    build:
-      context: ./frontend
-      args:
-        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
-    container_name: itsm_frontend
-    restart: always
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
+      # Frontend
+      - cd ../frontend
+      - npm install
 
-  ngrok:
-    image: ngrok/ngrok:latest
-    container_name: itsm_ngrok
-    restart: unless-stopped
-    command:
-      - "http"
-      - "backend:8000"
-    environment:
-      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
-    ports:
-      - "4040:4040"
-    depends_on:
-      - backend
+  pre_build:
+    commands:
+      - echo "Running tests..."
+      - cd ../backend
+      # Add backend tests here if available
+      # - pytest
 
-volumes:
-  postgres_data:
+      - cd ../frontend
+      # Add frontend tests here if available
+      # - npm test -- --watchAll=false
+
+  build:
+    commands:
+      - echo "Building React application..."
+      - cd ../frontend
+      - npm run build
+
+  post_build:
+    commands:
+      - echo "Build completed successfully."
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: .
