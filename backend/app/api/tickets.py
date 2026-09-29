@@ -11,6 +11,7 @@ from app.core.dependencies import get_current_user, require_roles
 from app.services.notification_service import create_notification
 from app.services.slack_service import send_slack_message
 from app.services.sla_service import calculate_sla_due, get_sla_status, get_remaining_minutes
+from app.core.sockets import notification_manager
 
 router = APIRouter(prefix="/tickets", tags=["Tickets"])
 
@@ -44,7 +45,7 @@ def add_sla_details(ticket):
 
 
 @router.post("/", response_model=TicketResponse, status_code=status.HTTP_201_CREATED)
-def create_ticket(
+async def create_ticket(
     ticket_data: TicketCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -89,6 +90,14 @@ def create_ticket(
     )
 
     db.commit()
+
+    # REAL-TIME DESKTOP WEBSOCKET POP-UP NOTIFICATION
+    await notification_manager.send_personal_notification(
+        user_id=str(user_id),
+        title=f"Ticket #{ticket.id} Created",
+        message=f"Your ticket '{ticket.title}' was created successfully.",
+        link=f"/tickets/{ticket.id}"
+    )
 
     # Re-fetch ticket with joined relationship objects
     ticket = db.query(Ticket).options(
@@ -142,8 +151,6 @@ def get_my_tickets(
         .all()
     )
     return [add_sla_details(ticket) for ticket in tickets]
-
-
 @router.get("/assigned", response_model=list[TicketResponse])
 def get_assigned_tickets(
     db: Session = Depends(get_db),
@@ -218,7 +225,7 @@ def get_ticket(
 
 
 @router.patch("/{ticket_id}", response_model=TicketResponse)
-def update_ticket(
+async def update_ticket(
     ticket_id: int,
     ticket_data: TicketUpdate,
     db: Session = Depends(get_db),
@@ -294,6 +301,14 @@ def update_ticket(
             notification_type="Ticket"
         )
 
+        # REAL-TIME DESKTOP POP-UP FOR REQUESTER
+        await notification_manager.send_personal_notification(
+            user_id=str(ticket.requester_id),
+            title=f"Ticket #{ticket.id} Updated",
+            message=f"Your ticket #{ticket.id} has been updated.",
+            link=f"/tickets/{ticket.id}"
+        )
+
     if assignment_happened:
         create_notification(
             db=db,
@@ -301,6 +316,14 @@ def update_ticket(
             title="Ticket Assigned",
             message=f"Ticket #{ticket.id} has been assigned to you.",
             notification_type="Ticket"
+        )
+
+        # REAL-TIME DESKTOP POP-UP FOR ASSIGNED TECHNICIAN
+        await notification_manager.send_personal_notification(
+            user_id=str(ticket.assignee_id),
+            title=f"Ticket #{ticket.id} Assigned",
+            message=f"Ticket #{ticket.id} ('{ticket.title}') was assigned to you.",
+            link=f"/tickets/{ticket.id}"
         )
 
     db.commit()

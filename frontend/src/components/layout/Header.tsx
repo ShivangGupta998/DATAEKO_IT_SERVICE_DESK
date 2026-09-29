@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Plus, Search } from 'lucide-react';
+import { Menu, Plus, Search, Bell } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { NotificationBell } from '../notifications/NotificationBell';
 import { ThemeToggle } from '../common/ThemeToggle';
@@ -14,6 +14,24 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar, pageTitle
   const { isAdmin, isManager, isEmployee } = useAuth();
   const [globalSearch, setGlobalSearch] = useState('');
   const navigate = useNavigate();
+
+  // 1. Tracks browser notification permission status
+  const [permission, setPermission] = useState<NotificationPermission>(
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
+  );
+
+  // 2. User gesture handler to request permission on explicit click
+  const handleEnableNotifications = async () => {
+    if ('Notification' in window) {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+      if (result === 'granted') {
+        new Notification('IT Service Desk', {
+          body: 'Desktop notifications enabled successfully!',
+        });
+      }
+    }
+  };
 
   const handleGlobalSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +72,19 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar, pageTitle
 
       {/* Right Action Bar: Notifications, Theme Toggle & Create Ticket Button */}
       <div className="flex items-center space-x-2 sm:space-x-4">
+        {/* Enable Desktop Pop-ups Button (Triggers Native Browser Prompt) */}
+        {permission !== 'granted' && (
+          <button
+            type="button"
+            onClick={handleEnableNotifications}
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-xs"
+            title="Enable browser desktop notifications"
+          >
+            <Bell className="w-3.5 h-3.5" />
+            <span>Enable Pop-ups</span>
+          </button>
+        )}
+
         {/* Notifications */}
         <NotificationBell />
 
