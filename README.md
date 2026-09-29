@@ -1,1 +1,1 @@
-loop hole pole
+globe
