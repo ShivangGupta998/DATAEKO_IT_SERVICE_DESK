@@ -1,12 +1,21 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.core.config import settings
 
-# Initialize SQLAlchemy engine with connection pool pre-pinging to prevent stale connections
+# Initialize SQLAlchemy engine with SSL, keepalives, and pool management
 engine = create_engine(
     settings.DATABASE_URL,
     echo=True,
-    pool_pre_ping=True
+    pool_pre_ping=True,      # Tests connection health before issuing queries
+    pool_recycle=300,        # Recycles connections every 5 minutes to prevent stale timeouts
+    connect_args={
+        "sslmode": "require",
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5,
+    }
 )
 
 # Create session factory
