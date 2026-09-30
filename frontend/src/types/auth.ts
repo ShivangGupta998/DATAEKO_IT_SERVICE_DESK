@@ -12,6 +12,7 @@ export interface User {
   full_name?: string;
   role_id: number;
   department_id?: number;
+  department?: string | { id: number; name: string };
   role?: string | { id: number; name: string };
 }
 

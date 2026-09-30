@@ -1,14 +1,12 @@
 @import "tailwindcss";
 
-/* 1. Register dark mode variant for class-based toggling (.dark on <html>) */
-@variant dark (&:where(.dark, .dark *));
+/* Register dark mode class-driven variant */
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* 2. Set root color scheme preferences */
 :root {
   color-scheme: light dark;
 }
 
-/* 3. Base styles for Light & Dark mode fallbacks */
 html {
   background-color: #f8fafc;
   color: #0f172a;
@@ -19,7 +17,6 @@ html.dark {
   color: #f8fafc;
 }
 
-/* Smooth transition for theme color switching */
 body {
   margin: 0;
   min-height: 100vh;
