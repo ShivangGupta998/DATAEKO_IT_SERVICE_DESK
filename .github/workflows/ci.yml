@@ -52,6 +52,9 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      - name: Build Render container
+        run: docker build --tag dataeko-it-service-desk:ci .
+
   deploy:
     name: Deploy to Render
     needs: validate
@@ -59,6 +62,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [[ -z "$RENDER_DEPLOY_HOOK_URL" ]]; then
+            echo "::error::Add the Render service deploy-hook URL as the GitHub Actions secret RENDER_DEPLOY_HOOK_URL."
+            exit 1
+          fi
+          if [[ "$RENDER_DEPLOY_HOOK_URL" != https://api.render.com/deploy/* ]]; then
+            echo "::error::RENDER_DEPLOY_HOOK_URL must be copied from the Render service Deploy Hook settings."
+            exit 1
+          fi
+
       - name: Trigger Render deployment
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
