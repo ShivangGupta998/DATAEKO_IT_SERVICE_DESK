@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, User as UserIcon, MessageSquare, Tag, ArrowRight } from 'lucide-react';
+import { Clock, User as UserIcon, MessageSquare, ArrowRight } from 'lucide-react';
 import { TicketHistoryItem } from '../../types/ticket';
 
 export const TicketTimeline: React.FC<{ history: TicketHistoryItem[]; className?: string }> = ({
@@ -35,7 +35,6 @@ export const TicketTimeline: React.FC<{ history: TicketHistoryItem[]; className?
     <div className={`relative pl-6 border-l-2 border-slate-200 dark:border-slate-800 space-y-6 ${className}`}>
       {history.map((item, index) => {
         const actorName = item.user?.full_name || item.user?.username || item.changed_by_name || 'System';
-        const isComment = !!item.comment || item.action === 'comment';
 
         return (
           <div key={item.id || index} className="relative group">

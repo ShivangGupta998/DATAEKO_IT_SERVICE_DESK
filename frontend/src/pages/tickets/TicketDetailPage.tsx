@@ -2,16 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft,
-  Clock,
-  User as UserIcon,
-  Tag,
-  Shield,
   Send,
   RefreshCw,
-  AlertCircle,
-  CheckCircle2,
-  Lock,
-  Layers,
   History,
   FileText,
   UserCheck,
@@ -20,7 +12,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../context/ToastContext';
 import { ticketService } from '../../services/ticketService';
 import { Ticket, TicketHistoryItem, TicketStatus, TicketPriority } from '../../types/ticket';
-import { StatusBadge, PriorityBadge, SLABadge } from '../../components/common/Badge';
+import { StatusBadge, PriorityBadge } from '../../components/common/Badge';
 import { SLAIndicator } from '../../components/tickets/SLAIndicator';
 import { TicketTimeline } from '../../components/tickets/TicketTimeline';
 import { LoadingSpinner } from '../../components/common/LoadingState';
@@ -30,7 +22,7 @@ import { parseApiError } from '../../api/client';
 export const TicketDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, isAdmin, isManager, isTechnician } = useAuth();
+  const { isAdmin, isManager, isTechnician } = useAuth();
   const { success, error: toastError } = useToast();
 
   const [ticket, setTicket] = useState<Ticket | null>(null);

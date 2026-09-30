@@ -31,7 +31,11 @@ export function getStoredApiUrl(): string {
   // 3. Check local storage
   const storedUrl = localStorage.getItem(STORAGE_KEY_API_URL);
 
-  return storedUrl || DEFAULT_API_URL;
+  if (storedUrl) return storedUrl;
+
+  return currentHostname === 'localhost' || currentHostname === '127.0.0.1'
+    ? DEFAULT_API_URL
+    : window.location.origin;
 }
 
 export function setStoredApiUrl(url: string): void {

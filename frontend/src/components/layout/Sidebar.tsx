@@ -23,8 +23,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
     user,
     roleId,
     roleName,
-    isAdmin,
-    isManager,
     isTechnician,
     isEmployee,
     logout,
