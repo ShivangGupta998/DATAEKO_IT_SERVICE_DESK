@@ -9,6 +9,7 @@ import {
   BookOpen,
   BarChart3,
   PlusCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -123,12 +124,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
       }`}
     >
       {/* Brand Header */}
-      <div className="p-6 flex items-center space-x-3 border-b border-slate-800/80">
-        <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center shadow-xs">
-          <span className="text-white font-black text-xl leading-none">S</span>
+      <div className="p-5 flex items-center space-x-3 border-b border-slate-800/80">
+        <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-indigo-500/20 border border-indigo-400/30 shrink-0">
+          <ShieldCheck className="w-5 h-5" />
         </div>
         <h1 className="text-white font-extrabold text-lg tracking-tight">
-          ServiceDesk<span className="text-indigo-400 font-medium">Pro</span>
+          IT Service Desk
         </h1>
       </div>
 

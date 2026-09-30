@@ -8,6 +8,8 @@ import {
   CheckCircle2,
   Bell,
   Send,
+  Activity,
+  Cpu,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -63,35 +65,52 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
+  const getDepartmentName = () => {
+    if (!user?.department) return 'General IT';
+    if (typeof user.department === 'object') return user.department.name || 'General IT';
+    return user.department;
+  };
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header Profile Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white flex items-center justify-center font-bold text-2xl shadow-lg shadow-indigo-500/20">
-            {user?.username?.charAt(0).toUpperCase() || 'U'}
+    <div className="space-y-8 transition-colors duration-300 antialiased selection:bg-indigo-500 selection:text-white pb-10">
+      {/* Top Header Profile Card */}
+      <div className="bg-slate-900/40 p-6 sm:p-8 rounded-3xl border border-slate-800/60 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+          {/* Glowing Avatar */}
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-sky-400 rounded-2xl blur-md opacity-75 group-hover:opacity-100 transition duration-300" />
+            <div className="relative w-20 h-20 rounded-2xl bg-slate-950 border border-indigo-500/30 text-white flex items-center justify-center font-black text-3xl shadow-2xl">
+              {user?.username?.charAt(0).toUpperCase() || 'U'}
+            </div>
           </div>
 
-          <div className="flex-1 space-y-2">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+          <div className="flex-1 space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+              Authenticated Account Profile
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
                 {user?.full_name || user?.username}
               </h2>
               <RoleBadge roleId={roleId || 4} />
             </div>
 
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-500 dark:text-slate-400">
-              <span className="flex items-center gap-1.5">
-                <UserIcon className="w-3.5 h-3.5 text-slate-400" />
-                <span>@{user?.username}</span>
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-5 text-xs text-slate-400 font-medium">
+              <span className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950/40 border border-slate-800/60">
+                <UserIcon className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="text-slate-200">@{user?.username}</span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-slate-400" />
-                <span>{user?.email || 'No email specified'}</span>
+              <span className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950/40 border border-slate-800/60">
+                <Mail className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="text-slate-200">{user?.email || 'No email specified'}</span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <Building className="w-3.5 h-3.5 text-slate-400" />
-                <span>{user?.department || 'General IT'}</span>
+              <span className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950/40 border border-slate-800/60">
+                <Building className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="text-slate-200">{getDepartmentName()}</span>
               </span>
             </div>
           </div>
@@ -99,103 +118,151 @@ export const ProfilePage: React.FC = () => {
       </div>
 
       {/* RBAC Privileges Matrix */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs p-6 sm:p-8 space-y-4">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Shield className="w-4 h-4 text-indigo-600" />
-          <span>Role Permissions & Access Matrix</span>
-        </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          Your account is currently assigned to <strong>{roleName} (Role ID {roleId})</strong> with the following capabilities:
-        </p>
+      <div className="bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-800/80 shadow-2xl shadow-black/50 p-6 sm:p-8 space-y-5">
+        <div>
+          <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1 block">
+            PRIVILEGE MATRIX
+          </span>
+          <h3 className="text-lg font-extrabold text-white flex items-center gap-2.5">
+            <Shield className="w-5 h-5 text-indigo-400" />
+            <span>Role Permissions & Access Matrix</span>
+          </h3>
+          <p className="text-xs text-slate-400 mt-1">
+            Your account is assigned to <strong className="text-indigo-300 font-bold">{roleName} (Role ID {roleId})</strong> with the following capabilities:
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 flex items-start gap-3">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-            <div className="text-xs">
-              <span className="font-semibold text-slate-900 dark:text-white">Ticket Queue Access</span>
-              <p className="text-slate-500 mt-0.5">
-                {isAdmin || isManager
-                  ? 'Full view of all enterprise support tickets across all departments.'
-                  : isTechnician
-                  ? 'Access to all tickets assigned to your technician ID.'
-                  : 'Access to self-service tickets requested by your user account.'}
-              </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          {/* Ticket Queue Access */}
+          <div className="p-4 rounded-2xl bg-slate-950/50 border border-slate-800/80 hover:border-indigo-500/40 transition-all duration-300 group">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              <div className="text-xs">
+                <span className="font-extrabold text-white tracking-wide block mb-1">
+                  Ticket Queue Access
+                </span>
+                <p className="text-slate-400 leading-relaxed font-medium">
+                  {isAdmin || isManager
+                    ? 'Full view of all enterprise support tickets across all departments.'
+                    : isTechnician
+                    ? 'Access to all tickets assigned to your technician ID.'
+                    : 'Access to self-service tickets requested by your user account.'}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 flex items-start gap-3">
-            <CheckCircle2
-              className={`w-4 h-4 shrink-0 mt-0.5 ${
-                isAdmin || isManager ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-700'
-              }`}
-            />
-            <div className="text-xs">
-              <span className="font-semibold text-slate-900 dark:text-white">Ticket Assignment & Routing</span>
-              <p className="text-slate-500 mt-0.5">
-                {isAdmin || isManager
-                  ? 'Authorized to assign, reassign, or unassign tickets to technicians via PATCH.'
-                  : 'Restricted. Technicians and Employees cannot reassign tickets.'}
-              </p>
+          {/* Ticket Assignment & Routing */}
+          <div className="p-4 rounded-2xl bg-slate-950/50 border border-slate-800/80 hover:border-indigo-500/40 transition-all duration-300 group">
+            <div className="flex items-start gap-3">
+              <div
+                className={`p-2 rounded-xl border shrink-0 ${
+                  isAdmin || isManager
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                    : 'bg-slate-800/40 border-slate-800 text-slate-500'
+                }`}
+              >
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              <div className="text-xs">
+                <span className="font-extrabold text-white tracking-wide block mb-1">
+                  Ticket Assignment & Routing
+                </span>
+                <p className="text-slate-400 leading-relaxed font-medium">
+                  {isAdmin || isManager
+                    ? 'Authorized to assign, reassign, or unassign tickets to technicians via PATCH.'
+                    : 'Restricted. Technicians and Employees cannot reassign tickets.'}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 flex items-start gap-3">
-            <CheckCircle2
-              className={`w-4 h-4 shrink-0 mt-0.5 ${
-                isAdmin || isManager ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-700'
-              }`}
-            />
-            <div className="text-xs">
-              <span className="font-semibold text-slate-900 dark:text-white">IT Asset Management & Offboarding</span>
-              <p className="text-slate-500 mt-0.5">
-                {isAdmin || isManager
-                  ? 'Register hardware, assign devices, and track employee departure deprovisioning.'
-                  : 'View-only access to devices personally assigned to you.'}
-              </p>
+          {/* IT Asset Management & Offboarding */}
+          <div className="p-4 rounded-2xl bg-slate-950/50 border border-slate-800/80 hover:border-indigo-500/40 transition-all duration-300 group">
+            <div className="flex items-start gap-3">
+              <div
+                className={`p-2 rounded-xl border shrink-0 ${
+                  isAdmin || isManager
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                    : 'bg-slate-800/40 border-slate-800 text-slate-500'
+                }`}
+              >
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              <div className="text-xs">
+                <span className="font-extrabold text-white tracking-wide block mb-1">
+                  IT Asset Management & Offboarding
+                </span>
+                <p className="text-slate-400 leading-relaxed font-medium">
+                  {isAdmin || isManager
+                    ? 'Register hardware, assign devices, and track employee departure deprovisioning.'
+                    : 'View-only access to devices personally assigned to you.'}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800/80 flex items-start gap-3">
-            <CheckCircle2
-              className={`w-4 h-4 shrink-0 mt-0.5 ${
-                isAdmin || isManager ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-700'
-              }`}
-            />
-            <div className="text-xs">
-              <span className="font-semibold text-slate-900 dark:text-white">Executive Reports & Analytics</span>
-              <p className="text-slate-500 mt-0.5">
-                {isAdmin || isManager
-                  ? 'Real-time SLA compliance, ticket status breakdown, and workload reports.'
-                  : 'Restricted to IT management.'}
-              </p>
+          {/* Executive Reports & Analytics */}
+          <div className="p-4 rounded-2xl bg-slate-950/50 border border-slate-800/80 hover:border-indigo-500/40 transition-all duration-300 group">
+            <div className="flex items-start gap-3">
+              <div
+                className={`p-2 rounded-xl border shrink-0 ${
+                  isAdmin || isManager
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                    : 'bg-slate-800/40 border-slate-800 text-slate-500'
+                }`}
+              >
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              <div className="text-xs">
+                <span className="font-extrabold text-white tracking-wide block mb-1">
+                  Executive Reports & Analytics
+                </span>
+                <p className="text-slate-400 leading-relaxed font-medium">
+                  {isAdmin || isManager
+                    ? 'Real-time SLA compliance, ticket status breakdown, and workload reports.'
+                    : 'Restricted to IT management.'}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Backend & Slack Integrations Configuration */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Backend & Integration Configuration Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Backend API Configuration */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs p-6 space-y-4">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Server className="w-4 h-4 text-indigo-600" />
-            <span>FastAPI Server Endpoint</span>
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Current backend target address for all API operations.
-          </p>
+        <div className="bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-800/80 shadow-2xl shadow-black/50 p-6 space-y-4 flex flex-col justify-between">
+          <div className="space-y-2">
+            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">
+              SYSTEM ENDPOINT
+            </span>
+            <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+              <Server className="w-4 h-4 text-indigo-400" />
+              <span>FastAPI Server Endpoint</span>
+            </h3>
+            <p className="text-xs text-slate-400 font-medium">
+              Current backend target address for all API operations.
+            </p>
+          </div>
 
-          <form onSubmit={handleUpdateBackendUrl} className="space-y-3">
-            <input
-              type="text"
-              value={customUrl}
-              onChange={(e) => setCustomUrl(e.target.value)}
-              placeholder="http://127.0.0.1:8000"
-              className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 font-mono"
-            />
+          <form onSubmit={handleUpdateBackendUrl} className="space-y-3 pt-2">
+            <div className="relative">
+              <input
+                type="text"
+                value={customUrl}
+                onChange={(e) => setCustomUrl(e.target.value)}
+                placeholder="http://127.0.0.1:8000"
+                className="w-full px-4 py-2.5 text-xs bg-slate-950/80 border border-slate-800 text-indigo-300 rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 font-mono transition-all outline-none"
+              />
+              <Cpu className="w-4 h-4 text-slate-600 absolute right-3 top-3 pointer-events-none" />
+            </div>
+
             <button
               type="submit"
-              className="w-full py-2 px-3 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-xs transition-colors"
+              className="w-full py-2.5 px-4 text-xs font-bold uppercase tracking-wider text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-lg shadow-indigo-600/30 transition-all hover:-translate-y-0.5 active:translate-y-0"
             >
               Update Target URL
             </button>
@@ -203,32 +270,38 @@ export const ProfilePage: React.FC = () => {
         </div>
 
         {/* Slack Integration Diagnostics */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs p-6 space-y-4">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Bell className="w-4 h-4 text-indigo-600" />
-            <span>Slack Channel Webhook Test</span>
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Verify automated Slack notification webhooks configured on your FastAPI backend.
-          </p>
+        <div className="bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-800/80 shadow-2xl shadow-black/50 p-6 space-y-4 flex flex-col justify-between">
+          <div className="space-y-2">
+            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">
+              INTEGRATION DIAGNOSTICS
+            </span>
+            <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+              <Bell className="w-4 h-4 text-indigo-400" />
+              <span>Slack Webhook Diagnostics</span>
+            </h3>
+            <p className="text-xs text-slate-400 font-medium">
+              Verify automated Slack notification webhooks configured on your FastAPI backend.
+            </p>
+          </div>
 
-          <div className="space-y-2 pt-1">
+          <div className="space-y-3 pt-2">
             <button
               type="button"
               onClick={handleTestSlack}
               disabled={testingSlack}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 text-xs font-bold text-white bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 rounded-xl shadow-xs transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-xs font-bold uppercase tracking-wider text-white bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
             >
-              <Send className="w-3.5 h-3.5" />
+              <Send className="w-3.5 h-3.5 text-indigo-400" />
               <span>{testingSlack ? 'Sending Test...' : 'Send Test Slack Ping'}</span>
             </button>
 
             <button
               type="button"
               onClick={handleCheckSlackHealth}
-              className="w-full py-2 px-3 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white bg-slate-950/60 hover:bg-slate-800/80 rounded-xl border border-slate-800 transition-all hover:-translate-y-0.5 active:translate-y-0"
             >
-              Check Slack Endpoint Status
+              <Activity className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Check Slack Endpoint Status</span>
             </button>
           </div>
         </div>
