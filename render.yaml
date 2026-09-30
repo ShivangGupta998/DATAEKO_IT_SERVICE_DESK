@@ -22,6 +22,12 @@ services:
         sync: false
       - key: SLACK_CHANNEL_ID
         sync: false
+      - key: DEFAULT_ADMIN_EMAIL
+        sync: false
+      - key: DEFAULT_ADMIN_USERNAME
+        sync: false
+      - key: DEFAULT_ADMIN_PASSWORD
+        sync: false
 
 databases:
   - name: dataeko-postgres

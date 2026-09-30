@@ -15,6 +15,7 @@ from app.services.sla_service import start_sla_and_auto_assign_scheduler
 
 from app.database.database import engine, SessionLocal
 from app.database.base import Base
+from app.core.config import settings
 
 from app.models.asset import Asset
 from app.models.role import Role
@@ -111,21 +112,28 @@ async def startup_event():
                 db.add(Role(name=role_name, description=f"Default {role_name} Role"))
         db.commit()
 
-        user = db.query(User).filter(User.email == "abhi@itservicedesk.com").first()
-        if not user:
-            hashed_pw = hash_password_direct("abhi@123")
-            user = User(
-                username="abhi",
-                email="abhi@itservicedesk.com",
-                hashed_password=hashed_pw,
-                is_active=True,
-                role_id=admin_role.id
-            )
-            db.add(user)
-            db.commit()
-            print("--> SEED SUCCESS: User abhi@itservicedesk.com initialized")
+        default_admin_email = getattr(settings, "DEFAULT_ADMIN_EMAIL", None)
+        default_admin_username = getattr(settings, "DEFAULT_ADMIN_USERNAME", None)
+        default_admin_password = getattr(settings, "DEFAULT_ADMIN_PASSWORD", None)
+
+        if default_admin_email and default_admin_password:
+            user = db.query(User).filter(User.email == default_admin_email).first()
+            if not user:
+                hashed_pw = hash_password_direct(default_admin_password)
+                user = User(
+                    username=default_admin_username or default_admin_email.split("@")[0],
+                    email=default_admin_email,
+                    hashed_password=hashed_pw,
+                    is_active=True,
+                    role_id=admin_role.id
+                )
+                db.add(user)
+                db.commit()
+                print(f"--> SEED SUCCESS: Default admin {default_admin_email} initialized")
+            else:
+                print(f"--> SEED SKIPPED: Admin {default_admin_email} already exists")
         else:
-            print("--> SEED SKIPPED: User abhi@itservicedesk.com already exists")
+            print("--> SEED SKIPPED: No default admin configured. Set DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_USERNAME, and DEFAULT_ADMIN_PASSWORD in the environment to enable one.")
 
     except Exception as e:
         print(f"--> SEED ERROR: {e}")
