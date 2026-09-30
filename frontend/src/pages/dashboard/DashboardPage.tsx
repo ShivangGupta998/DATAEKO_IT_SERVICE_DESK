@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Ticket as TicketIcon,
   Clock,
   AlertTriangle,
   CheckCircle2,
-  AlertOctagon,
   TrendingUp,
   PlusCircle,
   Laptop,
@@ -13,7 +11,7 @@ import {
   BookOpen,
   ArrowUpRight,
   RefreshCw,
-  Search,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { ticketService } from '../../services/ticketService';
@@ -55,7 +53,6 @@ export const DashboardPage: React.FC = () => {
     fetchDashboardData();
   }, [isAdmin, isManager, isTechnician, isEmployee]);
 
-  // Derived Statistics from real tickets data
   const stats = useMemo(() => {
     const total = tickets.length;
     const open = tickets.filter((t) => {
@@ -95,22 +92,29 @@ export const DashboardPage: React.FC = () => {
   }, [tickets]);
 
   return (
-    <div className="space-y-6 transition-colors duration-300">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">
-            {roleName} Workspace • Enterprise Insights
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+    <div className="space-y-8 transition-colors duration-300 antialiased selection:bg-indigo-500 selection:text-white pb-10">
+      {/* Top Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800/60 dark:backdrop-blur-2xl shadow-sm dark:shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-pulse" />
+            {roleName || 'User'} Workspace • Enterprise Insights
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
             {isEmployee ? 'My Helpdesk Hub' : isTechnician ? 'Technician Queue' : 'System Overview'}
           </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
+            Welcome back, <span className="text-slate-800 dark:text-slate-200 font-bold">{user?.full_name || user?.username || 'Team Member'}</span>. Here is your operational summary.
+          </p>
         </div>
-        <div className="flex items-center gap-3">
+
+        <div className="flex items-center gap-3 relative z-10">
           {isEmployee && (
             <Link
               to="/tickets/new"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-colors uppercase tracking-wider shadow-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all uppercase tracking-wider shadow-md hover:-translate-y-0.5 active:translate-y-0"
             >
               <PlusCircle className="w-4 h-4" />
               <span>Submit Ticket</span>
@@ -120,9 +124,9 @@ export const DashboardPage: React.FC = () => {
             type="button"
             onClick={fetchDashboardData}
             disabled={isLoading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold transition-colors uppercase tracking-wider shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all uppercase tracking-wider shadow-xs hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 ${isLoading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </button>
         </div>
@@ -130,225 +134,210 @@ export const DashboardPage: React.FC = () => {
 
       {error && <ErrorAlert error={error} onRetry={fetchDashboardData} />}
 
-      {/* 4 Dynamic Metric Cards */}
+      {/* Metric Cards */}
       {isLoading ? (
         <CardSkeleton count={4} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs transition-colors">
-            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">
-              {isEmployee ? 'Active Requests' : 'Active Tickets'}
-            </p>
-            <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1">{stats.open + stats.inProgress}</h3>
-            <div className="mt-2 flex items-center text-emerald-600 dark:text-emerald-400 text-xs font-bold">
-              <span>↑ Active in queue ({stats.total} total)</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Active Tickets / Requests */}
+          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-emerald-500/50 hover:-translate-y-1 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                {isEmployee ? 'Active Requests' : 'Active Tickets'}
+              </span>
+              <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                <TrendingUp className="w-4 h-4" />
+              </div>
             </div>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+              {stats.open + stats.inProgress}
+            </h3>
+            <p className="mt-2 flex items-center text-emerald-600 dark:text-emerald-400/90 text-xs font-semibold">
+              <span className="inline-block mr-1">↑</span> Active in queue
+              <span className="text-slate-400 dark:text-slate-400 ml-1 font-normal">({stats.total} total)</span>
+            </p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs transition-colors">
-            <p className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-tight">
-              {isEmployee ? 'In Progress' : 'SLA At Risk'}
-            </p>
-            <h3 className="text-3xl font-black text-amber-500 mt-1">
+          {/* SLA At Risk / In Progress */}
+          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-amber-500/50 hover:-translate-y-1 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                {isEmployee ? 'In Progress' : 'SLA At Risk'}
+              </span>
+              <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400">
+                <Clock className="w-4 h-4" />
+              </div>
+            </div>
+            <h3 className="text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight">
               {isEmployee ? stats.inProgress : stats.slaAtRisk}
             </h3>
-            <div className="mt-2 flex items-center text-slate-500 dark:text-slate-400 text-xs font-medium">
+            <p className="mt-2 flex items-center text-slate-500 dark:text-slate-400 text-xs font-medium">
               <span>{isEmployee ? 'Being worked on' : 'Response time < 1hr'}</span>
-            </div>
+            </p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs transition-colors">
-            <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-tight">
-              {isEmployee ? 'Needs Attention' : 'SLA Breached'}
-            </p>
-            <h3 className="text-3xl font-black text-rose-600 dark:text-rose-500 mt-1">
+          {/* SLA Breached / Needs Attention */}
+          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-rose-500/50 hover:-translate-y-1 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-red-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+                {isEmployee ? 'Needs Attention' : 'SLA Breached'}
+              </span>
+              <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400">
+                <AlertTriangle className="w-4 h-4" />
+              </div>
+            </div>
+            <h3 className="text-3xl font-black text-rose-600 dark:text-rose-400 tracking-tight">
               {isEmployee ? stats.critical : stats.slaBreached.toString().padStart(2, '0')}
             </h3>
-            <div className="mt-2 flex items-center text-rose-600 dark:text-rose-400 text-xs font-bold">
+            <p className="mt-2 flex items-center text-rose-600 dark:text-rose-400/90 text-xs font-bold">
               <span>{isEmployee ? 'High/Critical priority' : 'Immediate action required'}</span>
-            </div>
+            </p>
           </div>
 
-          <div className="bg-indigo-50/50 dark:bg-slate-900 p-5 rounded-2xl border border-indigo-100 dark:border-slate-800 shadow-xs transition-colors">
-            <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-tight">
-              {isEmployee ? 'Resolved Requests' : 'Resolved Total'}
-            </p>
-            <h3 className="text-3xl font-black text-indigo-700 dark:text-indigo-400 mt-1">{stats.resolved}</h3>
-            <div className="mt-2 flex items-center text-indigo-600 dark:text-indigo-400 text-xs font-bold">
-              <span>Completed tickets</span>
+          {/* Resolved Total */}
+          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-indigo-500/50 hover:-translate-y-1 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-sky-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                {isEmployee ? 'Resolved Requests' : 'Resolved Total'}
+              </span>
+              <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
             </div>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-indigo-300 tracking-tight">
+              {stats.resolved}
+            </h3>
+            <p className="mt-2 flex items-center text-indigo-600 dark:text-indigo-400/90 text-xs font-bold">
+              <span>Completed tickets</span>
+            </p>
           </div>
         </div>
       )}
 
-      {/* Main 2-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Role-Specific Ticket Table */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col overflow-hidden transition-colors">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <h4 className="text-base font-bold text-slate-900 dark:text-white">
-              {isEmployee ? 'My Active Requests' : isTechnician ? 'My Assigned Queue' : 'Recent Escalations'}
-            </h4>
+      {/* Main Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/50 flex flex-col overflow-hidden transition-all p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-base font-extrabold text-slate-900 dark:text-white tracking-wide">
+                {isEmployee ? 'My Active Requests' : isTechnician ? 'My Assigned Queue' : 'Recent Escalations'}
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {isEmployee ? 'Track your active support requests in real-time' : 'Tickets requiring immediate action'}
+              </p>
+            </div>
             <Link
               to="/tickets"
-              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline uppercase tracking-wider inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
             >
-              <span>View All Tickets</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <span>View All</span>
+              <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
 
           {recentTickets.length === 0 ? (
-            <div className="p-8 text-center text-xs text-slate-400 dark:text-slate-500 font-medium">
-              No tickets recorded in system.
+            <div className="p-12 text-center text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-200 dark:border-slate-800/50">
+              No tickets found in queue.
             </div>
           ) : (
-            <div className="flex-1 overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 dark:bg-slate-800/50 text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                  <tr>
-                    <th className="px-6 py-3">Ticket ID</th>
-                    <th className="px-6 py-3">{isEmployee ? 'Subject' : 'Requester'}</th>
-                    <th className="px-6 py-3">Priority</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3 text-right">SLA</th>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800/80 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-950/40">
+                    <th className="py-3.5 px-4 rounded-l-xl">TICKET ID</th>
+                    <th className="py-3.5 px-4">SUBJECT</th>
+                    <th className="py-3.5 px-4">STATUS</th>
+                    <th className="py-3.5 px-4">PRIORITY</th>
+                    <th className="py-3.5 px-4 rounded-r-xl text-right">ACTION</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
-                  {recentTickets.map((t) => {
-                    const remMin = t.sla?.remaining_minutes ?? t.remaining_minutes;
-                    return (
-                      <tr
-                        key={t.id}
-                        onClick={() => navigate(`/tickets/${t.id}`)}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors"
-                      >
-                        <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">
-                          INC-{t.id}
-                        </td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-300 font-medium">
-                          {isEmployee
-                            ? t.title || 'Support Request'
-                            : t.requester?.full_name || t.requester?.username || t.requester_name || 'User'}
-                        </td>
-                        <td className="px-6 py-4">
-                          <PriorityBadge priority={t.priority} />
-                        </td>
-                        <td className="px-6 py-4">
-                          <StatusBadge status={t.status} />
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          {remMin !== undefined ? (
-                            remMin <= 0 ? (
-                              <span className="text-rose-600 dark:text-rose-400 font-black">-{Math.abs(remMin)}m</span>
-                            ) : (
-                              <span className="text-slate-600 dark:text-slate-400 font-bold">{remMin}m</span>
-                            )
-                          ) : (
-                            <span className="text-slate-400 dark:text-slate-500 font-medium">On Track</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 text-xs">
+                  {recentTickets.map((ticket) => (
+                    <tr key={ticket.id} className="hover:bg-slate-50 dark:hover:bg-indigo-500/10 transition-colors group">
+                      <td className="py-4 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                        #{ticket.id}
+                      </td>
+                      <td className="py-4 px-4 font-medium text-slate-800 dark:text-slate-200 max-w-[200px] truncate">
+                        {ticket.title}
+                      </td>
+                      <td className="py-4 px-4">
+                        <StatusBadge status={ticket.status} />
+                      </td>
+                      <td className="py-4 px-4">
+                        <PriorityBadge priority={ticket.priority} />
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/tickets/${ticket.id}`)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                        >
+                          <ArrowUpRight className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
           )}
         </div>
 
-        {/* Right Column: Quick Portal / Capacity Card */}
-        {isEmployee ? (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-6 transition-colors">
-            <div>
-              <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
-                Self-Service Portal
-              </p>
-              <h4 className="text-xl font-bold mt-1 tracking-tight text-slate-900 dark:text-white">Quick Actions</h4>
+        {/* Right Sidebar Quick Actions */}
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-6 shadow-xs dark:shadow-2xl dark:shadow-black/50 space-y-4">
+            <h4 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+              Quick Shortcuts
+            </h4>
+            <div className="grid grid-cols-1 gap-3">
+              <button
+                type="button"
+                onClick={() => navigate('/tickets/new')}
+                className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-left transition-all group"
+              >
+                <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                  <Laptop className="w-4 h-4" />
+                </div>
+                <div>
+                  <h5 className="text-xs font-bold text-slate-900 dark:text-white">Hardware & Software</h5>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Request devices or software access</p>
+                </div>
+              </button>
 
-              <div className="mt-6 space-y-3">
-                <Link
-                  to="/tickets/new"
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
-                >
-                  <div className="flex items-center gap-3">
-                    <PlusCircle className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">Report IT Issue</span>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
-                </Link>
+              <button
+                type="button"
+                onClick={() => navigate('/tickets/new')}
+                className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-left transition-all group"
+              >
+                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-all">
+                  <KeyRound className="w-4 h-4" />
+                </div>
+                <div>
+                  <h5 className="text-xs font-bold text-slate-900 dark:text-white">Account & Access</h5>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Password resets and permissions</p>
+                </div>
+              </button>
 
-                <Link
-                  to="/access-requests"
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
-                >
-                  <div className="flex items-center gap-3">
-                    <KeyRound className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">Request System Access</span>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
-                </Link>
-
-                <Link
-                  to="/knowledge-base"
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
-                >
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">Browse Knowledge Base</span>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
-                </Link>
-              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/kb')}
+                className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-left transition-all group"
+              >
+                <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div>
+                  <h5 className="text-xs font-bold text-slate-900 dark:text-white">Knowledge Base</h5>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Self-help guides and FAQs</p>
+                </div>
+              </button>
             </div>
           </div>
-        ) : (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-6 transition-colors">
-            <div>
-              <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
-                Operations
-              </p>
-              <h4 className="text-xl font-bold mt-1 tracking-tight text-slate-900 dark:text-white">Quick Links</h4>
-
-              <div className="mt-6 space-y-3">
-                <Link
-                  to="/tickets"
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
-                >
-                  <div className="flex items-center gap-3">
-                    <TicketIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">Manage Ticket Queue</span>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
-                </Link>
-
-                <Link
-                  to="/assets"
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
-                >
-                  <div className="flex items-center gap-3">
-                    <Laptop className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">Asset Inventory</span>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
-                </Link>
-
-                {(isAdmin || isManager) && (
-                  <Link
-                    to="/reports"
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors border border-slate-200 dark:border-slate-700/60"
-                  >
-                    <div className="flex items-center gap-3">
-                      <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                      <span className="text-xs font-bold text-slate-900 dark:text-white">Analytics & Reports</span>
-                    </div>
-                    <ArrowUpRight className="w-4 h-4 text-slate-400" />
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
