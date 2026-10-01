@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, AlertCircle, Send, HelpCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { ticketService } from '../../services/ticketService';
 import { TicketPriority, TicketCategory } from '../../types/ticket';
@@ -9,14 +8,13 @@ import { parseApiError } from '../../api/client';
 
 export const TicketCreatePage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { success, error: toastError } = useToast();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<string>('hardware');
   const [priority, setPriority] = useState<string>('medium');
-  const [source, setSource] = useState('portal');
+  const source = 'portal';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

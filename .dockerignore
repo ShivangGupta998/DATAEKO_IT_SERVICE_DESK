@@ -1,0 +1,9 @@
+.git/
+it_service_desk_backup.dump
+**/node_modules/
+**/dist/
+**/__pycache__/
+**/*.py[cod]
+backend/.env
+frontend/.env
+.venv/
