@@ -2,11 +2,6 @@ import React from 'react';
 import { TicketPriority, TicketStatus } from '../../types/ticket';
 import { UserRole } from '../../types/auth';
 
-interface BadgeProps {
-  children?: React.ReactNode;
-  className?: string;
-}
-
 export const StatusBadge: React.FC<{ status: TicketStatus | string; className?: string }> = ({ status, className = '' }) => {
   const norm = (status || '').toLowerCase();
 

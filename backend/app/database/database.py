@@ -3,9 +3,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.core.config import settings
 
+db_url = settings.DATABASE_URL
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
 # Initialize SQLAlchemy engine with SSL, keepalives, and pool management
 engine = create_engine(
-    settings.DATABASE_URL,
+    db_url,
     echo=True,
     pool_pre_ping=True,      # Tests connection health before issuing queries
     pool_recycle=300,        # Recycles connections every 5 minutes to prevent stale timeouts
