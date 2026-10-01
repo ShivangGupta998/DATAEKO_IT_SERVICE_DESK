@@ -42,6 +42,25 @@ class User(Base):
         nullable=True
     )
 
+    phone_number = Column(
+        String,
+        nullable=True
+    )
+
+    job_title = Column(
+        String,
+        nullable=True
+    )
+
+    timezone = Column(
+        String,
+        nullable=True
+    )
+
+    avatar_url = Column(
+        String,
+        nullable=True
+    )
 
     hashed_password = Column(
         String,
