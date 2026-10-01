@@ -153,6 +153,10 @@ FRONTEND_DIST_DIR = os.path.abspath(
 )
 
 if os.path.exists(FRONTEND_DIST_DIR):
+    static_path = os.path.join(FRONTEND_DIST_DIR, "static")
+    if os.path.exists(static_path):
+        app.mount("/static", StaticFiles(directory=static_path), name="static")
+
     assets_path = os.path.join(FRONTEND_DIST_DIR, "assets")
     if os.path.exists(assets_path):
         app.mount("/assets", StaticFiles(directory=assets_path), name="assets")

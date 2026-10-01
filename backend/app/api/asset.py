@@ -162,7 +162,7 @@ def get_my_assets(
 # ============================================================
 
 @router.get(
-    "/{asset_id}",
+    "/{asset_id:int}",
     response_model=AssetResponse
 )
 def get_asset(
@@ -203,7 +203,7 @@ def get_asset(
 # ============================================================
 
 @router.patch(
-    "/{asset_id}",
+    "/{asset_id:int}",
     response_model=AssetResponse
 )
 def update_asset(
@@ -300,7 +300,7 @@ def update_asset(
 # ============================================================
 
 @router.patch(
-    "/{asset_id}/assign",
+    "/{asset_id:int}/assign",
     response_model=AssetResponse
 )
 def assign_asset(
@@ -361,7 +361,7 @@ def assign_asset(
 # ============================================================
 
 @router.patch(
-    "/{asset_id}/retire",
+    "/{asset_id:int}/retire",
     response_model=AssetResponse
 )
 def retire_asset(
