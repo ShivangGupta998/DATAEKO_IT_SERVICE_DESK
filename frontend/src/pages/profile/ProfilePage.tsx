@@ -10,7 +10,6 @@ import {
   Trash2,
   Phone,
   Briefcase,
-  Globe,
   Bell,
   Sun,
   Moon,
@@ -526,15 +525,11 @@ export const ProfilePage: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   Timezone
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Globe className="w-4 h-4" />
-                  </div>
-                  <select
-                    value={timezone}
-                    onChange={(e) => setTimezone(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium cursor-pointer"
-                  >
+                <select
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium cursor-pointer"
+                >
                     <option value="UTC">UTC (Coordinated Universal Time)</option>
                     <option value="America/New_York">Eastern Time (US & Canada)</option>
                     <option value="America/Chicago">Central Time (US & Canada)</option>
@@ -548,9 +543,8 @@ export const ProfilePage: React.FC = () => {
                   </select>
                 </div>
               </div>
-            </div>
 
-            {/* Read-Only Fields: Email & Role */}
+              {/* Read-Only Fields: Email & Role */}
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
                 Read-Only System Fields
