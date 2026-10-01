@@ -11,8 +11,8 @@ import {
   Activity,
   Cpu,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../hooks/useToast';
 import { RoleBadge } from '../../components/common/Badge';
 import { slackService } from '../../services/slackService';
 import { parseApiError } from '../../api/client';

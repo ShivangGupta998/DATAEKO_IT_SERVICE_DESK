@@ -9,7 +9,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../hooks/useToast';
 import { ticketService } from '../../services/ticketService';
 import { Ticket, TicketHistoryItem, TicketStatus, TicketPriority } from '../../types/ticket';
 import { StatusBadge, PriorityBadge } from '../../components/common/Badge';

@@ -10,9 +10,9 @@ import {
   RefreshCw,
   User,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
-import { knowledgeBaseService } from '../../services/knowledgeBaseService';
+import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../hooks/useToast';
+import { knowledgeBaseService, DEFAULT_KB_ARTICLES } from '../../services/knowledgeBaseService';
 import { KnowledgeArticle as KBArticle } from '../../types/knowledgeBase';
 import { CardSkeleton } from '../../components/common/LoadingState';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -25,7 +25,7 @@ export const KnowledgeBasePage: React.FC = () => {
   const { isAdmin, isManager, isTechnician } = useAuth();
   const { success, error: toastError } = useToast();
 
-  const [articles, setArticles] = useState<KBArticle[]>([]);
+  const [articles, setArticles] = useState<KBArticle[]>(DEFAULT_KB_ARTICLES);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
@@ -61,9 +61,15 @@ export const KnowledgeBasePage: React.FC = () => {
         ? rawData
         : rawData?.data || rawData?.articles || [];
 
-      setArticles(resolvedList);
-    } catch (err: any) {
-      setError(parseApiError(err));
+      if (resolvedList && resolvedList.length > 0) {
+        const existingIds = new Set(resolvedList.map((a: KBArticle) => Number(a.id)));
+        const missingDefaults = DEFAULT_KB_ARTICLES.filter((def) => !existingIds.has(Number(def.id)));
+        setArticles([...resolvedList, ...missingDefaults]);
+      } else {
+        setArticles(DEFAULT_KB_ARTICLES);
+      }
+    } catch {
+      setArticles(DEFAULT_KB_ARTICLES);
     } finally {
       setIsLoading(false);
     }
@@ -168,19 +174,22 @@ export const KnowledgeBasePage: React.FC = () => {
   };
 
   const filteredArticles = useMemo(() => {
-    if (!Array.isArray(articles)) return [];
+    const listToFilter = Array.isArray(articles) && articles.length > 0 ? articles : DEFAULT_KB_ARTICLES;
 
-    return articles.filter((a) => {
+    return listToFilter.filter((a) => {
       if (!selectedCategory || selectedCategory.toUpperCase() === 'ALL') {
         return true;
       }
       const articleCat = (a.category || 'General').trim().toLowerCase();
       const targetCat = selectedCategory.trim().toLowerCase();
+      if (targetCat === 'network' && (articleCat === 'network' || articleCat === 'vpn')) {
+        return true;
+      }
       return articleCat === targetCat;
     });
   }, [articles, selectedCategory]);
 
-  const categories = ['ALL', 'Hardware', 'Software', 'Network', 'Security', 'General'];
+  const categories = ['ALL', 'Hardware', 'Software', 'Network', 'VPN', 'Security', 'General'];
 
   const getTagsArray = (tags: any): string[] => {
     if (Array.isArray(tags)) return tags.map(String);

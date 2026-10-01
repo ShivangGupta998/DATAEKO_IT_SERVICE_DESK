@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AlertCircle, RefreshCw, CheckCircle2, ShieldAlert } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { apiClient } from '../../api/client';
 
 interface ErrorAlertProps {

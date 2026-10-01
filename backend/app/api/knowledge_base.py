@@ -64,6 +64,11 @@ def search_articles(
 # ============================================================
 
 @router.post(
+    "",
+    response_model=KnowledgeArticleResponse,
+    status_code=status.HTTP_201_CREATED
+)
+@router.post(
     "/",
     response_model=KnowledgeArticleResponse,
     status_code=status.HTTP_201_CREATED
@@ -91,6 +96,7 @@ def create_article(
 # GET ALL ARTICLES
 # ============================================================
 
+@router.get("", response_model=List[KnowledgeArticleResponse])
 @router.get("/", response_model=List[KnowledgeArticleResponse])
 def get_articles(
     db: Session = Depends(get_db),

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Lock, Mail, AlertCircle, Eye, EyeOff, Info } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../hooks/useToast';
 import { ThemeToggle } from '../../components/common/ThemeToggle';
 import { parseApiError } from '../../api/client';
 
@@ -462,13 +462,6 @@ export const LoginPage: React.FC = () => {
               </button>
             </div>
           </form>
-
-          <div className="mt-5 text-center text-xs text-slate-500 dark:text-slate-400 font-semibold">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-indigo-600 dark:text-sky-400 hover:underline font-bold transition-colors">
-              Create Account
-            </Link>
-          </div>
         </div>
       </div>
 

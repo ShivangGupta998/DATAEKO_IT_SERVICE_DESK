@@ -8,8 +8,8 @@ import {
   RefreshCw,
   DollarSign,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../hooks/useToast';
 import { assetService } from '../../services/assetService';
 import { Asset } from '../../types/asset';
 import { StatusBadge } from '../../components/common/Badge';
