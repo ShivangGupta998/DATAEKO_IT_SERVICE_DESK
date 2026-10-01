@@ -31,7 +31,7 @@ import {
 import { CardSkeleton } from '../../components/common/LoadingState';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { parseApiError } from '../../api/client';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 const STATUS_COLORS: Record<string, string> = {
   OPEN: '#38bdf8',

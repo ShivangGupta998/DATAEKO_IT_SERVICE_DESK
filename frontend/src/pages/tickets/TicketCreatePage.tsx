@@ -1,22 +1,35 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, AlertCircle, Send, HelpCircle } from 'lucide-react';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../hooks/useToast';
 import { ticketService } from '../../services/ticketService';
 import { TicketPriority, TicketCategory } from '../../types/ticket';
 import { parseApiError } from '../../api/client';
 
 export const TicketCreatePage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { success, error: toastError } = useToast();
+
+  const validCategories = ['hardware', 'software', 'network', 'access', 'security', 'general'];
+  const categoryParam = searchParams.get('category')?.toLowerCase();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<string>('hardware');
+  const [category, setCategory] = useState<string>(
+    categoryParam && validCategories.includes(categoryParam) ? categoryParam : 'hardware'
+  );
   const [priority, setPriority] = useState<string>('medium');
   const source = 'portal';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const cat = searchParams.get('category')?.toLowerCase();
+    if (cat && validCategories.includes(cat)) {
+      setCategory(cat);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

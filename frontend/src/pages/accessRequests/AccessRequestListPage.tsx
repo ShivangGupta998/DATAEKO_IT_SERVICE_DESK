@@ -9,8 +9,8 @@ import {
   RefreshCw,
   FileCheck,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../hooks/useToast';
 import { accessRequestService } from '../../services/accessRequestService';
 import { AccessRequest } from '../../types/accessRequest';
 import { StatusBadge } from '../../components/common/Badge';

@@ -8,11 +8,9 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  Building,
-  Briefcase,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../hooks/useToast';
 import { ThemeToggle } from '../../components/common/ThemeToggle';
 import { parseApiError } from '../../api/client';
 import { UserRole } from '../../types/auth';
@@ -526,42 +524,32 @@ export const RegisterPage: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">
                   Role
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <Briefcase className="w-3.5 h-3.5" />
-                  </div>
-                  <select
-                    value={roleId}
-                    onChange={(e) => setRoleId(parseInt(e.target.value, 10))}
-                    className="w-full pl-9 pr-2 py-2 text-xs bg-slate-50 dark:bg-slate-950/90 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-sky-500 transition-all font-medium cursor-pointer"
-                  >
-                    <option value={UserRole.ADMIN}>Admin</option>
-                    <option value={UserRole.MANAGER}>Manager</option>
-                    <option value={UserRole.TECHNICIAN}>Technician</option>
-                    <option value={UserRole.EMPLOYEE}>Employee</option>
-                  </select>
-                </div>
+                <select
+                  value={roleId}
+                  onChange={(e) => setRoleId(parseInt(e.target.value, 10))}
+                  className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950/90 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-sky-500 transition-all font-medium cursor-pointer"
+                >
+                  <option value={UserRole.ADMIN}>Admin</option>
+                  <option value={UserRole.MANAGER}>Manager</option>
+                  <option value={UserRole.TECHNICIAN}>Technician</option>
+                  <option value={UserRole.EMPLOYEE}>Employee</option>
+                </select>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">
                   Department
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <Building className="w-3.5 h-3.5" />
-                  </div>
-                  <select
-                    value={departmentId}
-                    onChange={(e) => setDepartmentId(parseInt(e.target.value, 10))}
-                    className="w-full pl-9 pr-2 py-2 text-xs bg-slate-50 dark:bg-slate-950/90 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-sky-500 transition-all font-medium cursor-pointer"
-                  >
-                    <option value={1}>Engineering</option>
-                    <option value={2}>IT Support</option>
-                    <option value={3}>Human Resources</option>
-                    <option value={4}>Finance</option>
-                  </select>
-                </div>
+                <select
+                  value={departmentId}
+                  onChange={(e) => setDepartmentId(parseInt(e.target.value, 10))}
+                  className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950/90 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-sky-500 transition-all font-medium cursor-pointer"
+                >
+                  <option value={1}>Engineering</option>
+                  <option value={2}>IT Support</option>
+                  <option value={3}>Human Resources</option>
+                  <option value={4}>Finance</option>
+                </select>
               </div>
             </div>
 

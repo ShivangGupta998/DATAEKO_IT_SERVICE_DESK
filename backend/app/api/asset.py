@@ -17,6 +17,8 @@ from app.core.dependencies import (
     get_current_user,
     require_roles
 )
+from app.services.notification_service import create_notification
+from app.core.sockets import notification_manager
 
 
 router = APIRouter(
@@ -303,7 +305,7 @@ def update_asset(
     "/{asset_id:int}/assign",
     response_model=AssetResponse
 )
-def assign_asset(
+async def assign_asset(
     asset_id: int,
     assign_data: AssetAssign,
     db: Session = Depends(get_db),
@@ -351,6 +353,22 @@ def assign_asset(
 
     db.commit()
     db.refresh(asset)
+
+    create_notification(
+        db=db,
+        user_id=employee.id,
+        title="Asset Assigned",
+        message=f"Asset '{asset.name}' has been assigned to you.",
+        notification_type="asset"
+    )
+    db.commit()
+
+    await notification_manager.send_personal_notification(
+        user_id=str(employee.id),
+        title="Asset Assigned",
+        message=f"Asset '{asset.name}' has been assigned to you.",
+        link="/assets"
+    )
 
     return asset
 

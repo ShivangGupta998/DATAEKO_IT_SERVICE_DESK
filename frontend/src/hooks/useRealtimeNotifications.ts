@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { requestNotificationPermission, showDesktopNotification } from "../utils/notifications";
+import { autoRequestNotificationPermission, showDesktopNotification } from "../utils/notifications";
+import { getStoredApiUrl } from "../api/client";
 
 export interface User {
   id?: number | string;
@@ -12,7 +13,7 @@ export function useRealtimeNotifications(currentUser: User | null | undefined): 
   const connectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    requestNotificationPermission();
+    autoRequestNotificationPermission();
 
     if (!currentUser || currentUser.id === undefined || currentUser.id === null) {
       return;
@@ -37,9 +38,9 @@ export function useRealtimeNotifications(currentUser: User | null | undefined): 
           return;
         }
 
-        const hostname = window.location.hostname;
-        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        const wsUrl = `${protocol}//${hostname}:8000/ws/notifications/${userIdStr}`;
+        const apiUrl = getStoredApiUrl();
+        const wsBase = apiUrl.replace(/^http/, 'ws');
+        const wsUrl = `${wsBase}/ws/notifications/${userIdStr}`;
 
         const socket = new WebSocket(wsUrl);
         wsRef.current = socket;
@@ -53,10 +54,24 @@ export function useRealtimeNotifications(currentUser: User | null | undefined): 
           if (!isMounted) return;
           try {
             const data = JSON.parse(event.data);
-            showDesktopNotification(data.title || "IT Service Desk", {
-              body: data.message,
+            const title = data.title || "IT Service Desk";
+            const message = data.message || "";
+
+            // 1. Show Native OS/Browser Desktop Pop-up
+            showDesktopNotification(title, {
+              body: message,
               url: data.link || "/tickets",
             });
+
+            // 2. Show In-App Visual Pop-up Card in the top place
+            window.dispatchEvent(
+              new CustomEvent("itsm:toast", {
+                detail: { type: "info", title, message, duration: 6000, position: "top-right" },
+              })
+            );
+
+            // 3. Immediately refresh bell notification counter & list
+            window.dispatchEvent(new CustomEvent("itsm:refresh-notifications"));
           } catch (err) {
             console.error("[WS] Error parsing JSON payload:", err);
           }
