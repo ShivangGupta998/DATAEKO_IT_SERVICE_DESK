@@ -4,7 +4,6 @@ import {
   Shield,
   Mail,
   Building,
-  CheckCircle2,
   Lock,
   Camera,
   Trash2,
@@ -18,11 +17,7 @@ import {
   KeyRound,
   Eye,
   EyeOff,
-  Server,
   Send,
-  Activity,
-  Cpu,
-  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
