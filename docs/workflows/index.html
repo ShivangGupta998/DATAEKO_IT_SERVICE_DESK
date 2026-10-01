@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT Service Desk Workflows</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @media print {
+      body { background: white !important; padding: 0 !important; }
+      .no-print { display: none !important; }
+      .print-page { page-break-after: always; margin-bottom: 2rem; }
+      .workflow-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+    }
+    .node-card {
+      transition: transform 0.15s ease, filter 0.15s ease;
+      cursor: pointer;
+    }
+    .node-card:hover {
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.08));
+      transform: translateY(-1px);
+    }
+    .tab-btn.active {
+      background-color: #1e293b;
+      color: #ffffff;
+      border-color: #1e293b;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen p-4 md:p-8 font-sans">
+  <div class="max-w-6xl mx-auto">
+
+    <!-- Header Section -->
+    <header class="no-print bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Official Process Standard</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">IT Service Desk Workflows</h1>
+        <p class="text-sm text-slate-500 mt-1">Standard operating procedures, decision gates, auto-escalations, and lifecycle maps.</p>
+      </div>
+
+      <!-- Action Toolbar -->
+      <div class="flex items-center flex-wrap gap-2">
+        <button onclick="downloadCurrentPNG()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download PNG
+        </button>
+        <button onclick="downloadCurrentSVG()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download SVG
+        </button>
+        <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors border border-slate-200 shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          Print / PDF
+        </button>
+        <div class="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200">
+          <button onclick="adjustZoom(-0.1)" title="Zoom Out" class="px-2.5 py-1 text-slate-600 hover:bg-white rounded text-xs font-bold transition-colors">−</button>
+          <span id="zoomPercent" class="px-2 text-xs font-mono font-medium text-slate-600">100%</span>
+          <button onclick="adjustZoom(0.1)" title="Zoom In" class="px-2.5 py-1 text-slate-600 hover:bg-white rounded text-xs font-bold transition-colors">+</button>
+          <button onclick="resetZoom()" title="Reset Zoom" class="px-2 py-1 text-slate-500 hover:bg-white rounded text-xs font-medium transition-colors">Reset</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="no-print flex items-center gap-1.5 overflow-x-auto pb-2 mb-6 scrollbar-none">
+      <button onclick="switchTab('wf0')" id="tab-wf0" class="tab-btn active px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-900 text-white shadow-sm whitespace-nowrap transition-all">
+        0) Employee Onboarding ⭐
+      </button>
+      <button onclick="switchTab('wf1')" id="tab-wf1" class="tab-btn px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-sm whitespace-nowrap transition-all">
+        1) Ticket Management
+      </button>
+      <button onclick="switchTab('wf2')" id="tab-wf2" class="tab-btn px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-sm whitespace-nowrap transition-all">
+        2) Access Requests
+      </button>
+      <button onclick="switchTab('wf3')" id="tab-wf3" class="tab-btn px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-sm whitespace-nowrap transition-all">
+        3) Asset Lifecycle
+      </button>
+      <button onclick="switchTab('wf4')" id="tab-wf4" class="tab-btn px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-sm whitespace-nowrap transition-all">
+        4) Employee Offboarding
+      </button>
+      <button onclick="switchTab('wf5')" id="tab-wf5" class="tab-btn px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 shadow-sm whitespace-nowrap transition-all">
+        5) Knowledge Base & Deflection
+      </button>
+      <button onclick="switchTab('all')" id="tab-all" class="tab-btn px-4 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-indigo-600 hover:bg-indigo-50 shadow-sm whitespace-nowrap transition-all">
+        📑 View All Continuous
+      </button>
+    </nav>
+
+    <!-- Legend Bar -->
+    <div class="no-print bg-white border border-slate-200 rounded-xl p-3 mb-6 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
+      <span class="font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Design System Legend:</span>
+      <div class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-1.5">
+          <span class="w-3.5 h-3.5 rounded border border-[#d5d0c5] bg-[#f2f0ea]"></span>
+          <span class="text-slate-600">Start / Notification / End</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-3.5 h-3.5 rounded border border-[#ead5ba] bg-[#fcf3e8]"></span>
+          <span class="text-slate-600">Decision Gateway</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-3.5 h-3.5 rounded border border-[#a3e3cd] bg-[#e0f5ed]"></span>
+          <span class="text-slate-600">Active IT Action / Resolution</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-3.5 h-3.5 rounded border border-[#f7c6bd] bg-[#fce9e6]"></span>
+          <span class="text-slate-600">Rejection / Lockout / Decommission</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Container for Workflows -->
+    <div id="workflowsContainer" class="flex flex-col gap-10 transition-transform origin-top">
+
+      <!-- ========================================================================= -->
+      <!-- WORKFLOW 0: EMPLOYEE ONBOARDING WORKFLOW -->
+      <!-- ========================================================================= -->
+      <section id="wf0" class="workflow-section print-page bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10">
+        <div class="max-w-[840px] mx-auto">
+          <svg viewBox="0 0 840 1250" class="w-full h-auto drop-shadow-xs" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#8c857b" />
+              </marker>
+            </defs>
+
+            <!-- Title & Underline -->
+            <text x="420" y="42" text-anchor="middle" font-size="20" font-weight="900" fill="#1c1917" letter-spacing="0.5" font-family="system-ui, -apple-system, sans-serif">IT SERVICE DESK (WORKFLOWS)</text>
+            <line x1="260" y1="52" x2="580" y2="52" stroke="#1c1917" stroke-width="2.5" />
+
+            <!-- Subheading -->
+            <text x="50" y="95" font-size="16" font-weight="800" fill="#1c1917" font-family="system-ui, -apple-system, sans-serif">0) EMPLOYEE ONBOARDING WORKFLOW</text>
+
+            <!-- Connector: Start to Decision 1 -->
+            <line x1="420" y1="165" x2="420" y2="198" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 1: HR / Manager submits new hire details -->
+            <g class="node-card">
+              <rect x="260" y="125" width="320" height="42" rx="21" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">HR / Manager submits new hire details</text>
+            </g>
+
+            <!-- Node 2: Is requestor Admin or Manager? (Decision 1) -->
+            <g class="node-card">
+              <rect x="250" y="200" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="224" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Is requestor Admin or Manager?</text>
+              <text x="420" y="244" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Checks authorization &amp; RBAC permissions</text>
+            </g>
+
+            <!-- Branch: No (Right) -> 403 Forbidden -->
+            <path d="M 590 229 L 690 229 L 690 268" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="635" y="222" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <g class="node-card">
+              <rect x="590" y="270" width="200" height="56" rx="8" fill="#fce9e6" stroke="#f7c6bd" stroke-width="1.5" />
+              <text x="690" y="293" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b" font-family="system-ui, -apple-system, sans-serif">Reject request</text>
+              <text x="690" y="312" text-anchor="middle" font-size="11" font-weight="600" fill="#b91c1c" font-family="system-ui, -apple-system, sans-serif">403 Forbidden: Unauthorized</text>
+            </g>
+
+            <line x1="690" y1="326" x2="690" y2="355" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <g class="node-card">
+              <rect x="590" y="357" width="200" height="54" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="690" y="380" text-anchor="middle" font-size="13" font-weight="700" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Notify requestor</text>
+              <text x="690" y="399" text-anchor="middle" font-size="11" font-weight="500" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Security event logged</text>
+            </g>
+            <path d="M 690 411 L 690 1150 L 420 1150" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Branch: Yes (Center Down) -->
+            <line x1="420" y1="258" x2="420" y2="295" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="278" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Node 3: Create User Account -->
+            <g class="node-card">
+              <rect x="250" y="298" width="340" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="322" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Create user account &amp; credentials</text>
+              <text x="420" y="342" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Generates secure initial password &amp; profile</text>
+            </g>
+
+            <line x1="420" y1="356" x2="420" y2="388" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 4: Assign Role & Department -->
+            <g class="node-card">
+              <rect x="250" y="390" width="340" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="414" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Assign role &amp; department</text>
+              <text x="420" y="434" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Provisions default email, Slack &amp; portal access</text>
+            </g>
+
+            <line x1="420" y1="448" x2="420" y2="480" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 5: Physical Hardware required? (Decision 2) -->
+            <g class="node-card">
+              <rect x="250" y="482" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="506" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Physical hardware required?</text>
+              <text x="420" y="526" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Checks department equipment policy</text>
+            </g>
+
+            <!-- Branch: No (Left - BYOD / Remote Contractor) -->
+            <path d="M 250 511 L 130 511 L 130 815 L 250 815" fill="none" stroke="#9e988f" stroke-width="1.6" />
+            <text x="145" y="502" font-size="11" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No (BYOD / Cloud)</text>
+
+            <!-- Branch: Yes (Down) -->
+            <line x1="420" y1="540" x2="420" y2="570" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="558" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Node 6: Hardware in stock? (Decision 3) -->
+            <g class="node-card">
+              <rect x="250" y="572" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="596" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Hardware in stock?</text>
+              <text x="420" y="616" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Checks CMDB device inventory</text>
+            </g>
+
+            <!-- Branch: No (Procurement needed) -->
+            <path d="M 590 601 L 690 601 L 690 638" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="635" y="594" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <g class="node-card">
+              <rect x="590" y="640" width="200" height="54" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="690" y="663" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Order equipment</text>
+              <text x="690" y="682" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Procurement dispatch</text>
+            </g>
+            <path d="M 690 694 L 690 735 L 590 735" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Branch: Yes (In stock) -->
+            <line x1="420" y1="630" x2="420" y2="660" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="648" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Node 7: Image & Configure Device -->
+            <g class="node-card">
+              <rect x="250" y="662" width="340" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="686" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Image &amp; configure device</text>
+              <text x="420" y="706" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Install OS, disk encryption, VPN &amp; MDM agent</text>
+            </g>
+
+            <line x1="420" y1="720" x2="420" y2="750" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 8: Assign Asset to new employee -->
+            <g class="node-card">
+              <rect x="250" y="752" width="340" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="776" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Assign asset to new employee</text>
+              <text x="420" y="796" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Record serial number &amp; equipment handover</text>
+            </g>
+
+            <line x1="420" y1="810" x2="420" y2="840" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 9: Dispatch welcome email & credentials -->
+            <g class="node-card">
+              <rect x="250" y="842" width="340" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="866" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Dispatch welcome email &amp; credentials</text>
+              <text x="420" y="886" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Login portal link &amp; temporary password</text>
+            </g>
+
+            <!-- Side notification to HR & Manager -->
+            <path d="M 250 871 L 130 871 L 130 910" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <g class="node-card">
+              <rect x="50" y="912" width="160" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="130" y="939" text-anchor="middle" font-size="12" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Notify HR &amp; Manager</text>
+            </g>
+
+            <line x1="420" y1="900" x2="420" y2="932" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 10: First login & password reset? (Decision 4) -->
+            <g class="node-card">
+              <rect x="250" y="934" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="958" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">First login &amp; password reset?</text>
+              <text x="420" y="978" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Monitors initial 24h user activation</text>
+            </g>
+
+            <!-- Branch: No (> 24h) -->
+            <path d="M 590 963 L 690 963 L 690 998" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="630" y="955" font-size="11" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No (&gt; 24h)</text>
+
+            <g class="node-card">
+              <rect x="590" y="1000" width="200" height="52" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="690" y="1022" text-anchor="middle" font-size="13" font-weight="700" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Send reminder notice</text>
+              <text x="690" y="1041" text-anchor="middle" font-size="11" font-weight="500" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Alerts hiring manager</text>
+            </g>
+
+            <!-- Branch: Yes -->
+            <line x1="420" y1="992" x2="420" y2="1024" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="1010" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Node 11: Enforce MFA & complete IT orientation -->
+            <g class="node-card">
+              <rect x="250" y="1026" width="340" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="1050" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Enforce MFA &amp; complete IT orientation</text>
+              <text x="420" y="1070" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Authenticator enrollment &amp; Knowledge Base guides</text>
+            </g>
+
+            <line x1="420" y1="1084" x2="420" y2="1165" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 12: End Pill -->
+            <g class="node-card">
+              <rect x="290" y="1168" width="260" height="42" rx="21" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="1194" text-anchor="middle" font-size="13.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">End (Onboarding Completed)</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Explanatory notes -->
+        <div class="mt-8 border-t border-slate-100 pt-6">
+          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">Onboarding Operating Principles</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+            <div class="p-3 bg-amber-50/60 border border-amber-200/60 rounded-xl">
+              <span class="font-bold text-amber-900 block mb-1">1. Admin/Manager RBAC Gate</span>
+              The Onboarding portal is guarded strictly by Manager/Admin roles. Any unauthenticated or regular Employee attempt triggers immediate 403 Forbidden deflection.
+            </div>
+            <div class="p-3 bg-emerald-50/60 border border-emerald-200/60 rounded-xl">
+              <span class="font-bold text-emerald-900 block mb-1">2. Zero-Touch Day 1 Readiness</span>
+              Accounts are created with randomized temporary passwords and auto-assigned to departmental distribution lists. Hardware is imaged with full disk encryption and MDM profiles.
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <span class="font-bold text-slate-900 block mb-1">3. Security &amp; Self-Service Handoff</span>
+              On first login, users must reset their initial password, enroll in MFA, and are directed to the Knowledge Base self-service portal to accelerate ramp-up without manual IT intervention.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- WORKFLOW 1: TICKET MANAGEMENT (EXACT RECREATION OF USER'S IMAGE) -->
+      <!-- ========================================================================= -->
+      <section id="wf1" class="workflow-section print-page bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10">
+        <div class="max-w-[840px] mx-auto">
+          <svg viewBox="0 0 840 1140" class="w-full h-auto drop-shadow-xs" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#8c857b" />
+              </marker>
+            </defs>
+
+            <!-- Title & Underline -->
+            <text x="420" y="42" text-anchor="middle" font-size="20" font-weight="900" fill="#1c1917" letter-spacing="0.5" font-family="system-ui, -apple-system, sans-serif">IT SERVICE DESK (WORKFLOWS)</text>
+            <line x1="260" y1="52" x2="580" y2="52" stroke="#1c1917" stroke-width="2.5" />
+
+            <!-- Subheading -->
+            <text x="50" y="95" font-size="16" font-weight="800" fill="#1c1917" font-family="system-ui, -apple-system, sans-serif">1) TICKET MANAGEMENT</text>
+
+            <!-- Connector: Start to Decision 1 -->
+            <line x1="420" y1="165" x2="420" y2="198" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 1: Employee creates ticket (Top Pill) -->
+            <g class="node-card">
+              <rect x="290" y="125" width="260" height="42" rx="21" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Employee creates ticket</text>
+            </g>
+
+            <!-- Node 2: Both admin & manager on leave? (Decision 1) -->
+            <g class="node-card">
+              <rect x="250" y="200" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="224" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Both admin &amp; manager on leave?</text>
+              <text x="420" y="244" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Checks availability</text>
+            </g>
+
+            <!-- Branch: Yes (Left from Decision 1) -->
+            <path d="M 330 258 L 330 282 L 210 282 L 210 308" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="312" y="274" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Branch: No (Right from Decision 1) -->
+            <path d="M 510 258 L 510 282 L 610 282 L 610 308" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="525" y="274" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Node 3: Wait in queue -->
+            <g class="node-card">
+              <rect x="95" y="310" width="230" height="48" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="210" y="339" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Wait in queue</text>
+            </g>
+
+            <!-- Connector: Wait in queue -> In queue > 90 min? -->
+            <line x1="210" y1="358" x2="210" y2="388" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 4: In queue > 90 min? (Decision 2) -->
+            <g class="node-card">
+              <rect x="95" y="390" width="230" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="210" y="414" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">In queue &gt; 90 min?</text>
+              <text x="210" y="434" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Checks wait time</text>
+            </g>
+
+            <!-- Loopback: No (from In queue > 90 min back to Wait in queue) -->
+            <path d="M 325 419 L 360 419 L 360 334 L 327 334" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="372" y="375" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Branch: Yes (from In queue > 90 min to Auto-assign) -->
+            <line x1="210" y1="448" x2="210" y2="478" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="222" y="466" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Node 5: Auto-assign To available technician -->
+            <g class="node-card">
+              <rect x="95" y="480" width="230" height="58" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="210" y="504" text-anchor="middle" font-size="13" font-weight="700" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Auto-assign</text>
+              <text x="210" y="524" text-anchor="middle" font-size="11" font-weight="500" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">To available technician</text>
+            </g>
+
+            <!-- Node 6: Is manager available? (Decision 3) -->
+            <g class="node-card">
+              <rect x="495" y="310" width="230" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="610" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Is manager available?</text>
+              <text x="610" y="354" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Checks manager status</text>
+            </g>
+
+            <!-- Branch: Yes (from Is manager available? to Manager Reviews ticket) -->
+            <path d="M 540 368 L 540 388 L 485 388 L 485 410" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="522" y="382" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Branch: No (from Is manager available? to Admin Reviews ticket) -->
+            <path d="M 680 368 L 680 388 L 725 388 L 725 410" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="695" y="382" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Node 7: Manager Reviews ticket -->
+            <g class="node-card">
+              <rect x="415" y="412" width="140" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="485" y="435" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Manager</text>
+              <text x="485" y="454" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Reviews ticket</text>
+            </g>
+
+            <!-- Node 8: Admin Reviews ticket -->
+            <g class="node-card">
+              <rect x="655" y="412" width="140" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="725" y="435" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Admin</text>
+              <text x="725" y="454" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Reviews ticket</text>
+            </g>
+
+            <!-- Convergence: Manager & Admin -> Approve ticket? -->
+            <path d="M 485 468 L 485 490 L 595 490 L 595 508" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <path d="M 725 468 L 725 490 L 595 490" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Node 9: Approve ticket? (Decision 4) -->
+            <g class="node-card">
+              <rect x="480" y="510" width="230" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="595" y="534" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Approve ticket?</text>
+              <text x="595" y="554" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Reviewer decision</text>
+            </g>
+
+            <!-- Branch: Yes (from Approve ticket? down-left to Assign technician junction) -->
+            <path d="M 530 568 L 530 595 L 380 595 L 380 668" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="510" y="586" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Connector from Auto-assign into Assign technician junction -->
+            <path d="M 210 538 L 210 655 L 380 655" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Branch: No (from Approve ticket? to Set status Rejected) -->
+            <path d="M 660 568 L 660 595 L 700 595 L 700 618" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="675" y="586" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Node 10: Set status Rejected -->
+            <g class="node-card">
+              <rect x="600" y="620" width="200" height="56" rx="8" fill="#fce9e6" stroke="#f7c6bd" stroke-width="1.5" />
+              <text x="700" y="643" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b" font-family="system-ui, -apple-system, sans-serif">Set status</text>
+              <text x="700" y="662" text-anchor="middle" font-size="11" font-weight="600" fill="#b91c1c" font-family="system-ui, -apple-system, sans-serif">Rejected</text>
+            </g>
+
+            <!-- Connector: Set status Rejected -> Close ticket -->
+            <line x1="700" y1="676" x2="700" y2="703" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 11: Close ticket Notify employee -->
+            <g class="node-card">
+              <rect x="600" y="705" width="200" height="56" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="700" y="728" text-anchor="middle" font-size="13" font-weight="700" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Close ticket</text>
+              <text x="700" y="747" text-anchor="middle" font-size="11" font-weight="500" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Notify employee</text>
+            </g>
+
+            <!-- Rejection path to End -->
+            <path d="M 700 761 L 700 1045 L 380 1045" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Node 12: Assign technician -->
+            <g class="node-card">
+              <rect x="270" y="670" width="220" height="46" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="380" y="698" text-anchor="middle" font-size="13.5" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Assign technician</text>
+            </g>
+
+            <!-- Connector: Assign technician -> Set status In progress -->
+            <line x1="380" y1="716" x2="380" y2="743" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 13: Set status In progress, priority -->
+            <g class="node-card">
+              <rect x="270" y="745" width="220" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="380" y="768" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Set status</text>
+              <text x="380" y="787" text-anchor="middle" font-size="11" font-weight="600" fill="#047857" font-family="system-ui, -apple-system, sans-serif">In progress, priority</text>
+            </g>
+
+            <!-- Side branch: Notify employee -->
+            <path d="M 270 773 L 160 773 L 160 818" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <g class="node-card">
+              <rect x="80" y="820" width="160" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="160" y="847" text-anchor="middle" font-size="12" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Notify employee</text>
+            </g>
+
+            <!-- Connector: Set status In progress -> Solve the problem -->
+            <line x1="380" y1="801" x2="380" y2="833" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 15: Solve the problem -->
+            <g class="node-card">
+              <rect x="270" y="835" width="220" height="46" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="380" y="863" text-anchor="middle" font-size="13.5" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Solve the problem</text>
+            </g>
+
+            <!-- Connector: Solve problem -> Set status: resolved -->
+            <line x1="380" y1="881" x2="380" y2="908" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 16: Set status: resolved -->
+            <g class="node-card">
+              <rect x="270" y="910" width="220" height="46" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="380" y="938" text-anchor="middle" font-size="13.5" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Set status: resolved</text>
+            </g>
+
+            <!-- Connector: Resolved -> Notify employee -->
+            <line x1="380" y1="956" x2="380" y2="978" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 17: Notify employee (before End) -->
+            <g class="node-card">
+              <rect x="270" y="980" width="220" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="380" y="1007" text-anchor="middle" font-size="12.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Notify employee</text>
+            </g>
+
+            <!-- Connector: Notify employee -> End -->
+            <line x1="380" y1="1024" x2="380" y2="1058" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 18: End (Bottom Pill) -->
+            <g class="node-card">
+              <rect x="315" y="1060" width="130" height="40" rx="20" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="380" y="1085" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">End</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Explanatory notes -->
+        <div class="mt-8 border-t border-slate-100 pt-6">
+          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">Key Operating Rules &amp; SLA Milestones</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+            <div class="p-3 bg-amber-50/60 border border-amber-200/60 rounded-xl">
+              <span class="font-bold text-amber-900 block mb-1">90-Minute Queue Auto-Assign</span>
+              If both Manager and Admin are on leave or unresponsive for 90 minutes, tickets bypass manual triage and are automatically routed to the next available qualified technician.
+            </div>
+            <div class="p-3 bg-emerald-50/60 border border-emerald-200/60 rounded-xl">
+              <span class="font-bold text-emerald-900 block mb-1">Active Status Updates</span>
+              Technicians set priority and mark "In Progress". An automated email/Slack notification is immediately dispatched to the requester with tracking links.
+            </div>
+            <div class="p-3 bg-rose-50/60 border border-rose-200/60 rounded-xl">
+              <span class="font-bold text-rose-900 block mb-1">Rejection &amp; Deflection</span>
+              If reviewers reject the ticket (e.g. out of scope, unauthorized), the ticket is closed with mandatory reviewer comments and the employee is notified with alternative self-service paths.
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ========================================================================= -->
+      <!-- WORKFLOW 2: ACCESS REQUEST MANAGEMENT -->
+      <!-- ========================================================================= -->
+      <section id="wf2" class="workflow-section print-page bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10">
+        <div class="max-w-[840px] mx-auto">
+          <svg viewBox="0 0 840 1080" class="w-full h-auto drop-shadow-xs" xmlns="http://www.w3.org/2000/svg">
+            <!-- Underline & Title -->
+            <text x="420" y="42" text-anchor="middle" font-size="20" font-weight="900" fill="#1c1917" letter-spacing="0.5" font-family="system-ui, -apple-system, sans-serif">IT SERVICE DESK (WORKFLOWS)</text>
+            <line x1="260" y1="52" x2="580" y2="52" stroke="#1c1917" stroke-width="2.5" />
+
+            <!-- Subheading -->
+            <text x="50" y="95" font-size="16" font-weight="800" fill="#1c1917" font-family="system-ui, -apple-system, sans-serif">2) ACCESS REQUEST MANAGEMENT</text>
+
+            <!-- Connector: Start -> Decision 1 -->
+            <line x1="420" y1="165" x2="420" y2="198" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 1: Start Pill -->
+            <g class="node-card">
+              <rect x="270" y="125" width="300" height="42" rx="21" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Employee submits access request</text>
+            </g>
+
+            <!-- Node 2: High privilege or sensitive? -->
+            <g class="node-card">
+              <rect x="250" y="200" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="224" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">High privilege or sensitive role?</text>
+              <text x="420" y="244" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Evaluates security tier &amp; scope</text>
+            </g>
+
+            <!-- Branch: No (Standard pre-approved access) -->
+            <path d="M 330 258 L 330 282 L 210 282 L 210 308" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="312" y="274" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Branch: Yes (Manager approval required) -->
+            <path d="M 510 258 L 510 282 L 610 282 L 610 308" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="525" y="274" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Node 3: Pre-approved catalog check -->
+            <g class="node-card">
+              <rect x="95" y="310" width="230" height="48" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="210" y="339" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Standard role catalog</text>
+            </g>
+
+            <!-- Connector down to auto-provision -->
+            <line x1="210" y1="358" x2="210" y2="388" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 4: Fast-track approval -->
+            <g class="node-card">
+              <rect x="95" y="390" width="230" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="210" y="414" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Auto-approve request</text>
+              <text x="210" y="434" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Standard employee tier</text>
+            </g>
+
+            <!-- Line from fast-track into Provisioning track -->
+            <path d="M 210 448 L 210 635 L 380 635" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Node 5: Manager reviews request -->
+            <g class="node-card">
+              <rect x="495" y="310" width="230" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="610" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Manager review</text>
+              <text x="610" y="354" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Validates business justification</text>
+            </g>
+
+            <!-- Connector to Manager decision -->
+            <line x1="610" y1="368" x2="610" y2="398" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 6: Approve access? -->
+            <g class="node-card">
+              <rect x="495" y="400" width="230" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="610" y="424" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Approve access?</text>
+              <text x="610" y="444" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Manager decision</text>
+            </g>
+
+            <!-- Branch: No (Manager rejects) -->
+            <path d="M 680 458 L 680 482 L 720 482 L 720 510" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="695" y="475" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Branch: Yes (Manager approves -> IT Security / Admin review) -->
+            <path d="M 540 458 L 540 482 L 490 482 L 490 510" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="520" y="475" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Node 7: IT Admin & Security Review -->
+            <g class="node-card">
+              <rect x="415" y="512" width="160" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="495" y="535" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">IT Admin</text>
+              <text x="495" y="554" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Licensing &amp; security check</text>
+            </g>
+
+            <!-- Rejection Node -->
+            <g class="node-card">
+              <rect x="620" y="512" width="200" height="56" rx="8" fill="#fce9e6" stroke="#f7c6bd" stroke-width="1.5" />
+              <text x="720" y="535" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b" font-family="system-ui, -apple-system, sans-serif">Set status: Rejected</text>
+              <text x="720" y="554" text-anchor="middle" font-size="11" font-weight="600" fill="#b91c1c" font-family="system-ui, -apple-system, sans-serif">Reason logged</text>
+            </g>
+
+            <!-- Connector: Rejected -> Close request -->
+            <line x1="720" y1="568" x2="720" y2="598" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <g class="node-card">
+              <rect x="620" y="600" width="200" height="56" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="720" y="623" text-anchor="middle" font-size="13" font-weight="700" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Close request</text>
+              <text x="720" y="642" text-anchor="middle" font-size="11" font-weight="500" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Notify employee</text>
+            </g>
+            <path d="M 720 656 L 720 985 L 380 985" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- IT Admin -> Provisioning convergence -->
+            <path d="M 495 568 L 495 645 L 380 645 L 380 658" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 8: Provision credentials & RBAC -->
+            <g class="node-card">
+              <rect x="270" y="660" width="220" height="46" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="380" y="688" text-anchor="middle" font-size="13.5" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Provision access &amp; role</text>
+            </g>
+
+            <!-- Connector to status -->
+            <line x1="380" y1="706" x2="380" y2="733" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 9: Set status: Approved & Active -->
+            <g class="node-card">
+              <rect x="270" y="735" width="220" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="380" y="758" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Set status: Approved</text>
+              <text x="380" y="777" text-anchor="middle" font-size="11" font-weight="600" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Active permissions</text>
+            </g>
+
+            <!-- Side notification -->
+            <path d="M 270 763 L 160 763 L 160 808" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <g class="node-card">
+              <rect x="80" y="810" width="160" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="160" y="837" text-anchor="middle" font-size="12" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Notify employee</text>
+            </g>
+
+            <!-- Connector to Time-bound check -->
+            <line x1="380" y1="791" x2="380" y2="823" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 10: Temporary / Time-bound? -->
+            <g class="node-card">
+              <rect x="270" y="825" width="220" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="380" y="849" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Temporary / Time-bound?</text>
+              <text x="380" y="869" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Checks expiration policy</text>
+            </g>
+
+            <!-- Branch: Yes (Schedule revocation) -->
+            <path d="M 270 854 L 160 854 L 160 898" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="210" y="848" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <g class="node-card">
+              <rect x="75" y="900" width="170" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="160" y="927" text-anchor="middle" font-size="12" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Schedule auto-revocation</text>
+            </g>
+            <path d="M 160 944 L 160 985 L 380 985" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Branch: No (Permanent) -->
+            <line x1="380" y1="883" x2="380" y2="920" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="390" y="905" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Node 11: Audit log recorded -->
+            <g class="node-card">
+              <rect x="270" y="922" width="220" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="380" y="949" text-anchor="middle" font-size="12.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Log compliance audit trail</text>
+            </g>
+
+            <line x1="380" y1="966" x2="380" y2="1005" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- End Pill -->
+            <g class="node-card">
+              <rect x="315" y="1008" width="130" height="40" rx="20" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="380" y="1033" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">End</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+
+      <!-- ========================================================================= -->
+      <!-- WORKFLOW 3: ASSET LIFECYCLE MANAGEMENT -->
+      <!-- ========================================================================= -->
+      <section id="wf3" class="workflow-section print-page bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10">
+        <div class="max-w-[840px] mx-auto">
+          <svg viewBox="0 0 840 1080" class="w-full h-auto drop-shadow-xs" xmlns="http://www.w3.org/2000/svg">
+            <text x="420" y="42" text-anchor="middle" font-size="20" font-weight="900" fill="#1c1917" letter-spacing="0.5" font-family="system-ui, -apple-system, sans-serif">IT SERVICE DESK (WORKFLOWS)</text>
+            <line x1="260" y1="52" x2="580" y2="52" stroke="#1c1917" stroke-width="2.5" />
+            <text x="50" y="95" font-size="16" font-weight="800" fill="#1c1917" font-family="system-ui, -apple-system, sans-serif">3) ASSET LIFECYCLE MANAGEMENT</text>
+
+            <line x1="420" y1="165" x2="420" y2="198" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Start Pill -->
+            <g class="node-card">
+              <rect x="270" y="125" width="300" height="42" rx="21" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Hardware / Device procurement intake</text>
+            </g>
+
+            <!-- Register in CMDB -->
+            <g class="node-card">
+              <rect x="250" y="200" width="340" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="224" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Tag asset &amp; register in inventory</text>
+              <text x="420" y="244" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Record serial number, model, &amp; specs</text>
+            </g>
+
+            <line x1="420" y1="258" x2="420" y2="288" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decision: Immediate allocation? -->
+            <g class="node-card">
+              <rect x="250" y="290" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="314" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Allocated immediately?</text>
+              <text x="420" y="334" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Checks pending new-hire or request</text>
+            </g>
+
+            <!-- Branch: No -> Storage -->
+            <path d="M 590 319 L 690 319 L 690 368" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="635" y="312" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <g class="node-card">
+              <rect x="590" y="370" width="200" height="56" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="690" y="393" text-anchor="middle" font-size="13" font-weight="700" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Secure IT storage</text>
+              <text x="690" y="412" text-anchor="middle" font-size="11" font-weight="500" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Status: Available / In Stock</text>
+            </g>
+
+            <!-- Branch: Yes -> Configure -->
+            <line x1="420" y1="348" x2="420" y2="388" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="370" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Configure Device -->
+            <g class="node-card">
+              <rect x="270" y="390" width="300" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="414" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Configure OS &amp; security posture</text>
+              <text x="420" y="434" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Install agent, MDM, &amp; encryption</text>
+            </g>
+
+            <line x1="420" y1="448" x2="420" y2="478" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Assign to employee -->
+            <g class="node-card">
+              <rect x="270" y="480" width="300" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="504" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Assign asset to employee</text>
+              <text x="420" y="524" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Set status: In Use / Active</text>
+            </g>
+
+            <!-- Side notification -->
+            <path d="M 270 509 L 160 509 L 160 550" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <g class="node-card">
+              <rect x="80" y="552" width="160" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="160" y="579" text-anchor="middle" font-size="12" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Notify employee</text>
+            </g>
+
+            <line x1="420" y1="538" x2="420" y2="570" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decision: Malfunction / Repair? -->
+            <g class="node-card">
+              <rect x="270" y="572" width="300" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="596" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Defect or hardware malfunction?</text>
+              <text x="420" y="616" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Health check &amp; maintenance</text>
+            </g>
+
+            <!-- Branch: Yes -> In Repair -->
+            <path d="M 270 601 L 160 601 L 160 648" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="210" y="595" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <g class="node-card">
+              <rect x="70" y="650" width="180" height="56" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="160" y="673" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Set status: In Repair</text>
+              <text x="160" y="692" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Issue loaner device</text>
+            </g>
+            <path d="M 160 706 L 160 750 L 270 750" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Branch: No -> End of life check -->
+            <line x1="420" y1="630" x2="420" y2="720" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="670" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Decision: Retirement / EOL? -->
+            <g class="node-card">
+              <rect x="270" y="722" width="300" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="746" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">End of life or employee exit?</text>
+              <text x="420" y="766" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Retirement evaluation</text>
+            </g>
+
+            <line x1="420" y1="780" x2="420" y2="812" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="800" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Wipe Data -->
+            <g class="node-card">
+              <rect x="270" y="815" width="300" height="56" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="838" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Secure disk wipe &amp; audit</text>
+              <text x="420" y="857" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">DoD / NIST sanitize standards</text>
+            </g>
+
+            <line x1="420" y1="871" x2="420" y2="903" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decommission Status -->
+            <g class="node-card">
+              <rect x="270" y="905" width="300" height="56" rx="8" fill="#fce9e6" stroke="#f7c6bd" stroke-width="1.5" />
+              <text x="420" y="928" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b" font-family="system-ui, -apple-system, sans-serif">Set status: Retired</text>
+              <text x="420" y="947" text-anchor="middle" font-size="11" font-weight="600" fill="#b91c1c" font-family="system-ui, -apple-system, sans-serif">E-waste recycle / decommission</text>
+            </g>
+
+            <line x1="420" y1="961" x2="420" y2="998" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- End Pill -->
+            <g class="node-card">
+              <rect x="355" y="1000" width="130" height="40" rx="20" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="1025" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">End</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+
+      <!-- ========================================================================= -->
+      <!-- WORKFLOW 4: EMPLOYEE OFFBOARDING -->
+      <!-- ========================================================================= -->
+      <section id="wf4" class="workflow-section print-page bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10">
+        <div class="max-w-[840px] mx-auto">
+          <svg viewBox="0 0 840 1080" class="w-full h-auto drop-shadow-xs" xmlns="http://www.w3.org/2000/svg">
+            <text x="420" y="42" text-anchor="middle" font-size="20" font-weight="900" fill="#1c1917" letter-spacing="0.5" font-family="system-ui, -apple-system, sans-serif">IT SERVICE DESK (WORKFLOWS)</text>
+            <line x1="260" y1="52" x2="580" y2="52" stroke="#1c1917" stroke-width="2.5" />
+            <text x="50" y="95" font-size="16" font-weight="800" fill="#1c1917" font-family="system-ui, -apple-system, sans-serif">4) EMPLOYEE OFFBOARDING WORKFLOW</text>
+
+            <line x1="420" y1="165" x2="420" y2="198" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Start Pill -->
+            <g class="node-card">
+              <rect x="260" y="125" width="320" height="42" rx="21" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">HR / Manager initiates offboarding</text>
+            </g>
+
+            <!-- Decision: Immediate / Involuntary? -->
+            <g class="node-card">
+              <rect x="250" y="200" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="224" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Immediate / Involuntary departure?</text>
+              <text x="420" y="244" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Assesses immediate risk &amp; data safety</text>
+            </g>
+
+            <!-- Branch: Yes -> Urgent Lockdown -->
+            <path d="M 590 229 L 690 229 L 690 278" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="635" y="222" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <g class="node-card">
+              <rect x="590" y="280" width="200" height="56" rx="8" fill="#fce9e6" stroke="#f7c6bd" stroke-width="1.5" />
+              <text x="690" y="303" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b" font-family="system-ui, -apple-system, sans-serif">Urgent session kill</text>
+              <text x="690" y="322" text-anchor="middle" font-size="11" font-weight="600" fill="#b91c1c" font-family="system-ui, -apple-system, sans-serif">Revoke SSO, VPN &amp; MFA</text>
+            </g>
+            <path d="M 690 336 L 690 540 L 570 540" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Branch: No -> Normal Checklist -->
+            <line x1="420" y1="258" x2="420" y2="298" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="280" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Retrieve assets checklist -->
+            <g class="node-card">
+              <rect x="270" y="300" width="300" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="324" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Review assigned company assets</text>
+              <text x="420" y="344" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Cross-reference CMDB &amp; badge access</text>
+            </g>
+
+            <line x1="420" y1="358" x2="420" y2="398" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decision: Assets returned? -->
+            <g class="node-card">
+              <rect x="270" y="400" width="300" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="424" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">All hardware assets returned?</text>
+              <text x="420" y="444" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Laptops, monitors, security tokens</text>
+            </g>
+
+            <!-- Branch: No -> Escrow hold -->
+            <path d="M 270 429 L 160 429 L 160 478" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="210" y="422" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <g class="node-card">
+              <rect x="70" y="480" width="180" height="56" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="160" y="503" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Send return notice</text>
+              <text x="160" y="522" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Escrow clearance hold</text>
+            </g>
+            <path d="M 160 536 L 160 620 L 270 620" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Branch: Yes -> Revoke accounts -->
+            <line x1="420" y1="458" x2="420" y2="508" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="480" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Revoke all permissions -->
+            <g class="node-card">
+              <rect x="270" y="510" width="300" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="534" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Revoke all cloud &amp; SaaS permissions</text>
+              <text x="420" y="554" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Google, Slack, GitHub, AWS, Jira</text>
+            </g>
+
+            <line x1="420" y1="568" x2="420" y2="608" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Archive mailbox & transfer data -->
+            <g class="node-card">
+              <rect x="270" y="610" width="300" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="634" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Archive mailbox &amp; delegate files</text>
+              <text x="420" y="654" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Transfer Google Drive/OneDrive to manager</text>
+            </g>
+
+            <line x1="420" y1="668" x2="420" y2="708" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Deactivate Account -->
+            <g class="node-card">
+              <rect x="270" y="710" width="300" height="56" rx="8" fill="#fce9e6" stroke="#f7c6bd" stroke-width="1.5" />
+              <text x="420" y="733" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b" font-family="system-ui, -apple-system, sans-serif">Deactivate user account</text>
+              <text x="420" y="752" text-anchor="middle" font-size="11" font-weight="600" fill="#b91c1c" font-family="system-ui, -apple-system, sans-serif">Status: Inactive &amp; Archived</text>
+            </g>
+
+            <line x1="420" y1="766" x2="420" y2="806" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Send Completion Report -->
+            <g class="node-card">
+              <rect x="270" y="808" width="300" height="46" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="836" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Send final offboarding audit to HR</text>
+            </g>
+
+            <line x1="420" y1="854" x2="420" y2="894" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- End Pill -->
+            <g class="node-card">
+              <rect x="355" y="896" width="130" height="40" rx="20" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="921" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">End</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+
+      <!-- ========================================================================= -->
+      <!-- WORKFLOW 5: KNOWLEDGE BASE & DEFLECTION -->
+      <!-- ========================================================================= -->
+      <section id="wf5" class="workflow-section print-page bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-6 md:p-10">
+        <div class="max-w-[840px] mx-auto">
+          <svg viewBox="0 0 840 1060" class="w-full h-auto drop-shadow-xs" xmlns="http://www.w3.org/2000/svg">
+            <text x="420" y="42" text-anchor="middle" font-size="20" font-weight="900" fill="#1c1917" letter-spacing="0.5" font-family="system-ui, -apple-system, sans-serif">IT SERVICE DESK (WORKFLOWS)</text>
+            <line x1="260" y1="52" x2="580" y2="52" stroke="#1c1917" stroke-width="2.5" />
+            <text x="50" y="95" font-size="16" font-weight="800" fill="#1c1917" font-family="system-ui, -apple-system, sans-serif">5) KNOWLEDGE BASE &amp; INCIDENT DEFLECTION</text>
+
+            <line x1="420" y1="165" x2="420" y2="198" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Start Pill -->
+            <g class="node-card">
+              <rect x="270" y="125" width="300" height="42" rx="21" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Employee encounters IT issue</text>
+            </g>
+
+            <!-- Search KB -->
+            <g class="node-card">
+              <rect x="250" y="200" width="340" height="58" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="224" text-anchor="middle" font-size="13" font-weight="700" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Search Knowledge Base portal</text>
+              <text x="420" y="244" text-anchor="middle" font-size="11" font-weight="500" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Keyword search &amp; smart AI recommendations</text>
+            </g>
+
+            <line x1="420" y1="258" x2="420" y2="288" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decision: Relevant article found? -->
+            <g class="node-card">
+              <rect x="250" y="290" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="314" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Relevant article found?</text>
+              <text x="420" y="334" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Evaluates matching self-service guides</text>
+            </g>
+
+            <!-- Branch: Yes -> Follow Solution -->
+            <path d="M 330 348 L 330 372 L 210 372 L 210 398" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="312" y="364" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Branch: No -> Submit Ticket -->
+            <path d="M 510 348 L 510 372 L 610 372 L 610 398" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="525" y="364" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Node: Follow Self-service solution -->
+            <g class="node-card">
+              <rect x="95" y="400" width="230" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="210" y="423" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Follow self-service guide</text>
+              <text x="210" y="442" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Step-by-step resolution</text>
+            </g>
+
+            <line x1="210" y1="456" x2="210" y2="488" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decision: Issue resolved? -->
+            <g class="node-card">
+              <rect x="95" y="490" width="230" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="210" y="514" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Issue resolved?</text>
+              <text x="210" y="534" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Employee confirmation</text>
+            </g>
+
+            <!-- Branch: Yes -> Deflected -->
+            <line x1="210" y1="548" x2="210" y2="578" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="222" y="566" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <g class="node-card">
+              <rect x="95" y="580" width="230" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="210" y="603" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Incident Deflected! 🎉</text>
+              <text x="210" y="622" text-anchor="middle" font-size="11" font-weight="600" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Record helpful article feedback</text>
+            </g>
+            <path d="M 210 636 L 210 990 L 380 990" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Branch: No -> Escalate into Ticket creation -->
+            <path d="M 325 519 L 450 519 L 450 428 L 495 428" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="350" y="512" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Submit Ticket Box -->
+            <g class="node-card">
+              <rect x="495" y="400" width="230" height="56" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="610" y="423" text-anchor="middle" font-size="13" font-weight="700" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Submit IT ticket</text>
+              <text x="610" y="442" text-anchor="middle" font-size="11" font-weight="500" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Routes to Ticket Management flow</text>
+            </g>
+
+            <line x1="610" y1="456" x2="610" y2="488" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Technician solves & creates KB Candidate -->
+            <g class="node-card">
+              <rect x="495" y="490" width="230" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="610" y="514" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Technician resolves ticket</text>
+              <text x="610" y="534" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Documents new reusable solution</text>
+            </g>
+
+            <line x1="610" y1="548" x2="610" y2="578" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decision: Recurring issue? -->
+            <g class="node-card">
+              <rect x="495" y="580" width="230" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="610" y="604" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Recurring issue for KB?</text>
+              <text x="610" y="624" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Knowledge candidate check</text>
+            </g>
+
+            <!-- Branch: Yes -> Draft Article -->
+            <line x1="610" y1="638" x2="610" y2="668" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="620" y="655" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <g class="node-card">
+              <rect x="495" y="670" width="230" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="610" y="693" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Draft KB article</text>
+              <text x="610" y="712" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Symptoms, screenshots &amp; steps</text>
+            </g>
+
+            <line x1="610" y1="726" x2="610" y2="758" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decision: Admin review -->
+            <g class="node-card">
+              <rect x="495" y="760" width="230" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="610" y="784" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Admin review &amp; verify?</text>
+              <text x="610" y="804" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Technical accuracy &amp; formatting</text>
+            </g>
+
+            <!-- Branch: Yes -> Publish -->
+            <line x1="610" y1="818" x2="610" y2="850" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="620" y="836" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <g class="node-card">
+              <rect x="495" y="852" width="230" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="610" y="875" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Publish to Knowledge Base</text>
+              <text x="610" y="894" text-anchor="middle" font-size="11" font-weight="600" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Status: Published &amp; Live</text>
+            </g>
+
+            <path d="M 610 908 L 610 990 L 460 990" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- End Pill -->
+            <g class="node-card">
+              <rect x="355" y="970" width="130" height="40" rx="20" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="995" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">End</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Quick Footer -->
+    <footer class="no-print mt-12 text-center text-xs text-slate-400">
+      IT Service Desk Standard Operating Procedures &bull; Generated for pair-programming &amp; production alignment
+    </footer>
+
+  </div>
+
+  <script>
+    let currentZoom = 1.0;
+    const container = document.getElementById('workflowsContainer');
+    const zoomText = document.getElementById('zoomPercent');
+
+    function adjustZoom(delta) {
+      currentZoom = Math.min(Math.max(0.6, currentZoom + delta), 1.6);
+      applyZoom();
+    }
+
+    function resetZoom() {
+      currentZoom = 1.0;
+      applyZoom();
+    }
+
+    function applyZoom() {
+      container.style.transform = `scale(${currentZoom})`;
+      zoomText.textContent = `${Math.round(currentZoom * 100)}%`;
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-slate-900', 'text-white');
+        btn.classList.add('bg-white', 'text-slate-600');
+      });
+
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.add('active', 'bg-slate-900', 'text-white');
+        activeBtn.classList.remove('bg-white', 'text-slate-600');
+      }
+
+      const sections = document.querySelectorAll('.workflow-section');
+      if (tabId === 'all') {
+        sections.forEach(sec => sec.style.display = 'block');
+      } else {
+        sections.forEach(sec => {
+          if (sec.id === tabId) {
+            sec.style.display = 'block';
+          } else {
+            sec.style.display = 'none';
+          }
+        });
+      }
+    }
+
+    function getActiveSection() {
+      const activeSections = Array.from(document.querySelectorAll('.workflow-section')).filter(s => s.style.display !== 'none');
+      return activeSections[0] || document.getElementById('wf0');
+    }
+
+    function getActiveFilename(ext) {
+      const sec = getActiveSection();
+      const idMap = {
+        'wf0': '0_employee_onboarding',
+        'wf1': '1_ticket_management',
+        'wf2': '2_access_request',
+        'wf3': '3_asset_lifecycle',
+        'wf4': '4_employee_offboarding',
+        'wf5': '5_knowledge_base'
+      };
+      const name = idMap[sec.id] || 'it_workflow';
+      return `${name}.${ext}`;
+    }
+
+    function downloadCurrentSVG() {
+      const sec = getActiveSection();
+      const svg = sec.querySelector('svg');
+      if (!svg) return;
+      const serializer = new XMLSerializer();
+      let svgString = serializer.serializeToString(svg);
+      if (!svgString.includes('xmlns="http://www.w3.org/2000/svg"')) {
+        svgString = svgString.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = getActiveFilename('svg');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadCurrentPNG() {
+      const sec = getActiveSection();
+      const svg = sec.querySelector('svg');
+      if (!svg) return;
+      const serializer = new XMLSerializer();
+      let svgString = serializer.serializeToString(svg);
+      if (!svgString.includes('xmlns="http://www.w3.org/2000/svg"')) {
+        svgString = svgString.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      const vb = svg.getAttribute('viewBox') ? svg.getAttribute('viewBox').split(' ') : ['0', '0', '840', '1250'];
+      const w = parseFloat(vb[2]) || 840;
+      const h = parseFloat(vb[3]) || 1250;
+
+      const canvas = document.createElement('canvas');
+      const scale = 2;
+      canvas.width = w * scale;
+      canvas.height = h * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(scale, scale);
+
+      const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+
+      img.onload = function() {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        try {
+          const pngUrl = canvas.toDataURL('image/png');
+          const a = document.createElement('a');
+          a.href = pngUrl;
+          a.download = getActiveFilename('png');
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } catch (e) {
+          downloadCurrentSVG();
+        }
+      };
+      img.onerror = function() {
+        URL.revokeObjectURL(url);
+        downloadCurrentSVG();
+      };
+      img.src = url;
+    }
+
+    // Default to WF0 (Onboarding) visible
+    switchTab('wf0');
+  </script>
+</body>
+</html>
