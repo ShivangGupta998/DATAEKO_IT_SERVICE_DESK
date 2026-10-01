@@ -41,6 +41,7 @@ from app.api import (
     knowledge_base,
     report,
     notification,
+    admin,
 )
 
 def hash_password_direct(password: str) -> str:
@@ -92,6 +93,8 @@ app.include_router(offboarding.router)
 app.include_router(knowledge_base.router)
 app.include_router(report.router)
 app.include_router(notification.router)
+app.include_router(admin.router)
+app.include_router(admin.router_v1)
 
 # 3. Startup & Seed Logic
 @app.on_event("startup")

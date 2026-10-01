@@ -10,8 +10,8 @@ import {
   Edit,
   ShieldAlert,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../hooks/useToast';
 import { offboardingService, InitiateOffboardingPayload } from '../../services/offboardingService';
 import { Offboarding, OffboardingStatus } from '../../types/offboarding';
 import { StatusBadge } from '../../components/common/Badge';

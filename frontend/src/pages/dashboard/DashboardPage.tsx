@@ -296,7 +296,7 @@ export const DashboardPage: React.FC = () => {
             <div className="grid grid-cols-1 gap-3">
               <button
                 type="button"
-                onClick={() => navigate('/tickets/new')}
+                onClick={() => navigate('/tickets/new?category=Hardware')}
                 className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-left transition-all group"
               >
                 <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">
@@ -310,7 +310,7 @@ export const DashboardPage: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => navigate('/tickets/new')}
+                onClick={() => navigate('/access-requests')}
                 className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-left transition-all group"
               >
                 <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-all">
@@ -324,7 +324,7 @@ export const DashboardPage: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => navigate('/kb')}
+                onClick={() => navigate('/knowledge-base')}
                 className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-left transition-all group"
               >
                 <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">

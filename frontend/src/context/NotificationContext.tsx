@@ -1,17 +1,10 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from './AuthContext';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import { notificationService } from '../services/notificationService';
 import { NotificationItem } from '../types/notification';
 import { STORAGE_KEY_TOKEN } from '../api/client';
-
-export interface NotificationContextType {
-  notifications: NotificationItem[];
-  unreadCount: number;
-  refreshNotifications: () => Promise<void>;
-  markAsRead: (id: number | string) => Promise<void>;
-}
-
-export const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+import { autoRequestNotificationPermission } from '../utils/notifications';
+import { NotificationContext } from './notificationContextDef';
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -78,7 +71,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       return;
     }
 
+    autoRequestNotificationPermission();
     refreshNotifications();
+
+    const handleImmediateRefresh = () => {
+      refreshNotifications();
+    };
+    window.addEventListener('itsm:refresh-notifications', handleImmediateRefresh);
 
     const interval = setInterval(() => {
       const liveToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
@@ -90,7 +89,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
     }, 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('itsm:refresh-notifications', handleImmediateRefresh);
+    };
   }, [isAuthenticated, isLoading, token, refreshNotifications]);
 
   return (

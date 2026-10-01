@@ -37,6 +37,12 @@ class User(Base):
     )
 
 
+    full_name = Column(
+        String,
+        nullable=True
+    )
+
+
     hashed_password = Column(
         String,
         nullable=False
@@ -59,6 +65,9 @@ class User(Base):
         Integer,
         ForeignKey("departments.id")
     )
+
+    role = relationship("Role", foreign_keys=[role_id], lazy="joined")
+    department = relationship("Department", foreign_keys=[department_id], lazy="joined")
 
 
     # ========================================================

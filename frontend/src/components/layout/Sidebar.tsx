@@ -6,6 +6,7 @@ import {
   Laptop,
   KeyRound,
   UserX,
+  UserPlus,
   BookOpen,
   BarChart3,
   PlusCircle,
@@ -71,6 +72,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
       label: 'Access Requests',
       icon: KeyRound,
       roles: [1, 2, 3, 4],
+      end: false,
+    },
+    {
+      to: '/admin/onboarding',
+      label: 'Employee Onboarding',
+      icon: UserPlus,
+      roles: [1, 2],
       end: false,
     },
     {
