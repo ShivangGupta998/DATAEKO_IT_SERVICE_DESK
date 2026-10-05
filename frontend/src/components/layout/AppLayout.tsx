@@ -6,6 +6,23 @@ import { useAuth } from '../../hooks/useAuth';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
 import { AIAssistantWidget } from '../ai/AIAssistantWidget';
 
+class WidgetErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: any) {
+    console.error('AI Assistant Widget caught error:', error);
+  }
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
+
 export const AppLayout: React.FC = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const location = useLocation();
@@ -55,7 +72,9 @@ export const AppLayout: React.FC = () => {
       </div>
 
       {/* Global Floating AI Support Assistant Widget */}
-      <AIAssistantWidget />
+      <WidgetErrorBoundary>
+        <AIAssistantWidget />
+      </WidgetErrorBoundary>
     </div>
   );
 };

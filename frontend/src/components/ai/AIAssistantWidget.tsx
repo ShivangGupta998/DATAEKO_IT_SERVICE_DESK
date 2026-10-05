@@ -89,12 +89,12 @@ export const AIAssistantWidget: React.FC = () => {
         {
           id: 'welcome-msg',
           sender: 'assistant',
-          text: `Hello ${user?.full_name?.split(' ')[0] || user?.username || 'there'}! 👋 I am your IT Service Desk Copilot. How can I assist you today? You can select any quick guide below or type a question about tickets, access, onboarding, or settings.`,
+          text: `Hello ${user?.full_name?.split(' ')[0] || user?.username || 'there'}! 👋 I am your IT Service Desk Copilot. How can I assist you today? You can select any quick guide below or ask any question about tickets, software access, onboarding, or profile preferences.`,
           timestamp: new Date(),
         },
       ]);
     }
-  }, [user]);
+  }, [user, messages.length]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -106,9 +106,10 @@ export const AIAssistantWidget: React.FC = () => {
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 150);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
@@ -129,7 +130,7 @@ export const AIAssistantWidget: React.FC = () => {
           title: 'Employee Onboarding (Admin / Manager Only)',
           category: 'User Management',
           isRestricted: true,
-          restrictionNotice: `Access Restricted: Employee Onboarding is only available to Administrators and Managers. Your current role is "${roleName}".`,
+          restrictionNotice: `Access Restricted: Employee Onboarding is only available to Administrators and Managers. Your current role is "${roleName || 'Employee'}".`,
           summary:
             'Standard employees do not have administrative permission to create accounts, provision equipment, or run the onboarding wizard.',
           steps: [
@@ -137,7 +138,7 @@ export const AIAssistantWidget: React.FC = () => {
             'Submit an IT Support Request detailing the new team member requirements (name, software licenses, equipment needs).',
             'An Administrator or Manager will review and execute the onboarding workflow from their management console.',
           ],
-          tip: 'If you have been promoted or require elevated management privileges, contact your IT Administrator to adjust your role.',
+          tip: 'If you require elevated management privileges, contact your IT Administrator to adjust your user role.',
           actions: [
             { label: 'Submit IT Request', path: '/tickets/new', primary: true },
             { label: 'Browse Knowledge Base', path: '/knowledge-base', primary: false },
@@ -153,7 +154,7 @@ export const AIAssistantWidget: React.FC = () => {
         summary:
           'Complete end-to-end workflow to provision new hires with credentials, department assignment, and hardware.',
         steps: [
-          'Navigate to Employee Onboarding (/admin/onboarding) from the Admin section.',
+          'Navigate to Employee Onboarding (/admin/onboarding) from the Admin navigation section.',
           'Click the "Onboard New Employee" button to open the onboarding wizard.',
           'Enter the employee details: Full Name, Work Email, Contact Phone, Department, and Role.',
           'Assign required equipment (laptop, monitor, peripherals) from active asset inventory.',
@@ -182,7 +183,7 @@ export const AIAssistantWidget: React.FC = () => {
           title: 'Employee Offboarding (Admin / Manager Only)',
           category: 'Offboarding',
           isRestricted: true,
-          restrictionNotice: `Access Restricted: The Offboarding checklist is reserved for Administrators and Managers. Your current role is "${roleName}".`,
+          restrictionNotice: `Access Restricted: The Offboarding checklist is reserved for Administrators and Managers. Your current role is "${roleName || 'Employee'}".`,
           summary:
             'Employees cannot initiate offboarding deprovisioning. Please contact your manager or HR team.',
           steps: [
@@ -403,7 +404,7 @@ export const AIAssistantWidget: React.FC = () => {
       title: `Assistance for "${queryKey}"`,
       category: 'General Help',
       summary:
-        `I couldn't find an exact matching tutorial for "${queryKey}", but I can guide you through our core service modules.`,
+        `I could not find an exact matching tutorial for "${queryKey}", but I can guide you through our core service modules.`,
       steps: [
         'Support Tickets: Create and track incidents or hardware/software requests (/tickets/new).',
         'Access Requests: Request software licenses, elevated roles, or VPN access (/access-requests).',
@@ -482,17 +483,18 @@ export const AIAssistantWidget: React.FC = () => {
       {/* 1. Floating Launcher Button (Bottom-Right) */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
+          type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           aria-label={isOpen ? 'Close AI Support Assistant' : 'Open AI Support Assistant'}
           className={`group relative flex items-center gap-2.5 px-4 py-3 rounded-full font-medium shadow-xl transition-all duration-300 transform active:scale-95 ${
             isOpen
               ? 'bg-slate-800 text-white dark:bg-slate-700 hover:bg-slate-900'
-              : 'bg-linear-to-r from-blue-600 via-indigo-600 to-blue-700 text-white hover:from-blue-700 hover:to-indigo-800 hover:shadow-blue-500/30'
+              : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white hover:from-blue-700 hover:to-indigo-800 hover:shadow-blue-500/30'
           }`}
         >
           {/* Animated Glow Halo */}
           {!isOpen && (
-            <span className="absolute -inset-0.5 rounded-full bg-linear-to-r from-blue-500 to-indigo-500 opacity-75 blur-xs group-hover:opacity-100 transition duration-300 -z-10 animate-pulse" />
+            <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 opacity-75 blur-xs group-hover:opacity-100 transition duration-300 -z-10 animate-pulse" />
           )}
 
           <div className="relative flex items-center justify-center">
@@ -528,9 +530,9 @@ export const AIAssistantWidget: React.FC = () => {
           className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[440px] max-h-[640px] h-[82vh] z-50 flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
         >
           {/* Panel Header */}
-          <div className="px-4 py-3.5 bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-slate-800 flex items-center justify-between shrink-0">
+          <div className="px-4 py-3.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-slate-800 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 text-white shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 text-white shrink-0">
                 <Bot className="w-5 h-5" />
               </div>
               <div>
@@ -545,7 +547,7 @@ export const AIAssistantWidget: React.FC = () => {
                 </div>
                 <p className="text-[11px] text-slate-300 flex items-center gap-1.5">
                   <span>Role:</span>
-                  <span className="font-semibold text-blue-300">{roleName || 'User'}</span>
+                  <span className="font-semibold text-blue-300">{roleName || 'Employee'}</span>
                   {isAdmin && <span className="text-amber-300 text-[10px]">(Admin)</span>}
                 </p>
               </div>
@@ -553,6 +555,7 @@ export const AIAssistantWidget: React.FC = () => {
 
             <div className="flex items-center gap-1">
               <button
+                type="button"
                 onClick={handleResetChat}
                 title="Reset conversation"
                 className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
@@ -561,6 +564,7 @@ export const AIAssistantWidget: React.FC = () => {
                 <RotateCcw className="w-4 h-4" />
               </button>
               <button
+                type="button"
                 onClick={() => setIsOpen(false)}
                 title="Close Copilot"
                 className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
@@ -580,14 +584,15 @@ export const AIAssistantWidget: React.FC = () => {
               </span>
               <span className="text-[10px] text-slate-400">Click to load steps</span>
             </div>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 text-xs">
               {PRESET_PROMPTS.map((prompt) => {
                 const IconComponent = prompt.icon;
                 return (
                   <button
                     key={prompt.id}
+                    type="button"
                     onClick={() => handleSelectPrompt(prompt.label)}
-                    className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-850 hover:bg-blue-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-750 hover:border-blue-300 dark:hover:border-blue-600 transition-all shadow-2xs whitespace-nowrap active:scale-95"
+                    className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all shadow-xs whitespace-nowrap active:scale-95"
                   >
                     <IconComponent className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                     <span>{prompt.label}</span>
@@ -598,7 +603,7 @@ export const AIAssistantWidget: React.FC = () => {
           </div>
 
           {/* Messages Container */}
-          <div className="flex-1 p-3.5 overflow-y-auto space-y-3.5 bg-slate-100/50 dark:bg-slate-950/40 text-slate-800 dark:text-slate-100 text-sm">
+          <div className="flex-1 p-3.5 overflow-y-auto space-y-3.5 bg-slate-50 dark:bg-slate-950/40 text-slate-800 dark:text-slate-100 text-sm">
             {messages.map((msg) => {
               const isUser = msg.sender === 'user';
 
@@ -615,21 +620,21 @@ export const AIAssistantWidget: React.FC = () => {
               // Assistant message
               return (
                 <div key={msg.id} className="flex gap-2.5 items-start">
-                  <div className="w-7 h-7 rounded-lg bg-linear-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <Bot className="w-4 h-4" />
                   </div>
 
                   <div className="flex-1 space-y-2.5 min-w-0">
                     {/* Plain text response (e.g. Greeting) */}
                     {msg.text && (
-                      <div className="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-3 text-xs sm:text-sm text-slate-800 dark:text-slate-200 shadow-2xs leading-relaxed">
+                      <div className="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 p-3 text-xs sm:text-sm text-slate-800 dark:text-slate-200 shadow-xs leading-relaxed">
                         {msg.text}
                       </div>
                     )}
 
                     {/* Rich Guide Data Response */}
                     {msg.guide && (
-                      <div className="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 p-3.5 shadow-2xs space-y-3">
+                      <div className="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 p-3.5 shadow-xs space-y-3">
                         {/* Title and Category */}
                         <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
                           <div className="flex items-center justify-between gap-2">
@@ -697,11 +702,12 @@ export const AIAssistantWidget: React.FC = () => {
                             {msg.guide.actions.map((act, aIdx) => (
                               <button
                                 key={aIdx}
+                                type="button"
                                 onClick={() => handleNavigate(act.path)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs active:scale-95 ${
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-xs active:scale-95 ${
                                   act.primary
                                     ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
-                                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-800 dark:text-slate-200'
+                                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200'
                                 }`}
                               >
                                 <span>{act.label}</span>
@@ -731,7 +737,7 @@ export const AIAssistantWidget: React.FC = () => {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder="Ask anything (e.g. 'ticket', 'onboarding', 'assets')..."
-                className="w-full text-xs sm:text-sm pl-3 pr-8 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border border-transparent focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-hidden transition-all"
+                className="w-full text-xs sm:text-sm pl-3 pr-8 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border border-transparent focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-hidden transition-all"
               />
               {inputText && (
                 <button
@@ -758,3 +764,5 @@ export const AIAssistantWidget: React.FC = () => {
     </>
   );
 };
+
+export default AIAssistantWidget;
