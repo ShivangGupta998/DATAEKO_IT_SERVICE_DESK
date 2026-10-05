@@ -15,8 +15,17 @@ import {
   AlertCircle,
   CheckCircle2,
   Lock,
+  Key,
+  Cpu,
+  Loader2,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import {
+  aiService,
+  getClientGeminiApiKey,
+  setClientGeminiApiKey,
+  AIChatAction,
+} from '../../services/aiService';
 
 interface ActionCTA {
   label: string;
@@ -41,6 +50,9 @@ interface Message {
   sender: 'user' | 'assistant';
   text?: string;
   guide?: GuideData;
+  modelUsed?: string;
+  actions?: AIChatAction[];
+  isGemini?: boolean;
   timestamp: Date;
 }
 
@@ -79,6 +91,12 @@ export const AIAssistantWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [customApiKey, setCustomApiKey] = useState(() => getClientGeminiApiKey() || '');
+  const [selectedModel, setSelectedModel] = useState<'gemini-2.0-flash' | 'gemini-1.5-flash'>('gemini-2.0-flash');
+  const [keySavedToast, setKeySavedToast] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -89,7 +107,7 @@ export const AIAssistantWidget: React.FC = () => {
         {
           id: 'welcome-msg',
           sender: 'assistant',
-          text: `Hello ${user?.full_name?.split(' ')[0] || user?.username || 'there'}! 👋 I am your IT Service Desk Copilot. How can I assist you today? You can select any quick guide below or ask any question about tickets, software access, onboarding, or profile preferences.`,
+          text: `Hello ${user?.full_name?.split(' ')[0] || user?.username || 'there'}! 👋 I am your IT Service Desk Copilot, powered by Google Gemini and our enterprise knowledge base. How can I assist you today?`,
           timestamp: new Date(),
         },
       ]);
@@ -101,17 +119,27 @@ export const AIAssistantWidget: React.FC = () => {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isOpen]);
+  }, [messages, isOpen, isLoading]);
 
   // Focus input when opened
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !showSettings) {
       const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 150);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [isOpen, showSettings]);
+
+  const handleSaveApiKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    setClientGeminiApiKey(customApiKey);
+    setKeySavedToast(true);
+    setTimeout(() => {
+      setKeySavedToast(false);
+      setShowSettings(false);
+    }, 1200);
+  };
 
   const generateGuideResponse = (queryKey: string): GuideData => {
     const key = queryKey.toLowerCase().trim();
@@ -398,7 +426,7 @@ export const AIAssistantWidget: React.FC = () => {
       };
     }
 
-    // 8. Fallback / Unrecognized query
+    // 8. Fallback / General
     return {
       id: 'fallback-guide',
       title: `Assistance for "${queryKey}"`,
@@ -412,7 +440,7 @@ export const AIAssistantWidget: React.FC = () => {
         'Knowledge Base: Search self-service troubleshooting guides and FAQs (/knowledge-base).',
         'Profile & Settings: Update theme (Light/Dark), notification alerts, and password (/profile).',
       ],
-      tip: 'You can click any of the preset quick prompts at the top or choose a destination below.',
+      tip: 'You can click any of the preset quick prompts at the top or ask freeform questions.',
       actions: [
         { label: 'Browse Knowledge Base', path: '/knowledge-base', primary: true },
         { label: 'Create Support Ticket', path: '/tickets/new', primary: false },
@@ -420,7 +448,7 @@ export const AIAssistantWidget: React.FC = () => {
     };
   };
 
-  const handleSelectPrompt = (promptText: string) => {
+  const handleSelectPrompt = async (promptText: string) => {
     const userMsg: Message = {
       id: `user-${Date.now()}`,
       sender: 'user',
@@ -428,21 +456,62 @@ export const AIAssistantWidget: React.FC = () => {
       timestamp: new Date(),
     };
 
-    const guide = generateGuideResponse(promptText);
-    const botMsg: Message = {
-      id: `bot-${Date.now() + 1}`,
-      sender: 'assistant',
-      guide,
-      timestamp: new Date(),
-    };
+    setMessages((prev) => [...prev, userMsg]);
+    setIsLoading(true);
 
-    setMessages((prev) => [...prev, userMsg, botMsg]);
+    try {
+      // Try Gemini AI first
+      const geminiResult = await aiService.sendMessage({
+        message: promptText,
+        history: messages
+          .filter((m) => m.text)
+          .map((m) => ({
+            role: m.sender === 'user' ? 'user' : 'model',
+            text: m.text || '',
+          })),
+        roleName: roleName || 'Employee',
+        userName: user?.full_name || user?.username || 'User',
+        preferredModel: selectedModel,
+      });
+
+      if (geminiResult && geminiResult.text) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `bot-${Date.now()}`,
+            sender: 'assistant',
+            text: geminiResult.text,
+            modelUsed: geminiResult.modelUsed,
+            actions: geminiResult.suggestedActions,
+            isGemini: true,
+            timestamp: new Date(),
+          },
+        ]);
+        return;
+      }
+    } catch {
+      // Fallback below
+    } finally {
+      setIsLoading(false);
+    }
+
+    // Offline / Knowledge base fallback
+    const guide = generateGuideResponse(promptText);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `bot-${Date.now()}`,
+        sender: 'assistant',
+        guide,
+        timestamp: new Date(),
+      },
+    ]);
   };
 
-  const handleSendMessage = (e?: React.FormEvent) => {
+  const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const text = inputText.trim();
-    if (!text) return;
+    if (!text || isLoading) return;
 
     const userMsg: Message = {
       id: `user-${Date.now()}`,
@@ -451,16 +520,58 @@ export const AIAssistantWidget: React.FC = () => {
       timestamp: new Date(),
     };
 
-    const guide = generateGuideResponse(text);
-    const botMsg: Message = {
-      id: `bot-${Date.now() + 1}`,
-      sender: 'assistant',
-      guide,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMsg, botMsg]);
+    setMessages((prev) => [...prev, userMsg]);
     setInputText('');
+    setIsLoading(true);
+
+    try {
+      // Attempt Gemini AI via Backend /api/ai/chat or @google/genai
+      const geminiResult = await aiService.sendMessage({
+        message: text,
+        history: messages
+          .filter((m) => m.text)
+          .map((m) => ({
+            role: m.sender === 'user' ? 'user' : 'model',
+            text: m.text || '',
+          })),
+        roleName: roleName || 'Employee',
+        userName: user?.full_name || user?.username || 'User',
+        preferredModel: selectedModel,
+      });
+
+      if (geminiResult && geminiResult.text) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `bot-${Date.now()}`,
+            sender: 'assistant',
+            text: geminiResult.text,
+            modelUsed: geminiResult.modelUsed,
+            actions: geminiResult.suggestedActions,
+            isGemini: true,
+            timestamp: new Date(),
+          },
+        ]);
+        setIsLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.warn('Gemini query fallback:', err);
+    } finally {
+      setIsLoading(false);
+    }
+
+    // Structured Knowledge fallback if Gemini is not configured
+    const guide = generateGuideResponse(text);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `bot-${Date.now()}`,
+        sender: 'assistant',
+        guide,
+        timestamp: new Date(),
+      },
+    ]);
   };
 
   const handleResetChat = () => {
@@ -527,33 +638,49 @@ export const AIAssistantWidget: React.FC = () => {
         <div
           role="dialog"
           aria-label="IT Service Desk Copilot"
-          className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[440px] max-h-[640px] h-[82vh] z-50 flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
+          className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[450px] max-h-[660px] h-[84vh] z-50 flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
         >
           {/* Panel Header */}
-          <div className="px-4 py-3.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-slate-800 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 text-white shrink-0">
-                <Bot className="w-5 h-5" />
+          <div className="px-4 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-slate-800 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 text-white shrink-0">
+                <Bot className="w-4 h-4" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold tracking-tight text-white">
-                    IT Service Desk Copilot
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-xs sm:text-sm font-bold tracking-tight text-white">
+                    IT Copilot
                   </h3>
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     Online
                   </span>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/30 text-indigo-200 font-mono">
+                    Gemini 2.0
+                  </span>
                 </div>
-                <p className="text-[11px] text-slate-300 flex items-center gap-1.5">
+                <p className="text-[10px] text-slate-300 flex items-center gap-1">
                   <span>Role:</span>
                   <span className="font-semibold text-blue-300">{roleName || 'Employee'}</span>
-                  {isAdmin && <span className="text-amber-300 text-[10px]">(Admin)</span>}
+                  {isAdmin && <span className="text-amber-300 text-[9px]">(Admin)</span>}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setShowSettings(!showSettings)}
+                title="Gemini AI Settings"
+                className={`p-1.5 rounded-lg transition-colors ${
+                  showSettings
+                    ? 'text-white bg-indigo-600'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
+                }`}
+                aria-label="Gemini API Configuration"
+              >
+                <Cpu className="w-4 h-4" />
+              </button>
               <button
                 type="button"
                 onClick={handleResetChat}
@@ -575,14 +702,69 @@ export const AIAssistantWidget: React.FC = () => {
             </div>
           </div>
 
+          {/* Settings Panel (Toggleable) */}
+          {showSettings && (
+            <div className="p-3.5 bg-slate-100 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-xs shrink-0 animate-in fade-in">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-blue-500" />
+                  Google Gemini Configuration
+                </span>
+                <span className="text-[10px] text-slate-500">Free Tier (15 RPM / 1M Tokens)</span>
+              </div>
+
+              <form onSubmit={handleSaveApiKey} className="space-y-2.5">
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    Gemini API Key (optional if configured in backend .env):
+                  </label>
+                  <input
+                    type="password"
+                    value={customApiKey}
+                    onChange={(e) => setCustomApiKey(e.target.value)}
+                    placeholder="AIzaSy... (leave blank to use backend key)"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-hidden focus:border-blue-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <label className="text-[11px] font-medium text-slate-600 dark:text-slate-400">Model:</label>
+                    <select
+                      value={selectedModel}
+                      onChange={(e) => setSelectedModel(e.target.value as any)}
+                      className="text-[11px] px-2 py-1 rounded-md bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-hidden"
+                    >
+                      <option value="gemini-2.0-flash">Gemini 2.0 Flash (Fastest)</option>
+                      <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-xs transition-colors shadow-2xs"
+                  >
+                    Save Key
+                  </button>
+                </div>
+
+                {keySavedToast && (
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> API Key saved successfully!
+                  </p>
+                )}
+              </form>
+            </div>
+          )}
+
           {/* Quick Action Chips Bar */}
-          <div className="p-3 bg-slate-50/90 dark:bg-slate-950/60 border-b border-slate-200/80 dark:border-slate-800/80 shrink-0">
-            <div className="flex items-center justify-between mb-1.5 px-0.5">
-              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+          <div className="p-2.5 bg-slate-50/90 dark:bg-slate-950/60 border-b border-slate-200/80 dark:border-slate-800/80 shrink-0">
+            <div className="flex items-center justify-between mb-1 px-0.5">
+              <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-amber-500" />
                 Quick Guides
               </span>
-              <span className="text-[10px] text-slate-400">Click to load steps</span>
+              <span className="text-[9px] text-slate-400">Instant step-by-step solutions</span>
             </div>
             <div className="flex gap-1.5 overflow-x-auto pb-1 text-xs">
               {PRESET_PROMPTS.map((prompt) => {
@@ -592,7 +774,8 @@ export const AIAssistantWidget: React.FC = () => {
                     key={prompt.id}
                     type="button"
                     onClick={() => handleSelectPrompt(prompt.label)}
-                    className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all shadow-xs whitespace-nowrap active:scale-95"
+                    disabled={isLoading}
+                    className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all shadow-xs whitespace-nowrap active:scale-95 disabled:opacity-50"
                   >
                     <IconComponent className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                     <span>{prompt.label}</span>
@@ -603,7 +786,7 @@ export const AIAssistantWidget: React.FC = () => {
           </div>
 
           {/* Messages Container */}
-          <div className="flex-1 p-3.5 overflow-y-auto space-y-3.5 bg-slate-50 dark:bg-slate-950/40 text-slate-800 dark:text-slate-100 text-sm">
+          <div className="flex-1 p-3.5 overflow-y-auto space-y-3 bg-slate-50 dark:bg-slate-950/40 text-slate-800 dark:text-slate-100 text-sm">
             {messages.map((msg) => {
               const isUser = msg.sender === 'user';
 
@@ -624,18 +807,54 @@ export const AIAssistantWidget: React.FC = () => {
                     <Bot className="w-4 h-4" />
                   </div>
 
-                  <div className="flex-1 space-y-2.5 min-w-0">
-                    {/* Plain text response (e.g. Greeting) */}
-                    {msg.text && (
+                  <div className="flex-1 space-y-2 min-w-0">
+                    {/* Gemini AI Generated Response */}
+                    {msg.isGemini && msg.text && (
+                      <div className="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 p-3.5 shadow-xs space-y-2">
+                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/80 pb-1.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-amber-400" />
+                            {msg.modelUsed || 'Gemini 2.0 Flash'}
+                          </span>
+                          <span className="text-[9px] text-slate-400">AI Verified</span>
+                        </div>
+                        <div className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">
+                          {msg.text}
+                        </div>
+
+                        {/* In-Message Action CTAs */}
+                        {msg.actions && msg.actions.length > 0 && (
+                          <div className="pt-2 flex flex-wrap gap-1.5 border-t border-slate-100 dark:border-slate-700/80">
+                            {msg.actions.map((act, aIdx) => (
+                              <button
+                                key={aIdx}
+                                type="button"
+                                onClick={() => handleNavigate(act.path)}
+                                className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-all shadow-2xs active:scale-95 ${
+                                  act.primary
+                                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
+                                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-650 text-slate-800 dark:text-slate-200'
+                                }`}
+                              >
+                                <span>{act.label}</span>
+                                <ArrowRight className="w-3 h-3" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Plain text welcome greeting */}
+                    {!msg.isGemini && msg.text && (
                       <div className="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 p-3 text-xs sm:text-sm text-slate-800 dark:text-slate-200 shadow-xs leading-relaxed">
                         {msg.text}
                       </div>
                     )}
 
-                    {/* Rich Guide Data Response */}
+                    {/* Rich Guide Data Response (Fallback / Structured) */}
                     {msg.guide && (
                       <div className="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 p-3.5 shadow-xs space-y-3">
-                        {/* Title and Category */}
                         <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
                           <div className="flex items-center justify-between gap-2">
                             <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
@@ -657,7 +876,7 @@ export const AIAssistantWidget: React.FC = () => {
                           </p>
                         </div>
 
-                        {/* Role Restriction Banner (if restricted) */}
+                        {/* Restriction Banner */}
                         {msg.guide.isRestricted && msg.guide.restrictionNotice && (
                           <div className="rounded-xl p-2.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 flex items-start gap-2 text-xs">
                             <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
@@ -668,16 +887,16 @@ export const AIAssistantWidget: React.FC = () => {
                           </div>
                         )}
 
-                        {/* Numbered Steps List */}
+                        {/* Numbered Steps */}
                         <div className="space-y-1.5">
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Step-by-Step Instructions:
                           </p>
-                          <div className="space-y-2">
+                          <div className="space-y-1.5">
                             {msg.guide.steps.map((step, idx) => (
                               <div
                                 key={idx}
-                                className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200/60 dark:border-slate-800/60"
+                                className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200/60 dark:border-slate-800/60"
                               >
                                 <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5">
                                   {idx + 1}
@@ -722,6 +941,20 @@ export const AIAssistantWidget: React.FC = () => {
                 </div>
               );
             })}
+
+            {/* Loading / Generating State */}
+            {isLoading && (
+              <div className="flex gap-2.5 items-start animate-pulse">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div className="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-750 px-3.5 py-2.5 text-xs text-slate-600 dark:text-slate-300 shadow-xs flex items-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                  <span>Gemini is generating response...</span>
+                </div>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -736,8 +969,9 @@ export const AIAssistantWidget: React.FC = () => {
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Ask anything (e.g. 'ticket', 'onboarding', 'assets')..."
-                className="w-full text-xs sm:text-sm pl-3 pr-8 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border border-transparent focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-hidden transition-all"
+                placeholder="Ask Gemini anything (e.g. 'how to reset password', 'wifi')..."
+                disabled={isLoading}
+                className="w-full text-xs sm:text-sm pl-3 pr-8 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border border-transparent focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-hidden transition-all disabled:opacity-60"
               />
               {inputText && (
                 <button
@@ -752,7 +986,7 @@ export const AIAssistantWidget: React.FC = () => {
 
             <button
               type="submit"
-              disabled={!inputText.trim()}
+              disabled={!inputText.trim() || isLoading}
               className="p-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:hover:bg-blue-600 text-white font-medium transition-all shadow-xs shrink-0 flex items-center justify-center active:scale-95"
               aria-label="Send query"
             >
