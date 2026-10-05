@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { useAuth } from '../../hooks/useAuth';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
+import { AIAssistantWidget } from '../ai/AIAssistantWidget';
 
 export const AppLayout: React.FC = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -52,6 +53,9 @@ export const AppLayout: React.FC = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* Global Floating AI Support Assistant Widget */}
+      <AIAssistantWidget />
     </div>
   );
 };
