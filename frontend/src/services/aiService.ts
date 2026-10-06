@@ -1,4 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
 import { apiClient } from '../api/client';
 
 export interface AIChatAction {
