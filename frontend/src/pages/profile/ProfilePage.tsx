@@ -885,51 +885,51 @@ export const ProfilePage: React.FC = () => {
       )}
 
       {/* RBAC Privileges Matrix & Diagnostic Section */}
-      <div className="bg-slate-900/40 p-6 sm:p-8 rounded-3xl border border-slate-800/60 backdrop-blur-2xl shadow-xl space-y-6">
+      <div className="bg-white/90 dark:bg-slate-900/80 p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 backdrop-blur-xl shadow-xl space-y-6">
         <div>
-          <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-1">
+          <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block mb-1">
             PRIVILEGE MATRIX
           </span>
-          <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-            <Shield className="w-4 h-4 text-indigo-400" />
+          <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+            <Shield className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             <span>Role Permissions & Access Matrix</span>
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Your account is assigned to <strong className="text-indigo-300 font-bold">{roleName} (Role ID {roleId})</strong>.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Your account is assigned to <strong className="text-indigo-600 dark:text-indigo-300 font-bold">{roleName} (Role ID {roleId})</strong>.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-3.5 rounded-2xl bg-slate-950/50 border border-slate-800">
-            <span className="text-[11px] font-bold text-white block mb-1">Ticket Queue</span>
-            <p className="text-[10px] text-slate-400 leading-relaxed">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200/80 dark:border-slate-800">
+            <span className="text-[11px] font-bold text-slate-900 dark:text-white block mb-1">Ticket Queue</span>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
               {isAdmin || isManager ? 'All enterprise tickets' : isTechnician ? 'Assigned tickets' : 'Self-service tickets'}
             </p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-950/50 border border-slate-800">
-            <span className="text-[11px] font-bold text-white block mb-1">Ticket Reassignment</span>
-            <p className="text-[10px] text-slate-400 leading-relaxed">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200/80 dark:border-slate-800">
+            <span className="text-[11px] font-bold text-slate-900 dark:text-white block mb-1">Ticket Reassignment</span>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
               {isAdmin || isManager ? 'Authorized' : 'Restricted'}
             </p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-950/50 border border-slate-800">
-            <span className="text-[11px] font-bold text-white block mb-1">Asset Lifecycle</span>
-            <p className="text-[10px] text-slate-400 leading-relaxed">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200/80 dark:border-slate-800">
+            <span className="text-[11px] font-bold text-slate-900 dark:text-white block mb-1">Asset Lifecycle</span>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
               {isAdmin || isManager ? 'Manage hardware & offboarding' : 'Personal device view'}
             </p>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-950/50 border border-slate-800">
-            <span className="text-[11px] font-bold text-white block mb-1">Reports & Analytics</span>
-            <p className="text-[10px] text-slate-400 leading-relaxed">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200/80 dark:border-slate-800">
+            <span className="text-[11px] font-bold text-slate-900 dark:text-white block mb-1">Reports & Analytics</span>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
               {isAdmin || isManager ? 'Executive SLA reports' : 'Restricted'}
             </p>
           </div>
         </div>
 
         {/* System Endpoint & Slack Diagnostics (Collapsible or compact) */}
-        <div className="pt-4 border-t border-slate-800/80 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800/80 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-wider block">
+            <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block">
               System Endpoint
             </span>
             <form onSubmit={handleUpdateBackendUrl} className="flex gap-2">
@@ -937,11 +937,11 @@ export const ProfilePage: React.FC = () => {
                 type="text"
                 value={customUrl}
                 onChange={(e) => setCustomUrl(e.target.value)}
-                className="flex-1 px-3 py-2 text-xs bg-slate-950 border border-slate-800 text-indigo-300 rounded-xl font-mono focus:outline-none"
+                className="flex-1 px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-indigo-300 rounded-xl font-mono focus:outline-none focus:border-indigo-500 transition-colors"
               />
               <button
                 type="submit"
-                className="px-3 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shrink-0"
+                className="px-3 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shrink-0 transition-colors shadow-sm"
               >
                 Update
               </button>
@@ -949,16 +949,16 @@ export const ProfilePage: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-wider block">
+            <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block">
               Slack Webhook Diagnostics
             </span>
             <button
               type="button"
               onClick={handleTestSlack}
               disabled={testingSlack}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-750 rounded-xl border border-slate-700 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors shadow-sm"
             >
-              <Send className="w-3.5 h-3.5 text-indigo-400" />
+              <Send className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               <span>{testingSlack ? 'Sending...' : 'Send Test Slack Ping'}</span>
             </button>
           </div>
