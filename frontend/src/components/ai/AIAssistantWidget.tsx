@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   Lock,
   Key,
-  Cpu,
   Loader2,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -94,7 +93,9 @@ export const AIAssistantWidget: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [customApiKey, setCustomApiKey] = useState(() => getClientGeminiApiKey() || '');
-  const [selectedModel, setSelectedModel] = useState<'gemini-2.0-flash' | 'gemini-1.5-flash'>('gemini-2.0-flash');
+  const [selectedModel, setSelectedModel] = useState<
+    'gemini-3.8-flash' | 'gemini-2.5-flash' | 'gemini-2.0-flash' | 'gemini-1.5-flash'
+  >('gemini-3.8-flash');
   const [keySavedToast, setKeySavedToast] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -555,8 +556,25 @@ export const AIAssistantWidget: React.FC = () => {
         setIsLoading(false);
         return;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.warn('Gemini query fallback:', err);
+      if (err.message === 'GEMINI_NOT_CONFIGURED') {
+        setShowSettings(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `bot-${Date.now()}`,
+            sender: 'assistant',
+            text: 'I am currently operating in offline mode. To answer freeform questions using AI, please enter your Google Gemini API Key in the settings panel that just opened above.',
+            actions: [
+              { label: '⚙️ Open/Toggle Settings', path: 'OPEN_SETTINGS', primary: true },
+              { label: '🔑 Get Free Key on AI Studio', path: 'https://aistudio.google.com/app/apikey', primary: false },
+            ],
+            timestamp: new Date(),
+          },
+        ]);
+        return; // Don't fall back to rule-based for freeform queries when API is simply unconfigured
+      }
     } finally {
       setIsLoading(false);
     }
@@ -656,7 +674,7 @@ export const AIAssistantWidget: React.FC = () => {
                     Online
                   </span>
                   <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/30 text-indigo-200 font-mono">
-                    Gemini 2.0
+                    Gemini Flash
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-300 flex items-center gap-1">
@@ -679,7 +697,7 @@ export const AIAssistantWidget: React.FC = () => {
                 }`}
                 aria-label="Gemini API Configuration"
               >
-                <Cpu className="w-4 h-4" />
+                <Settings className="w-4 h-4" />
               </button>
               <button
                 type="button"
@@ -715,14 +733,24 @@ export const AIAssistantWidget: React.FC = () => {
 
               <form onSubmit={handleSaveApiKey} className="space-y-2.5">
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
-                    Gemini API Key (optional if configured in backend .env):
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                      Gemini API Key:
+                    </label>
+                    <a
+                      href="https://aistudio.google.com/app/apikey"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-blue-500 hover:text-blue-400 underline font-medium"
+                    >
+                      Get Free Key &rarr;
+                    </a>
+                  </div>
                   <input
                     type="password"
                     value={customApiKey}
                     onChange={(e) => setCustomApiKey(e.target.value)}
-                    placeholder="AIzaSy... (leave blank to use backend key)"
+                    placeholder="AIzaSy... (paste your API key here)"
                     className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-hidden focus:border-blue-500"
                   />
                 </div>
@@ -735,8 +763,10 @@ export const AIAssistantWidget: React.FC = () => {
                       onChange={(e) => setSelectedModel(e.target.value as any)}
                       className="text-[11px] px-2 py-1 rounded-md bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-hidden"
                     >
-                      <option value="gemini-2.0-flash">Gemini 2.0 Flash (Fastest)</option>
-                      <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                      <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite (Ultra Fast &amp; High Quota)</option>
+                      <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
+                      <option value="gemini-flash-latest">Gemini Flash Latest</option>
+                      <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
                     </select>
                   </div>
 
@@ -845,10 +875,37 @@ export const AIAssistantWidget: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Plain text welcome greeting */}
+                    {/* Plain text welcome greeting & offline notifications */}
                     {!msg.isGemini && msg.text && (
-                      <div className="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 p-3 text-xs sm:text-sm text-slate-800 dark:text-slate-200 shadow-xs leading-relaxed">
-                        {msg.text}
+                      <div className="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 p-3 text-xs sm:text-sm text-slate-800 dark:text-slate-200 shadow-xs leading-relaxed space-y-2.5">
+                        <div>{msg.text}</div>
+                        {msg.actions && msg.actions.length > 0 && (
+                          <div className="pt-1.5 flex flex-wrap gap-1.5 border-t border-slate-100 dark:border-slate-700/80">
+                            {msg.actions.map((act, aIdx) => (
+                              <button
+                                key={aIdx}
+                                type="button"
+                                onClick={() => {
+                                  if (act.path === 'OPEN_SETTINGS') {
+                                    setShowSettings((prev) => !prev);
+                                  } else if (act.path.startsWith('http')) {
+                                    window.open(act.path, '_blank', 'noopener,noreferrer');
+                                  } else {
+                                    handleNavigate(act.path);
+                                  }
+                                }}
+                                className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-all shadow-2xs active:scale-95 ${
+                                  act.primary
+                                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
+                                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-650 text-slate-800 dark:text-slate-200'
+                                }`}
+                              >
+                                <span>{act.label}</span>
+                                <ArrowRight className="w-3 h-3" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
 

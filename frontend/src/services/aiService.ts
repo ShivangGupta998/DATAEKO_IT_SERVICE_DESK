@@ -120,19 +120,82 @@ export class AIService {
     history?: { role: 'user' | 'model'; text: string }[];
     roleName: string;
     userName: string;
-    preferredModel?: 'gemini-2.0-flash' | 'gemini-1.5-flash';
+    preferredModel?: 'gemini-3.8-flash' | 'gemini-2.5-flash' | 'gemini-2.0-flash' | 'gemini-1.5-flash';
   }): Promise<AIChatResult | null> {
-    const { message, history, roleName, userName, preferredModel = 'gemini-2.0-flash' } = params;
+    const { message, history, roleName, userName, preferredModel = 'gemini-3.8-flash' } = params;
 
-    // 1. Try Backend route `/api/ai/chat`
-    try {
-      const res = await apiClient.post('/api/ai/chat', {
-        message,
-        history,
-        role_name: roleName,
-        user_name: userName,
-        model: preferredModel,
+    const clientKey = getClientGeminiApiKey();
+
+    // 1. Direct High-Speed Client REST (Instant ~1.5s response, bypasses backend timeouts)
+    if (clientKey) {
+      const modelsToTry = [
+        'gemini-3.1-flash-lite',
+        'gemini-3.5-flash-lite',
+        'gemini-flash-latest',
+        preferredModel,
+      ];
+      const seen = new Set<string>();
+      const deduped = modelsToTry.filter((m) => {
+        if (!m || seen.has(m)) return false;
+        seen.add(m);
+        return true;
       });
+
+      for (const m of deduped) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s per model max
+
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(clientKey)}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            signal: controller.signal,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: message }] }],
+              systemInstruction: {
+                parts: [{ text: `${SYSTEM_INSTRUCTION}\nCurrent User Role: ${roleName}\nUser Name: ${userName}` }],
+              },
+              generationConfig: {
+                temperature: 0.3,
+                maxOutputTokens: 800,
+              },
+            }),
+          });
+          clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const data = await res.json();
+            const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (replyText) {
+              const suggestedActions = extractActionsFromText(replyText, roleName);
+              return {
+                text: replyText,
+                modelUsed: m,
+                suggestedActions,
+                isGemini: true,
+              };
+            }
+          }
+        } catch {
+          // try next model
+        }
+      }
+    }
+
+    // 2. Try Backend route `/api/ai/chat` if client direct was not configured
+    try {
+      const res = await apiClient.post(
+        '/api/ai/chat',
+        {
+          message,
+          history,
+          role_name: roleName,
+          user_name: userName,
+          model: preferredModel,
+        },
+        { timeout: 5000 }
+      );
 
       if (res.data && res.data.configured) {
         return {
@@ -143,41 +206,21 @@ export class AIService {
         };
       }
     } catch {
-      // Backend route unreachable or errored; proceed to client-side fallback
+      // Backend route unreachable
     }
 
-    // 2. Try Client-side direct `@google/genai` if key exists in env or localStorage
-    const clientKey = getClientGeminiApiKey();
+    // If key is present but models failed or hit quota/network error, return friendly message instead of asking to configure key
     if (clientKey) {
-      try {
-        const ai = new GoogleGenAI({ apiKey: clientKey });
-        const response = await ai.models.generateContent({
-          model: preferredModel,
-          contents: message,
-          config: {
-            systemInstruction: `${SYSTEM_INSTRUCTION}\nCurrent User Role: ${roleName}\nUser Name: ${userName}`,
-            temperature: 0.4,
-            maxOutputTokens: 1024,
-          },
-        });
-
-        const replyText = response.text || '';
-        if (replyText) {
-          const suggestedActions = extractActionsFromText(replyText, roleName);
-          return {
-            text: replyText,
-            modelUsed: preferredModel,
-            suggestedActions,
-            isGemini: true,
-          };
-        }
-      } catch (err: any) {
-        console.warn('Direct @google/genai query error:', err);
-      }
+      return {
+        text: "I received your question, but Google Gemini is currently experiencing a temporary connection or capacity limit. Please try asking again in a moment.",
+        modelUsed: "gemini-3.1-flash-lite",
+        suggestedActions: extractActionsFromText(message, roleName),
+        isGemini: true,
+      };
     }
 
-    // 3. Neither key was configured or succeeded
-    return null;
+    // 3. Key was never configured
+    throw new Error('GEMINI_NOT_CONFIGURED');
   }
 }
 

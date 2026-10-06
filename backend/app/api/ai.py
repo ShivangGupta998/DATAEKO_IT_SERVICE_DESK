@@ -19,7 +19,7 @@ class AIChatRequest(BaseModel):
     history: Optional[List[Dict[str, Any]]] = None
     role_name: Optional[str] = "Employee"
     user_name: Optional[str] = None
-    model: Optional[str] = "gemini-2.0-flash"
+    model: Optional[str] = "gemini-3.8-flash"
 
 class AIChatResponse(BaseModel):
     text: str
@@ -123,7 +123,21 @@ def ai_chat_endpoint(payload: AIChatRequest):
     system_instruction = SYSTEM_PROMPT.format(role_name=role_name, user_name=user_name)
 
     # Prepare Gemini API request payload
-    models_to_try = [payload.model or "gemini-2.0-flash", "gemini-1.5-flash"]
+    # Prepare Gemini API request payload - prioritize fast flash-lite models with high free quota
+    models_to_try = [
+        "gemini-3.1-flash-lite",
+        "gemini-3.5-flash-lite",
+        payload.model or "gemini-flash-latest",
+        "gemini-flash-latest",
+        "gemini-3.8-flash",
+    ]
+    seen_models = set()
+    deduped_models = []
+    for m in models_to_try:
+        if m and m not in seen_models:
+            seen_models.add(m)
+            deduped_models.append(m)
+    models_to_try = deduped_models
     last_error = None
 
     for model in models_to_try:
