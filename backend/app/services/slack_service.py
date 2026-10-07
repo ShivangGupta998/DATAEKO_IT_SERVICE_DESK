@@ -248,7 +248,7 @@ def send_ticket_created_notification(
     rname = requester_name or "Unknown"
 
     message = (
-        f"🎫 *New Ticket Created*\n"
+        f"🎫 *[Dataeko IT Service Desk] New Ticket Created*\n"
         f"ID: #{tid}\n"
         f"Title: {title}\n"
         f"Priority: {prio}\n"
@@ -280,7 +280,7 @@ def send_ticket_assigned_notification(
         tech = technician_name or "Assigned Technician"
 
         message = (
-            f"🎫 *Ticket Assigned*\n"
+            f"🎫 *[Dataeko IT Service Desk] Ticket Assigned*\n"
             f"ID: #{tid}\n"
             f"Title: {title}\n"
             f"Assigned To: {tech}"
@@ -336,7 +336,7 @@ def send_ticket_priority_notification(
         user = updater_name or "System"
 
         message = (
-            f"🎫 *Priority Updated*\n"
+            f"🎫 *[Dataeko IT Service Desk] Priority Updated*\n"
             f"ID: #{tid}\n"
             f"Title: {title}\n"
             f"Priority: {prio}\n"
@@ -393,7 +393,7 @@ def send_ticket_status_notification(
         user = updater_name or "System"
 
         message = (
-            f"🎫 *Status Updated*\n"
+            f"🎫 *[Dataeko IT Service Desk] Status Updated*\n"
             f"ID: #{tid}\n"
             f"Title: {title}\n"
             f"Status: {stat}\n"
