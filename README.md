@@ -93,3 +93,8 @@ npm run dev:tunnel
 cd frontend
 npm run dev
 ```
+### Push Details
+```bash
+New Push
+```
+
