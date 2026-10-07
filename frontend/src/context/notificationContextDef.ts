@@ -6,6 +6,8 @@ export interface NotificationContextType {
   unreadCount: number;
   refreshNotifications: () => Promise<void>;
   markAsRead: (id: number | string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
 }
+
 
 export const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
