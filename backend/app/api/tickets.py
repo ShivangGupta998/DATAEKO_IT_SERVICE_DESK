@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
 from app.database.database import get_db
@@ -9,7 +10,13 @@ from app.models.user import User
 from app.schemas.ticket import TicketCreate, TicketUpdate, TicketResponse
 from app.core.dependencies import get_current_user, require_roles
 from app.services.notification_service import create_notification
-from app.services.slack_service import send_slack_message
+from app.services.slack_service import (
+    send_slack_message,
+    send_ticket_created_notification,
+    send_ticket_assigned_notification,
+    send_ticket_priority_notification,
+    send_ticket_status_notification,
+)
 from app.services.sla_service import calculate_sla_due, get_sla_status, get_remaining_minutes
 from app.core.sockets import notification_manager
 
@@ -47,9 +54,11 @@ def add_sla_details(ticket):
 @router.post("/", response_model=TicketResponse, status_code=status.HTTP_201_CREATED)
 async def create_ticket(
     ticket_data: TicketCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+
     user_id = current_user.id
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -105,17 +114,18 @@ async def create_ticket(
         joinedload(Ticket.requester)
     ).filter(Ticket.id == ticket.id).first()
 
-    # SLACK NOTIFICATION FOR TICKET CREATION
+    # SLACK NOTIFICATION FOR TICKET CREATION (Channel Broadcast in Background)
     requester_name = user.username
-    send_slack_message(
-        f"🎫 *New Ticket Created*\n"
-        f"ID: #{ticket.id}\n"
-        f"Title: {ticket.title}\n"
-        f"Priority: {ticket.priority}\n"
-        f"By: {requester_name}"
+    background_tasks.add_task(
+        send_ticket_created_notification,
+        ticket_id=ticket.id,
+        ticket_title=ticket.title,
+        priority=ticket.priority,
+        requester_name=requester_name
     )
 
     return add_sla_details(ticket)
+
 
 
 @router.get("/", response_model=list[TicketResponse])
@@ -224,10 +234,35 @@ def get_ticket(
     return add_sla_details(ticket)
 
 
+class TicketAssignRequest(BaseModel):
+    assignee_id: int
+
+
+@router.put("/{ticket_id}/assign", response_model=TicketResponse)
+@router.post("/{ticket_id}/assign", response_model=TicketResponse)
+async def assign_ticket_endpoint(
+    ticket_id: int,
+    assign_data: TicketAssignRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(ADMIN, MANAGER))
+):
+    update_data = TicketUpdate(assignee_id=assign_data.assignee_id)
+    return await update_ticket(
+        ticket_id=ticket_id,
+        ticket_data=update_data,
+        background_tasks=background_tasks,
+        db=db,
+        current_user=current_user
+    )
+
+
 @router.patch("/{ticket_id}", response_model=TicketResponse)
+@router.put("/{ticket_id}", response_model=TicketResponse)
 async def update_ticket(
     ticket_id: int,
     ticket_data: TicketUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(ADMIN, MANAGER, TECHNICIAN))
 ):
@@ -332,7 +367,8 @@ async def update_ticket(
         db.query(Ticket)
         .options(
             joinedload(Ticket.assignee),
-            joinedload(Ticket.requester)
+            joinedload(Ticket.requester),
+            joinedload(Ticket.activities)
         )
         .filter(Ticket.id == ticket_id)
         .first()
@@ -341,11 +377,48 @@ async def update_ticket(
     updater = db.query(User).filter(User.id == user_id).first()
     updater_name = updater.username if updater else "Unknown"
 
+    # Pre-extract snapshot fields for safe background execution
+    creator_email = getattr(ticket.requester, "email", None) if ticket.requester else None
+    creator_slack_id = getattr(ticket.requester, "slack_user_id", None) if ticket.requester else None
+    assignee_email = getattr(ticket.assignee, "email", None) if ticket.assignee else None
+    assignee_slack_id = getattr(ticket.assignee, "slack_user_id", None) if ticket.assignee else None
+    technician_name = agent.username if agent else (getattr(ticket.assignee, "username", None) if ticket.assignee else "")
+
+    # SLACK NOTIFICATIONS EXCLUSIVELY VIA DM IN BACKGROUND (NO PUBLIC SPAM)
     if assignment_happened:
-        send_slack_message(f"🎫 *Ticket Assigned*\nID: #{ticket.id}\nTitle: {ticket.title}\nAssigned To: {agent.username}")
+        background_tasks.add_task(
+            send_ticket_assigned_notification,
+            ticket_id=ticket.id,
+            ticket_title=ticket.title,
+            technician_name=technician_name,
+            creator_email=creator_email,
+            creator_slack_id=creator_slack_id,
+            assignee_email=assignee_email,
+            assignee_slack_id=assignee_slack_id
+        )
     if status_changed:
-        send_slack_message(f"🎫 *Status Updated*\nID: #{ticket.id}\nTitle: {ticket.title}\nStatus: {ticket.status}\nBy: {updater_name}")
+        background_tasks.add_task(
+            send_ticket_status_notification,
+            ticket_id=ticket.id,
+            ticket_title=ticket.title,
+            status=ticket.status,
+            updater_name=updater_name,
+            creator_email=creator_email,
+            creator_slack_id=creator_slack_id,
+            assignee_email=assignee_email,
+            assignee_slack_id=assignee_slack_id
+        )
     if priority_changed:
-        send_slack_message(f"🎫 *Priority Updated*\nID: #{ticket.id}\nTitle: {ticket.title}\nPriority: {ticket.priority}\nBy: {updater_name}")
+        background_tasks.add_task(
+            send_ticket_priority_notification,
+            ticket_id=ticket.id,
+            ticket_title=ticket.title,
+            priority=ticket.priority,
+            updater_name=updater_name,
+            creator_email=creator_email,
+            creator_slack_id=creator_slack_id,
+            assignee_email=assignee_email,
+            assignee_slack_id=assignee_slack_id
+        )
 
     return add_sla_details(ticket)

@@ -43,7 +43,9 @@ from app.api import (
     notification,
     admin,
     ai,
+    diagnostic,
 )
+
 
 def hash_password_direct(password: str) -> str:
     password_bytes = password.encode('utf-8')[:72]
@@ -97,6 +99,10 @@ app.include_router(notification.router)
 app.include_router(admin.router)
 app.include_router(admin.router_v1)
 app.include_router(ai.router)
+app.include_router(diagnostic.router, prefix="/api")
+app.include_router(diagnostic.router)
+# Support /api prefix for tickets as well
+app.include_router(tickets.router, prefix="/api")
 
 # 3. Startup & Seed Logic
 @app.on_event("startup")
