@@ -34,4 +34,16 @@ export const notificationService = {
     const response = await apiClient.patch<NotificationItem>(`/notifications/${notificationId}/read`);
     return response.data;
   },
+
+  async markAllAsRead(): Promise<void> {
+    try {
+      await apiClient.patch('/notifications/read-all');
+    } catch {
+      try {
+        await apiClient.post('/notifications/read-all');
+      } catch {
+        // Silently handle
+      }
+    }
+  },
 };

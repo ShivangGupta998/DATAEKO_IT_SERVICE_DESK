@@ -8,8 +8,10 @@ from app.schemas.notification import NotificationResponse
 from app.services.notification_service import (
     get_user_notifications,
     mark_notification_read,
+    mark_all_notifications_read,
     get_unread_notification_count
 )
+
 
 router = APIRouter(
     prefix="/notifications",
@@ -50,8 +52,19 @@ def read_notification(
     return notification
 
 
+@router.patch("/read-all")
+@router.post("/read-all")
+def read_all_user_notifications(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+) -> dict:
+    count = mark_all_notifications_read(db=db, user_id=_get_user_id(current_user))
+    return {"status": "ok", "marked_read_count": count}
+
+
 @router.get("/count")
 def get_notification_count(
+
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ) -> dict:
