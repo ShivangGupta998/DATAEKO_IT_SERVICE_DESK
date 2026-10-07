@@ -4,6 +4,7 @@ from app.models.ticket import Ticket
 from app.models.user import User
 from app.models.role import Role
 from app.models.ticket_activity import TicketActivity
+from app.services.slack_service import send_ticket_assigned_notification
 
 TECHNICIAN_ROLE_ID = 3
 
@@ -63,6 +64,9 @@ def auto_assign_stale_tickets(db: Session):
         )
         db.add(activity)
         db.add(ticket)
+
+        # Notify via Slack Direct Message (DM)
+        send_ticket_assigned_notification(ticket, least_busy_tech.username, db=db)
 
         print(f"--> [AUTO-ASSIGN SUCCESS] Ticket #{ticket.id} assigned to technician '{least_busy_tech.username}'")
 
