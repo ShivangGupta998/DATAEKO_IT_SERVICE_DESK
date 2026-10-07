@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Ticket,
@@ -29,6 +29,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
     logout,
   } = useAuth();
   const navigate = useNavigate();
+
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
+    if (user?.avatar_url) return user.avatar_url;
+    if (user?.id) return localStorage.getItem(`itsm_avatar_${user.id}`);
+    return null;
+  });
+
+  useEffect(() => {
+    if (user) {
+      setAvatarUrl(user.avatar_url || localStorage.getItem(`itsm_avatar_${user.id}`));
+    }
+    const handleAvatarUpdate = (e: any) => {
+      setAvatarUrl(e.detail?.avatarUrl || null);
+    };
+    window.addEventListener('itsm:avatar-updated', handleAvatarUpdate);
+    return () => window.removeEventListener('itsm:avatar-updated', handleAvatarUpdate);
+  }, [user]);
 
   // Role IDs: 1 = Admin, 2 = Manager, 3 = Technician, 4 = Employee
   const currentRoleId = roleId && [1, 2, 3, 4].includes(roleId) ? roleId : 4;
@@ -166,12 +183,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
 
       {/* User Card & Logout Footer */}
       <div className="p-4 mt-auto border-t border-slate-800 bg-slate-900/80">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-200 font-bold text-xs shrink-0 border border-slate-600">
-            {getInitials(user?.full_name, user?.username)}
-          </div>
+        <Link
+          to="/profile"
+          onClick={onCloseMobile}
+          className="flex items-center space-x-3 p-2 -m-2 rounded-xl hover:bg-slate-800/90 transition-all group cursor-pointer"
+          title="View & Edit Profile Settings"
+        >
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Avatar"
+              className="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-indigo-500/40 group-hover:border-indigo-400 transition-colors"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-slate-700 group-hover:bg-indigo-600 flex items-center justify-center text-slate-200 group-hover:text-white font-bold text-xs shrink-0 border border-slate-600 transition-colors">
+              {getInitials(user?.full_name, user?.username)}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-white uppercase tracking-wider truncate">
+            <p className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-indigo-300 transition-colors">
               {user?.full_name || user?.username || 'USER'}
             </p>
             <div className="flex items-center space-x-2">
@@ -180,7 +210,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
               </p>
             </div>
           </div>
-        </div>
+        </Link>
 
         <button
           type="button"

@@ -12,9 +12,35 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar, pageTitle }) => {
-  const { isAdmin, isManager, isEmployee } = useAuth();
+  const { user, isAdmin, isManager, isEmployee } = useAuth();
   const [globalSearch, setGlobalSearch] = useState('');
   const navigate = useNavigate();
+
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
+    if (user?.avatar_url) return user.avatar_url;
+    if (user?.id) return localStorage.getItem(`itsm_avatar_${user.id}`);
+    return null;
+  });
+
+  useEffect(() => {
+    if (user) {
+      setAvatarUrl(user.avatar_url || localStorage.getItem(`itsm_avatar_${user.id}`));
+    }
+    const handleAvatarUpdate = (e: any) => {
+      setAvatarUrl(e.detail?.avatarUrl || null);
+    };
+    window.addEventListener('itsm:avatar-updated', handleAvatarUpdate);
+    return () => window.removeEventListener('itsm:avatar-updated', handleAvatarUpdate);
+  }, [user]);
+
+  const getInitials = (name?: string, username?: string) => {
+    const target = name?.trim() || username?.trim() || 'USER';
+    const parts = target.split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return target.slice(0, 2).toUpperCase();
+  };
 
   // Automatically request browser notification permission
   useEffect(() => {
@@ -65,6 +91,25 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar, pageTitle
 
         {/* Dark / Light Mode Toggle */}
         <ThemeToggle />
+
+        {/* User Profile Avatar Link */}
+        <Link
+          to="/profile"
+          className="flex items-center gap-2 p-0.5 rounded-full hover:ring-2 hover:ring-indigo-500 transition-all shrink-0"
+          title={`Profile (${user?.full_name || user?.username || 'User'})`}
+        >
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Profile"
+              className="w-8 h-8 rounded-full object-cover border border-slate-300 dark:border-slate-700"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-linear-to-tr from-indigo-600 to-sky-500 text-white font-bold text-[11px] flex items-center justify-center shadow-xs">
+              {getInitials(user?.full_name, user?.username)}
+            </div>
+          )}
+        </Link>
 
         <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:bg-slate-800" />
 

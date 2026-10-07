@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 840 1080" class="w-full h-auto drop-shadow-xs" xmlns="http://www.w3.org/2000/svg"><rect width="840" height="1080" fill="#ffffff"/>
+            <text x="420" y="42" text-anchor="middle" font-size="20" font-weight="900" fill="#1c1917" letter-spacing="0.5" font-family="system-ui, -apple-system, sans-serif">IT SERVICE DESK (WORKFLOWS)</text>
+            <line x1="260" y1="52" x2="580" y2="52" stroke="#1c1917" stroke-width="2.5" />
+            <text x="50" y="95" font-size="16" font-weight="800" fill="#1c1917" font-family="system-ui, -apple-system, sans-serif">3) ASSET LIFECYCLE MANAGEMENT</text>
+
+            <line x1="420" y1="165" x2="420" y2="198" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Start Pill -->
+            <g class="node-card">
+              <rect x="270" y="125" width="300" height="42" rx="21" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Hardware / Device procurement intake</text>
+            </g>
+
+            <!-- Register in CMDB -->
+            <g class="node-card">
+              <rect x="250" y="200" width="340" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="224" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Tag asset &amp; register in inventory</text>
+              <text x="420" y="244" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Record serial number, model, &amp; specs</text>
+            </g>
+
+            <line x1="420" y1="258" x2="420" y2="288" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decision: Immediate allocation? -->
+            <g class="node-card">
+              <rect x="250" y="290" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="314" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Allocated immediately?</text>
+              <text x="420" y="334" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Checks pending new-hire or request</text>
+            </g>
+
+            <!-- Branch: No -> Storage -->
+            <path d="M 590 319 L 690 319 L 690 368" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="635" y="312" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <g class="node-card">
+              <rect x="590" y="370" width="200" height="56" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="690" y="393" text-anchor="middle" font-size="13" font-weight="700" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Secure IT storage</text>
+              <text x="690" y="412" text-anchor="middle" font-size="11" font-weight="500" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Status: Available / In Stock</text>
+            </g>
+
+            <!-- Branch: Yes -> Configure -->
+            <line x1="420" y1="348" x2="420" y2="388" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="370" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Configure Device -->
+            <g class="node-card">
+              <rect x="270" y="390" width="300" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="414" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Configure OS &amp; security posture</text>
+              <text x="420" y="434" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Install agent, MDM, &amp; encryption</text>
+            </g>
+
+            <line x1="420" y1="448" x2="420" y2="478" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Assign to employee -->
+            <g class="node-card">
+              <rect x="270" y="480" width="300" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="420" y="504" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Assign asset to employee</text>
+              <text x="420" y="524" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Set status: In Use / Active</text>
+            </g>
+
+            <!-- Side notification -->
+            <path d="M 270 509 L 160 509 L 160 550" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <g class="node-card">
+              <rect x="80" y="552" width="160" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="160" y="579" text-anchor="middle" font-size="12" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Notify employee</text>
+            </g>
+
+            <line x1="420" y1="538" x2="420" y2="570" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decision: Malfunction / Repair? -->
+            <g class="node-card">
+              <rect x="270" y="572" width="300" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="596" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Defect or hardware malfunction?</text>
+              <text x="420" y="616" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Health check &amp; maintenance</text>
+            </g>
+
+            <!-- Branch: Yes -> In Repair -->
+            <path d="M 270 601 L 160 601 L 160 648" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="210" y="595" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <g class="node-card">
+              <rect x="70" y="650" width="180" height="56" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="160" y="673" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Set status: In Repair</text>
+              <text x="160" y="692" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Issue loaner device</text>
+            </g>
+            <path d="M 160 706 L 160 750 L 270 750" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Branch: No -> End of life check -->
+            <line x1="420" y1="630" x2="420" y2="720" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="670" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Decision: Retirement / EOL? -->
+            <g class="node-card">
+              <rect x="270" y="722" width="300" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="746" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">End of life or employee exit?</text>
+              <text x="420" y="766" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Retirement evaluation</text>
+            </g>
+
+            <line x1="420" y1="780" x2="420" y2="812" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="430" y="800" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Wipe Data -->
+            <g class="node-card">
+              <rect x="270" y="815" width="300" height="56" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="838" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Secure disk wipe &amp; audit</text>
+              <text x="420" y="857" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">DoD / NIST sanitize standards</text>
+            </g>
+
+            <line x1="420" y1="871" x2="420" y2="903" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Decommission Status -->
+            <g class="node-card">
+              <rect x="270" y="905" width="300" height="56" rx="8" fill="#fce9e6" stroke="#f7c6bd" stroke-width="1.5" />
+              <text x="420" y="928" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b" font-family="system-ui, -apple-system, sans-serif">Set status: Retired</text>
+              <text x="420" y="947" text-anchor="middle" font-size="11" font-weight="600" fill="#b91c1c" font-family="system-ui, -apple-system, sans-serif">E-waste recycle / decommission</text>
+            </g>
+
+            <line x1="420" y1="961" x2="420" y2="998" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- End Pill -->
+            <g class="node-card">
+              <rect x="355" y="1000" width="130" height="40" rx="20" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="1025" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">End</text>
+            </g>
+          </svg>

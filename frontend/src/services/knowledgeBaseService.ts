@@ -78,7 +78,7 @@ export const knowledgeBaseService = {
       (a) =>
         a.title.toLowerCase().includes(q) ||
         a.content.toLowerCase().includes(q) ||
-        a.category.toLowerCase().includes(q)
+        (a.category || '').toLowerCase().includes(q)
     );
   },
 

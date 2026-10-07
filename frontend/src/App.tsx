@@ -10,7 +10,6 @@ import { LoadingSpinner } from './components/common/LoadingState';
 
 // Pages
 import { LoginPage } from './pages/auth/LoginPage';
-import { RegisterPage } from './pages/auth/RegisterPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { TicketListPage } from './pages/tickets/TicketListPage';
 import { TicketDetailPage } from './pages/tickets/TicketDetailPage';
