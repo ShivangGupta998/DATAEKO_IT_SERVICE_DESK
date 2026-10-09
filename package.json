@@ -1,0 +1,15 @@
+{
+  "name": "it-service-desk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IT Service Desk - Fullstack application with FastAPI backend and React frontend",
+  "scripts": {
+    "dev:backend": "cd backend && (test -f venv/bin/uvicorn && venv/bin/uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 || uvicorn app.main:app --reload --host 0.0.0.0 --port 8000)",
+    "dev:tunnel": "ngrok http 8000",
+    "dev": "concurrently -n \"BACKEND,TUNNEL\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:tunnel\"",
+    "dev:all": "concurrently -n \"BACKEND,TUNNEL,FRONTEND\" -c \"blue,green,magenta\" \"npm run dev:backend\" \"npm run dev:tunnel\" \"npm --prefix frontend run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

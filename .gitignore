@@ -12,7 +12,8 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Frontend dependencies
+# Frontend / Root dependencies
+node_modules/
 frontend/node_modules/
 
 # Frontend build output

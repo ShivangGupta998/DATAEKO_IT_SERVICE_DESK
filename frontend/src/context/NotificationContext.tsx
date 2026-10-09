@@ -62,6 +62,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, []);
 
+  const markAllAsRead = useCallback(async () => {
+    try {
+      // Optimistic update
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+
+      await notificationService.markAllAsRead();
+    } catch {
+      refreshNotifications();
+    }
+  }, [refreshNotifications]);
+
+
   useEffect(() => {
     const activeToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
 
@@ -102,9 +115,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         unreadCount,
         refreshNotifications,
         markAsRead,
+        markAllAsRead,
       }}
     >
       {children}
     </NotificationContext.Provider>
+
   );
 };

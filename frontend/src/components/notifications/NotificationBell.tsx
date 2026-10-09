@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Info, ShieldAlert, Ticket } from 'lucide-react';
+import { Bell, CheckCheck, Info, ShieldAlert, Ticket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotifications } from '../../hooks/useNotifications';
@@ -7,7 +7,7 @@ import { NotificationItem } from '../../types/notification';
 
 export const NotificationBell: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -98,11 +98,27 @@ export const NotificationBell: React.FC = () => {
             <h3 className="text-xs font-bold text-white uppercase tracking-wider">
               Notifications
             </h3>
-            {unreadCount > 0 && (
-              <span className="px-2 py-0.5 text-[10px] font-extrabold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">
-                {unreadCount} new
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    await markAllAsRead();
+                  }}
+                  className="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1 transition-colors cursor-pointer"
+                  title="Mark all as read"
+                >
+                  <CheckCheck className="w-3.5 h-3.5" />
+                  Read all
+                </button>
+              )}
+              {unreadCount > 0 && (
+                <span className="px-2 py-0.5 text-[10px] font-extrabold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">
+                  {unreadCount} new
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="max-h-80 overflow-y-auto divide-y divide-slate-800/60">
