@@ -11,6 +11,8 @@ from app.schemas.access_request import (
     AccessRequestUpdate,
 )
 from app.core.dependencies import get_current_user
+from app.services.notification_service import create_notification
+from app.core.sockets import notification_manager
 
 
 router = APIRouter(
@@ -57,7 +59,7 @@ def require_staff_role(current_user=Depends(get_current_user)):
     response_model=AccessRequestResponse,
     status_code=status.HTTP_201_CREATED
 )
-def create_access_request(
+async def create_access_request(
     request_data: AccessRequestCreate,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
@@ -81,6 +83,22 @@ def create_access_request(
     db.add(access_request)
     db.commit()
     db.refresh(access_request)
+
+    create_notification(
+        db=db,
+        user_id=user.id,
+        title="Access Request Submitted",
+        message=f"Access request for {access_request.resource_name} submitted successfully.",
+        notification_type="access"
+    )
+    db.commit()
+
+    await notification_manager.send_personal_notification(
+        user_id=str(user.id),
+        title="Access Request Submitted",
+        message=f"Your request for {access_request.resource_name} was submitted.",
+        link="/access-requests"
+    )
 
     return access_request
 
@@ -163,7 +181,7 @@ def get_access_request(
     "/{request_id}",
     response_model=AccessRequestResponse
 )
-def update_access_request(
+async def update_access_request(
     request_id: int,
     request_update: AccessRequestUpdate,
     db: Session = Depends(get_db),
@@ -193,5 +211,21 @@ def update_access_request(
 
     db.commit()
     db.refresh(access_request)
+
+    create_notification(
+        db=db,
+        user_id=access_request.requester_id,
+        title=f"Access Request {access_request.status}",
+        message=f"Your request for {access_request.resource_name} has been {access_request.status.lower()}.",
+        notification_type="access"
+    )
+    db.commit()
+
+    await notification_manager.send_personal_notification(
+        user_id=str(access_request.requester_id),
+        title=f"Access Request {access_request.status}",
+        message=f"Your request for {access_request.resource_name} has been {access_request.status.lower()}.",
+        link="/access-requests"
+    )
 
     return access_request

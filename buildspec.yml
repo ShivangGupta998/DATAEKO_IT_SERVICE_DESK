@@ -1,0 +1,41 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies..."
+
+      # Backend
+      - cd backend
+      - python3 -m pip install --upgrade pip
+      - pip install -r requirements.txt
+
+      # Frontend
+      - cd ../frontend
+      - npm install
+
+  pre_build:
+    commands:
+      - echo "Running tests..."
+      - cd ../backend
+      # Add backend tests here if available
+      # - pytest
+
+      - cd ../frontend
+      # Add frontend tests here if available
+      # - npm test -- --watchAll=false
+
+  build:
+    commands:
+      - echo "Building React application..."
+      - cd ../frontend
+      - npm run build
+
+  post_build:
+    commands:
+      - echo "Build completed successfully."
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: .

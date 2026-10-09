@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Check backend syntax
+        working-directory: backend
+        run: python -m compileall -q app
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Type-check frontend
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Build Render container
+        run: docker build --tag dataeko-it-service-desk:ci .
+
+  deploy:
+    name: Deploy to Render
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Shivang_Working_Branch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [[ -z "$RENDER_DEPLOY_HOOK_URL" ]]; then
+            echo "::error::Add the Render service deploy-hook URL as the GitHub Actions secret RENDER_DEPLOY_HOOK_URL."
+            exit 1
+          fi
+          if [[ "$RENDER_DEPLOY_HOOK_URL" != https://api.render.com/deploy/* ]]; then
+            echo "::error::RENDER_DEPLOY_HOOK_URL must be copied from the Render service Deploy Hook settings."
+            exit 1
+          fi
+
+      - name: Trigger Render deployment
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl --fail --silent --show-error --request POST "$RENDER_DEPLOY_HOOK_URL"

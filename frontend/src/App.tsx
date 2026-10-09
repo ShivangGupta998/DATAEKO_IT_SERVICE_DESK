@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './hooks/useAuth';
 import { NotificationProvider } from './context/NotificationContext';
 import { ToastProvider } from './context/ToastContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -9,7 +10,6 @@ import { LoadingSpinner } from './components/common/LoadingState';
 
 // Pages
 import { LoginPage } from './pages/auth/LoginPage';
-import { RegisterPage } from './pages/auth/RegisterPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { TicketListPage } from './pages/tickets/TicketListPage';
 import { TicketDetailPage } from './pages/tickets/TicketDetailPage';
@@ -20,6 +20,7 @@ import { OffboardingListPage } from './pages/offboarding/OffboardingListPage';
 import { KnowledgeBasePage } from './pages/knowledgeBase/KnowledgeBasePage';
 import { ReportsPage } from './pages/reports/ReportsPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
+import { OnboardingPage } from './pages/admin/OnboardingPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 // Protected Route Guard
@@ -70,7 +71,7 @@ export default function App() {
               <Routes>
                 {/* Public Authentication Routes */}
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/register" element={<Navigate to="/login" replace />} />
 
                 {/* Protected Workspace Routes */}
                 <Route element={<ProtectedRoute />}>
@@ -79,12 +80,18 @@ export default function App() {
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     <Route path="/dashboard" element={<DashboardPage />} />
 
+                    {/* Employee Onboarding & User Management (Admin:1, Manager:2) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2]} />}>
+                      <Route path="/admin/onboarding" element={<OnboardingPage />} />
+                      <Route path="/admin/users" element={<Navigate to="/admin/onboarding" replace />} />
+                    </Route>
+
                     {/* Ticket Management */}
                     <Route path="/tickets" element={<TicketListPage />} />
                     <Route path="/tickets/:id" element={<TicketDetailPage />} />
 
-                    {/* Create Ticket (Admin:1, Manager:2, Employee:4) */}
-                    <Route element={<RoleRoute allowedRoles={[1, 2, 4]} />}>
+                    {/* Create Ticket (Admin:1, Manager:2, Technician:3, Employee:4) */}
+                    <Route element={<RoleRoute allowedRoles={[1, 2, 3, 4]} />}>
                       <Route path="/tickets/new" element={<TicketCreatePage />} />
                     </Route>
 
@@ -96,6 +103,7 @@ export default function App() {
                     {/* Access Requests (Admin:1, Manager:2, Technician:3, Employee:4) */}
                     <Route element={<RoleRoute allowedRoles={[1, 2, 3, 4]} />}>
                       <Route path="/access-requests" element={<AccessRequestListPage />} />
+                      <Route path="/access" element={<Navigate to="/access-requests" replace />} />
                     </Route>
 
                     {/* Offboarding Checklist (Admin:1, Manager:2) */}
@@ -106,6 +114,8 @@ export default function App() {
                     {/* Knowledge Base (Admin:1, Manager:2, Technician:3, Employee:4) */}
                     <Route element={<RoleRoute allowedRoles={[1, 2, 3, 4]} />}>
                       <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
+                      <Route path="/kb" element={<Navigate to="/knowledge-base" replace />} />
+                      <Route path="/knowledgebase" element={<Navigate to="/knowledge-base" replace />} />
                     </Route>
 
                     {/* Reports & Analytics (Admin:1, Manager:2) */}

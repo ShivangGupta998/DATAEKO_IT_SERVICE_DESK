@@ -1,36 +1,8 @@
-import React, { createContext, useState, useEffect, useCallback, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { User, UserRole, UserCreate } from '../types/auth';
 import { authService } from '../services/AuthService';
 import { STORAGE_KEY_TOKEN, STORAGE_KEY_USER, getStoredApiUrl, setStoredApiUrl, parseApiError } from '../api/client';
-
-export interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  roleId: number | null;
-  roleName: 'Admin' | 'Manager' | 'Technician' | 'Employee' | 'Guest';
-  isAdmin: boolean;
-  isManager: boolean;
-  isTechnician: boolean;
-  isEmployee: boolean;
-  canManageTickets: boolean;
-  canAssignTickets: boolean;
-  canUpdateTickets: boolean;
-  canManageAssets: boolean;
-  canManageAccessRequests: boolean;
-  canManageOffboarding: boolean;
-  canManageKB: boolean;
-  canViewReports: boolean;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  backendUrl: string;
-  setBackendUrl: (url: string) => void;
-  login: (username: string, password: string) => Promise<User>;
-  register: (data: UserCreate) => Promise<User>;
-  logout: () => void;
-  refreshProfile: () => Promise<User | null>;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext } from './authContextDef';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(STORAGE_KEY_TOKEN));
@@ -195,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         canManageOffboarding,
         canManageKB,
         canViewReports,
-        isAuthenticated: !!token && !!user,
+        isAuthenticated: !isLoading && !!token && !!user,
         isLoading,
         backendUrl,
         setBackendUrl: updateBackendUrl,
@@ -208,12 +180,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

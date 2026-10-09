@@ -1,30 +1,18 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { notificationService } from '../services/notificationService';
 import { NotificationItem } from '../types/notification';
 import { STORAGE_KEY_TOKEN } from '../api/client';
-
-export interface NotificationContextType {
-  notifications: NotificationItem[];
-  unreadCount: number;
-  refreshNotifications: () => Promise<void>;
-  markAsRead: (id: number | string) => Promise<void>;
-}
-
-export const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+import { autoRequestNotificationPermission } from '../utils/notifications';
+import { NotificationContext } from './notificationContextDef';
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const { isAuthenticated, token, isLoading } = useAuth();
 
-  const getValidToken = useCallback(() => {
-    const active = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
-    return active && active.trim() !== '' ? active : null;
-  }, [token]);
-
   const refreshNotifications = useCallback(async () => {
-    const activeToken = getValidToken();
+    const activeToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
 
     if (isLoading || !isAuthenticated || !activeToken) {
       setNotifications([]);
@@ -47,7 +35,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setUnreadCount(0);
       }
     }
-  }, [isAuthenticated, isLoading, getValidToken]);
+  }, [isAuthenticated, isLoading, token]);
 
   const markAsRead = useCallback(async (id: number | string) => {
     try {
@@ -70,12 +58,25 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return updated;
       });
     } catch {
-      // Quiet fail
+      // Ignore silently
     }
   }, []);
 
+  const markAllAsRead = useCallback(async () => {
+    try {
+      // Optimistic update
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+
+      await notificationService.markAllAsRead();
+    } catch {
+      refreshNotifications();
+    }
+  }, [refreshNotifications]);
+
+
   useEffect(() => {
-    const activeToken = getValidToken();
+    const activeToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
 
     if (isLoading || !isAuthenticated || !activeToken) {
       setNotifications([]);
@@ -83,11 +84,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       return;
     }
 
+    autoRequestNotificationPermission();
     refreshNotifications();
 
+    const handleImmediateRefresh = () => {
+      refreshNotifications();
+    };
+    window.addEventListener('itsm:refresh-notifications', handleImmediateRefresh);
+
     const interval = setInterval(() => {
-      const liveToken = getValidToken();
-      if (liveToken && isAuthenticated) {
+      const liveToken = localStorage.getItem(STORAGE_KEY_TOKEN) || token;
+      if (liveToken && isAuthenticated && !isLoading) {
         refreshNotifications();
       } else {
         setNotifications([]);
@@ -95,8 +102,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
     }, 30000);
 
-    return () => clearInterval(interval);
-  }, [isAuthenticated, isLoading, refreshNotifications, getValidToken]);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('itsm:refresh-notifications', handleImmediateRefresh);
+    };
+  }, [isAuthenticated, isLoading, token, refreshNotifications]);
 
   return (
     <NotificationContext.Provider
@@ -105,9 +115,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         unreadCount,
         refreshNotifications,
         markAsRead,
+        markAllAsRead,
       }}
     >
       {children}
     </NotificationContext.Provider>
+
   );
 };

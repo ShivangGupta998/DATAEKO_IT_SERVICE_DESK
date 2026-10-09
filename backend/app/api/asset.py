@@ -17,6 +17,8 @@ from app.core.dependencies import (
     get_current_user,
     require_roles
 )
+from app.services.notification_service import create_notification
+from app.core.sockets import notification_manager
 
 
 router = APIRouter(
@@ -162,7 +164,7 @@ def get_my_assets(
 # ============================================================
 
 @router.get(
-    "/{asset_id}",
+    "/{asset_id:int}",
     response_model=AssetResponse
 )
 def get_asset(
@@ -203,7 +205,7 @@ def get_asset(
 # ============================================================
 
 @router.patch(
-    "/{asset_id}",
+    "/{asset_id:int}",
     response_model=AssetResponse
 )
 def update_asset(
@@ -300,10 +302,10 @@ def update_asset(
 # ============================================================
 
 @router.patch(
-    "/{asset_id}/assign",
+    "/{asset_id:int}/assign",
     response_model=AssetResponse
 )
-def assign_asset(
+async def assign_asset(
     asset_id: int,
     assign_data: AssetAssign,
     db: Session = Depends(get_db),
@@ -352,6 +354,22 @@ def assign_asset(
     db.commit()
     db.refresh(asset)
 
+    create_notification(
+        db=db,
+        user_id=employee.id,
+        title="Asset Assigned",
+        message=f"Asset '{asset.name}' has been assigned to you.",
+        notification_type="asset"
+    )
+    db.commit()
+
+    await notification_manager.send_personal_notification(
+        user_id=str(employee.id),
+        title="Asset Assigned",
+        message=f"Asset '{asset.name}' has been assigned to you.",
+        link="/assets"
+    )
+
     return asset
 
 
@@ -361,7 +379,7 @@ def assign_asset(
 # ============================================================
 
 @router.patch(
-    "/{asset_id}/retire",
+    "/{asset_id:int}/retire",
     response_model=AssetResponse
 )
 def retire_asset(

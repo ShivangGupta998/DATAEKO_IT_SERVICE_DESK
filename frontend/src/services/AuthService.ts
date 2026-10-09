@@ -65,4 +65,26 @@ export const authService = {
     const response = await apiClient.get<User>('/auth/me');
     return response.data;
   },
+
+  /**
+   * Update profile fields (Full Name, Phone Number, Job Title, Timezone, Avatar URL)
+   */
+  async updateProfile(data: Partial<User>): Promise<User> {
+    const response = await apiClient.patch<User>('/auth/me', data);
+    if (response.data) {
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(response.data));
+    }
+    return response.data;
+  },
+
+  /**
+   * Change user password
+   */
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
+    const response = await apiClient.post<{ message: string }>('/auth/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+    return response.data;
+  },
 };

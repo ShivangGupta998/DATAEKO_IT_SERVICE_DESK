@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 840 1080" class="w-full h-auto drop-shadow-xs" xmlns="http://www.w3.org/2000/svg"><rect width="840" height="1080" fill="#ffffff"/>
+            <!-- Underline & Title -->
+            <text x="420" y="42" text-anchor="middle" font-size="20" font-weight="900" fill="#1c1917" letter-spacing="0.5" font-family="system-ui, -apple-system, sans-serif">IT SERVICE DESK (WORKFLOWS)</text>
+            <line x1="260" y1="52" x2="580" y2="52" stroke="#1c1917" stroke-width="2.5" />
+
+            <!-- Subheading -->
+            <text x="50" y="95" font-size="16" font-weight="800" fill="#1c1917" font-family="system-ui, -apple-system, sans-serif">2) ACCESS REQUEST MANAGEMENT</text>
+
+            <!-- Connector: Start -> Decision 1 -->
+            <line x1="420" y1="165" x2="420" y2="198" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 1: Start Pill -->
+            <g class="node-card">
+              <rect x="270" y="125" width="300" height="42" rx="21" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="420" y="151" text-anchor="middle" font-size="13.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Employee submits access request</text>
+            </g>
+
+            <!-- Node 2: High privilege or sensitive? -->
+            <g class="node-card">
+              <rect x="250" y="200" width="340" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="420" y="224" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">High privilege or sensitive role?</text>
+              <text x="420" y="244" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Evaluates security tier &amp; scope</text>
+            </g>
+
+            <!-- Branch: No (Standard pre-approved access) -->
+            <path d="M 330 258 L 330 282 L 210 282 L 210 308" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="312" y="274" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Branch: Yes (Manager approval required) -->
+            <path d="M 510 258 L 510 282 L 610 282 L 610 308" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="525" y="274" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Node 3: Pre-approved catalog check -->
+            <g class="node-card">
+              <rect x="95" y="310" width="230" height="48" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="210" y="339" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Standard role catalog</text>
+            </g>
+
+            <!-- Connector down to auto-provision -->
+            <line x1="210" y1="358" x2="210" y2="388" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 4: Fast-track approval -->
+            <g class="node-card">
+              <rect x="95" y="390" width="230" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="210" y="414" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Auto-approve request</text>
+              <text x="210" y="434" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Standard employee tier</text>
+            </g>
+
+            <!-- Line from fast-track into Provisioning track -->
+            <path d="M 210 448 L 210 635 L 380 635" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Node 5: Manager reviews request -->
+            <g class="node-card">
+              <rect x="495" y="310" width="230" height="58" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="610" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Manager review</text>
+              <text x="610" y="354" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Validates business justification</text>
+            </g>
+
+            <!-- Connector to Manager decision -->
+            <line x1="610" y1="368" x2="610" y2="398" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 6: Approve access? -->
+            <g class="node-card">
+              <rect x="495" y="400" width="230" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="610" y="424" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Approve access?</text>
+              <text x="610" y="444" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Manager decision</text>
+            </g>
+
+            <!-- Branch: No (Manager rejects) -->
+            <path d="M 680 458 L 680 482 L 720 482 L 720 510" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="695" y="475" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Branch: Yes (Manager approves -> IT Security / Admin review) -->
+            <path d="M 540 458 L 540 482 L 490 482 L 490 510" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="520" y="475" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <!-- Node 7: IT Admin & Security Review -->
+            <g class="node-card">
+              <rect x="415" y="512" width="160" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="495" y="535" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">IT Admin</text>
+              <text x="495" y="554" text-anchor="middle" font-size="11" font-weight="500" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Licensing &amp; security check</text>
+            </g>
+
+            <!-- Rejection Node -->
+            <g class="node-card">
+              <rect x="620" y="512" width="200" height="56" rx="8" fill="#fce9e6" stroke="#f7c6bd" stroke-width="1.5" />
+              <text x="720" y="535" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b" font-family="system-ui, -apple-system, sans-serif">Set status: Rejected</text>
+              <text x="720" y="554" text-anchor="middle" font-size="11" font-weight="600" fill="#b91c1c" font-family="system-ui, -apple-system, sans-serif">Reason logged</text>
+            </g>
+
+            <!-- Connector: Rejected -> Close request -->
+            <line x1="720" y1="568" x2="720" y2="598" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <g class="node-card">
+              <rect x="620" y="600" width="200" height="56" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="720" y="623" text-anchor="middle" font-size="13" font-weight="700" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Close request</text>
+              <text x="720" y="642" text-anchor="middle" font-size="11" font-weight="500" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Notify employee</text>
+            </g>
+            <path d="M 720 656 L 720 985 L 380 985" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- IT Admin -> Provisioning convergence -->
+            <path d="M 495 568 L 495 645 L 380 645 L 380 658" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 8: Provision credentials & RBAC -->
+            <g class="node-card">
+              <rect x="270" y="660" width="220" height="46" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="380" y="688" text-anchor="middle" font-size="13.5" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Provision access &amp; role</text>
+            </g>
+
+            <!-- Connector to status -->
+            <line x1="380" y1="706" x2="380" y2="733" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 9: Set status: Approved & Active -->
+            <g class="node-card">
+              <rect x="270" y="735" width="220" height="56" rx="8" fill="#e0f5ed" stroke="#a3e3cd" stroke-width="1.5" />
+              <text x="380" y="758" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46" font-family="system-ui, -apple-system, sans-serif">Set status: Approved</text>
+              <text x="380" y="777" text-anchor="middle" font-size="11" font-weight="600" fill="#047857" font-family="system-ui, -apple-system, sans-serif">Active permissions</text>
+            </g>
+
+            <!-- Side notification -->
+            <path d="M 270 763 L 160 763 L 160 808" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <g class="node-card">
+              <rect x="80" y="810" width="160" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="160" y="837" text-anchor="middle" font-size="12" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Notify employee</text>
+            </g>
+
+            <!-- Connector to Time-bound check -->
+            <line x1="380" y1="791" x2="380" y2="823" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- Node 10: Temporary / Time-bound? -->
+            <g class="node-card">
+              <rect x="270" y="825" width="220" height="58" rx="8" fill="#fdf3e7" stroke="#e8d0b2" stroke-width="1.5" />
+              <text x="380" y="849" text-anchor="middle" font-size="13" font-weight="700" fill="#6f4218" font-family="system-ui, -apple-system, sans-serif">Temporary / Time-bound?</text>
+              <text x="380" y="869" text-anchor="middle" font-size="11" font-weight="500" fill="#925f34" font-family="system-ui, -apple-system, sans-serif">Checks expiration policy</text>
+            </g>
+
+            <!-- Branch: Yes (Schedule revocation) -->
+            <path d="M 270 854 L 160 854 L 160 898" fill="none" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="210" y="848" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">Yes</text>
+
+            <g class="node-card">
+              <rect x="75" y="900" width="170" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="160" y="927" text-anchor="middle" font-size="12" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Schedule auto-revocation</text>
+            </g>
+            <path d="M 160 944 L 160 985 L 380 985" fill="none" stroke="#9e988f" stroke-width="1.6" />
+
+            <!-- Branch: No (Permanent) -->
+            <line x1="380" y1="883" x2="380" y2="920" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+            <text x="390" y="905" font-size="12" font-weight="600" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif">No</text>
+
+            <!-- Node 11: Audit log recorded -->
+            <g class="node-card">
+              <rect x="270" y="922" width="220" height="44" rx="8" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="380" y="949" text-anchor="middle" font-size="12.5" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">Log compliance audit trail</text>
+            </g>
+
+            <line x1="380" y1="966" x2="380" y2="1005" stroke="#9e988f" stroke-width="1.6" marker-end="url(#arrow)" />
+
+            <!-- End Pill -->
+            <g class="node-card">
+              <rect x="315" y="1008" width="130" height="40" rx="20" fill="#f2f0ea" stroke="#d5d0c5" stroke-width="1.5" />
+              <text x="380" y="1033" text-anchor="middle" font-size="13" font-weight="600" fill="#292524" font-family="system-ui, -apple-system, sans-serif">End</text>
+            </g>
+          </svg>
