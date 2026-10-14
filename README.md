@@ -95,6 +95,5 @@ npm run dev
 ```
 ### Push Details
 ```bash
-New Push
+Laken 
 ```
-
