@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   TrendingUp,
-  PlusCircle,
   Laptop,
   KeyRound,
   BookOpen,
@@ -16,13 +15,12 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { ticketService } from '../../services/ticketService';
 import { Ticket } from '../../types/ticket';
-import { StatusBadge, PriorityBadge } from '../../components/common/Badge';
 import { CardSkeleton } from '../../components/common/LoadingState';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { parseApiError } from '../../api/client';
 
 export const DashboardPage: React.FC = () => {
-  const { user, isAdmin, isManager, isTechnician, isEmployee, roleName } = useAuth();
+  const { user, isAdmin, isManager, isTechnician, isEmployee } = useAuth();
   const navigate = useNavigate();
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
