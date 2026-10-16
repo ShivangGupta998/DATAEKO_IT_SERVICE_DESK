@@ -416,7 +416,7 @@ export const RegisterPage: React.FC = () => {
           IT Service Desk
         </h2>
         <p className="text-xs text-slate-600 dark:text-sky-200/80 mt-1 font-semibold tracking-wide">
-          Enterprise ITSM with Role-Based Access Control
+          Intelligent IT Support for the Modern Enterprise
         </p>
       </div>
 

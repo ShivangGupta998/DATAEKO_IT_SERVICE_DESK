@@ -25,6 +25,7 @@ import {
   setClientGeminiApiKey,
   AIChatAction,
 } from '../../services/aiService';
+import { CopilotRobotAvatar } from './CopilotRobotAvatar';
 
 interface ActionCTA {
   label: string;
@@ -609,21 +610,32 @@ export const AIAssistantWidget: React.FC = () => {
 
   return (
     <>
-      {/* 1. Floating Launcher Button (Bottom-Right) */}
-      <div className="fixed bottom-6 right-6 z-40">
+      {/* 1. Floating Launcher Button with 3D Friendly Robot (Bottom-Right) */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end">
+        {/* Friendly 3D Robot with Swirling Blue Particle Trail */}
+        {!isOpen && (
+          <div
+            className="mb-1 mr-2 transition-all duration-300 transform hover:scale-110 cursor-pointer"
+            onClick={() => setIsOpen(true)}
+            title="Chat with IT Copilot"
+          >
+            <CopilotRobotAvatar size={82} />
+          </div>
+        )}
+
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           aria-label={isOpen ? 'Close AI Support Assistant' : 'Open AI Support Assistant'}
-          className={`group relative flex items-center gap-2.5 px-4 py-3 rounded-full font-medium shadow-xl transition-all duration-300 transform active:scale-95 ${
+          className={`group relative flex items-center gap-2.5 px-5 py-2.5 rounded-full font-bold shadow-xl transition-all duration-300 transform active:scale-95 ${
             isOpen
-              ? 'bg-slate-800 text-white dark:bg-slate-700 hover:bg-slate-900'
-              : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white hover:from-blue-700 hover:to-indigo-800 hover:shadow-blue-500/30'
+              ? 'bg-slate-800 text-white dark:bg-slate-900/90 dark:border dark:border-sky-500/30 dark:backdrop-blur-xl hover:bg-slate-900'
+              : 'bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-500 text-white dark:border dark:border-sky-400/40 dark:shadow-[0_0_20px_rgba(56,189,248,0.35),inset_0_1px_1px_rgba(255,255,255,0.25)] hover:shadow-indigo-500/40'
           }`}
         >
           {/* Animated Glow Halo */}
           {!isOpen && (
-            <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 opacity-75 blur-xs group-hover:opacity-100 transition duration-300 -z-10 animate-pulse" />
+            <span className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-indigo-500 via-sky-400 to-indigo-600 opacity-75 blur-xs group-hover:opacity-100 transition duration-300 -z-10 animate-pulse" />
           )}
 
           <div className="relative flex items-center justify-center">
@@ -631,21 +643,21 @@ export const AIAssistantWidget: React.FC = () => {
               <X className="w-5 h-5 transition-transform duration-200 group-hover:rotate-90" />
             ) : (
               <>
-                <Bot className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
-                <Sparkles className="w-3 h-3 text-amber-300 absolute -top-1 -right-1 animate-bounce" />
+                <Bot className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
+                <Sparkles className="w-3 h-3 text-sky-200 absolute -top-1 -right-1 animate-bounce" />
               </>
             )}
           </div>
 
-          <span className="text-sm font-semibold tracking-wide">
+          <span className="text-xs sm:text-sm font-extrabold tracking-wide">
             {isOpen ? 'Close Copilot' : 'IT Copilot'}
           </span>
 
           {/* Active Status Badge Dot */}
           {!isOpen && (
-            <span className="relative flex h-2.5 w-2.5 ml-0.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+            <span className="relative flex h-2 w-2 ml-0.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-400" />
             </span>
           )}
         </button>
@@ -656,7 +668,7 @@ export const AIAssistantWidget: React.FC = () => {
         <div
           role="dialog"
           aria-label="IT Service Desk Copilot"
-          className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[450px] max-h-[660px] h-[84vh] z-50 flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
+          className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[450px] max-h-[660px] h-[84vh] z-50 flex flex-col rounded-3xl bg-white dark:bg-slate-950/85 dark:backdrop-blur-2xl border border-slate-300 dark:border-cyan-500/25 shadow-2xl dark:shadow-[0_8px_32px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
         >
           {/* Panel Header */}
           <div className="px-4 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-slate-800 flex items-center justify-between shrink-0">
