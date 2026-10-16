@@ -12,7 +12,6 @@ import {
   Star,
   HeartHandshake,
   MessageSquare,
-  ThumbsUp,
 } from 'lucide-react';
 import {
   ResponsiveContainer,

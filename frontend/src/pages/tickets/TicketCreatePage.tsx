@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, AlertCircle, Send, HelpCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Send, HelpCircle } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 import { ticketService } from '../../services/ticketService';
 import { TicketPriority, TicketCategory, Attachment } from '../../types/ticket';
