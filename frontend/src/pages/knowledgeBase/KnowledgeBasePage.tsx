@@ -200,7 +200,7 @@ export const KnowledgeBasePage: React.FC = () => {
   return (
     <div className="space-y-6 pb-10">
       {/* Top Banner / Header Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-6 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-2xl">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
             <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
@@ -220,7 +220,7 @@ export const KnowledgeBasePage: React.FC = () => {
               fetchArticles();
             }}
             disabled={isLoading}
-            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950/60 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all shadow-xs disabled:opacity-50"
+            className="p-2.5 rounded-xl border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-950/60 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all shadow-xs disabled:opacity-50"
             title="Reset Filters & Reload"
           >
             <RefreshCw className={`w-4 h-4 text-slate-600 dark:text-slate-300 ${isLoading ? 'animate-spin text-indigo-600 dark:text-indigo-400' : ''}`} />
@@ -242,8 +242,8 @@ export const KnowledgeBasePage: React.FC = () => {
       {error && <ErrorAlert error={error} onRetry={() => fetchArticles(searchQuery)} />}
 
       {/* Search and Category Filters Bar */}
-      <div className="bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-2xl space-y-4">
-        <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
+      <div className="bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-4 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-2xl space-y-4">
+        <form onSubmit={handleSearchSubmit} className="flex items-center gap-3 bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl px-4 py-2 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
           <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
           <input
             type="text"
@@ -296,7 +296,7 @@ export const KnowledgeBasePage: React.FC = () => {
             return (
               <div
                 key={art.id}
-                className="bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl rounded-2xl border border-slate-200/80 dark:border-slate-800/80 p-5 shadow-xs dark:shadow-2xl hover:border-indigo-300 dark:hover:border-slate-700 hover:shadow-md transition-all flex flex-col justify-between group"
+                className="bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl rounded-2xl border border-slate-300 dark:border-slate-800/80 p-5 shadow-xs dark:shadow-2xl hover:border-indigo-300 dark:hover:border-slate-700 hover:shadow-md transition-all flex flex-col justify-between group"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">

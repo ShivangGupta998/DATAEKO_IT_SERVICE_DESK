@@ -1,11 +1,14 @@
 import os
 import asyncio
+import logging
 import bcrypt
 from fastapi import FastAPI, Response, APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 # Import Connection Manager
 from app.core.sockets import notification_manager
@@ -16,6 +19,7 @@ from app.services.sla_service import start_sla_and_auto_assign_scheduler
 from app.database.database import engine, SessionLocal
 from app.database.base import Base
 from app.core.config import settings
+
 
 from app.models.asset import Asset
 from app.models.role import Role
@@ -73,7 +77,7 @@ app.add_middleware(
 ws_router = APIRouter()
 
 @ws_router.websocket("/ws/notifications/{user_id}")
-async def websocket_notifications_endpoint(websocket: WebSocket, user_id: str):
+async def websocket_notifications_endpoint(websocket: WebSocket, user_id: str) -> None:
     await notification_manager.connect(user_id, websocket)
     try:
         while True:
@@ -81,7 +85,7 @@ async def websocket_notifications_endpoint(websocket: WebSocket, user_id: str):
     except WebSocketDisconnect:
         notification_manager.disconnect(user_id)
     except Exception as e:
-        print(f"WebSocket session terminated for user {user_id}: {e}")
+        logger.error(f"WebSocket session terminated for user {user_id}: {e}")
         notification_manager.disconnect(user_id)
 
 app.include_router(ws_router)
@@ -95,6 +99,8 @@ app.include_router(access_request.router)
 app.include_router(offboarding.router)
 app.include_router(knowledge_base.router)
 app.include_router(report.router)
+app.include_router(report.router, prefix="/api")
+app.include_router(report.router, prefix="/api/v1")
 app.include_router(notification.router)
 app.include_router(admin.router)
 app.include_router(admin.router_v1)
@@ -106,7 +112,7 @@ app.include_router(tickets.router, prefix="/api")
 
 # 3. Startup & Seed Logic
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     asyncio.create_task(start_sla_and_auto_assign_scheduler())
 
     db: Session = SessionLocal()
@@ -140,17 +146,18 @@ async def startup_event():
                 )
                 db.add(user)
                 db.commit()
-                print(f"--> SEED SUCCESS: Default admin {default_admin_email} initialized")
+                logger.info(f"--> SEED SUCCESS: Default admin {default_admin_email} initialized")
             else:
-                print(f"--> SEED SKIPPED: Admin {default_admin_email} already exists")
+                logger.info(f"--> SEED SKIPPED: Admin {default_admin_email} already exists")
         else:
-            print("--> SEED SKIPPED: No default admin configured. Set DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_USERNAME, and DEFAULT_ADMIN_PASSWORD in the environment to enable one.")
+            logger.info("--> SEED SKIPPED: No default admin configured. Set DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_USERNAME, and DEFAULT_ADMIN_PASSWORD in the environment to enable one.")
 
     except Exception as e:
-        print(f"--> SEED ERROR: {e}")
+        logger.error(f"--> SEED ERROR: {e}")
         db.rollback()
     finally:
         db.close()
+
 
 # 4. Icon Handlers
 @app.get("/apple-touch-icon{path:path}.png", include_in_schema=False)
@@ -158,7 +165,13 @@ async def startup_event():
 async def ignore_icon_requests():
     return Response(status_code=204)
 
-# 5. Static Assets & SPA Catch-All Route
+# 5. Static Uploads & Assets
+UPLOADS_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../uploads")
+)
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+
 FRONTEND_DIST_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "../../frontend/dist")
 )
@@ -174,8 +187,8 @@ if os.path.exists(FRONTEND_DIST_DIR):
 
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_react_app(full_path: str):
-        # Exclude WebSocket and API paths from returning index.html
-        if full_path.startswith("ws") or full_path.startswith("api") or full_path in ["docs", "redoc", "openapi.json"]:
+        # Exclude WebSocket, uploads, and API paths from returning index.html
+        if full_path.startswith("ws") or full_path.startswith("api") or full_path.startswith("uploads") or full_path in ["docs", "redoc", "openapi.json"]:
             return Response(status_code=404)
 
         file_path = os.path.join(FRONTEND_DIST_DIR, full_path)

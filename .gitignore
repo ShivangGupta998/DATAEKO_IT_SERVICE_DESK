@@ -26,3 +26,7 @@ frontend/dist/
 # Binaries
 *.exe
 cloudflared.exe
+
+# Uploads
+backend/uploads/*
+!backend/uploads/**/.gitkeep

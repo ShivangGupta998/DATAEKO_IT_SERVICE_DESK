@@ -4,6 +4,7 @@ import {
   UserActivityItem,
   PriorityDistributionItem,
   StatusDistributionItem,
+  CsatAnalysisReport,
 } from '../types/report';
 
 export const reportService = {
@@ -16,10 +17,26 @@ export const reportService = {
   },
 
   /**
+   * Get CSAT satisfaction analytics and breakdown
+   */
+  async getCsatAnalysis(): Promise<CsatAnalysisReport> {
+    const response = await apiClient.get<CsatAnalysisReport>('/reports/csat-analysis');
+    return response.data;
+  },
+
+  /**
+   * Get technician & agent workload performance
+   */
+  async getWorkload(): Promise<UserActivityItem[]> {
+    const response = await apiClient.get<UserActivityItem[]>('/reports/workload');
+    return response.data;
+  },
+
+  /**
    * Get user / technician activity report
    */
   async getUserActivity(): Promise<UserActivityItem[]> {
-    const response = await apiClient.get<UserActivityItem[]>('/reports/user-activity');
+    const response = await apiClient.get<UserActivityItem[]>('/reports/workload');
     return response.data;
   },
 

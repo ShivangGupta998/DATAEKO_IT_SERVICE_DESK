@@ -25,6 +25,7 @@ class TicketActivity(Base):
     action = Column(String(100), nullable=False)
 
     comment = Column(Text, nullable=True)
+    attachments = Column(Text, nullable=True)
 
     created_at = Column(
         DateTime,
