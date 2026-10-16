@@ -18,11 +18,14 @@ import { TicketTimeline } from '../../components/tickets/TicketTimeline';
 import { LoadingSpinner } from '../../components/common/LoadingState';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { parseApiError } from '../../api/client';
+import { AttachmentGallery } from '../../components/common/AttachmentGallery';
+import { FileUploadZone } from '../../components/common/FileUploadZone';
+import { CsatRatingCard } from '../../components/tickets/CsatRatingCard';
 
 export const TicketDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAdmin, isManager, isTechnician } = useAuth();
+  const { isAdmin, isManager, isTechnician, user } = useAuth();
   const { success, error: toastError } = useToast();
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
@@ -36,6 +39,7 @@ export const TicketDetailPage: React.FC = () => {
   const [newPriority, setNewPriority] = useState<TicketPriority>('Medium');
   const [assigneeIdInput, setAssigneeIdInput] = useState<string>('');
   const [commentText, setCommentText] = useState<string>('');
+  const [commentFiles, setCommentFiles] = useState<File[]>([]);
 
   const fetchTicketDetails = async () => {
     if (!id) return;
@@ -91,9 +95,15 @@ export const TicketDetailPage: React.FC = () => {
         payload.comment = commentText.trim();
       }
 
+      if (commentFiles.length > 0) {
+        const uploaded = await ticketService.uploadAttachments(commentFiles);
+        payload.attachments = uploaded;
+      }
+
       const updated = await ticketService.updateTicket(id, payload);
       setTicket(updated);
       setCommentText('');
+      setCommentFiles([]);
       success('Ticket updated successfully', `Status: ${updated.status}`);
 
       const freshHistory = await ticketService.getTicketHistory(id).catch(() => []);
@@ -143,6 +153,10 @@ export const TicketDetailPage: React.FC = () => {
     );
   }
 
+  const isRequester = Boolean(
+    user && ticket && (user.id === ticket.requester_id || user.id === ticket.requester?.id)
+  );
+
   return (
     <div className="space-y-6 antialiased transition-colors duration-300">
       {/* Top Header */}
@@ -150,7 +164,7 @@ export const TicketDetailPage: React.FC = () => {
         <div className="flex items-center gap-3">
           <Link
             to="/tickets"
-            className="p-2.5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs dark:shadow-md"
+            className="p-2.5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-700 transition-all shadow-xs dark:shadow-md"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
@@ -172,7 +186,7 @@ export const TicketDetailPage: React.FC = () => {
           <button
             type="button"
             onClick={fetchTicketDetails}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-xs dark:shadow-md"
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-700 transition-all shadow-xs dark:shadow-md"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Refresh</span>
@@ -184,17 +198,33 @@ export const TicketDetailPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl p-6 rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/80 space-y-4">
+          {/* Customer Satisfaction Rating Prompt (When Resolved / Closed) */}
+          <CsatRatingCard
+            ticket={ticket}
+            isRequester={isRequester}
+            onRatingSubmitted={(updated) => {
+              setTicket(updated);
+              fetchTicketDetails();
+            }}
+          />
+
+          <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl p-6 rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/80 space-y-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-300 flex items-center gap-2">
               <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               <span>Issue Description</span>
             </h3>
-            <div className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap bg-slate-50 dark:bg-slate-950/80 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 font-normal">
+            <div className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap bg-slate-50 dark:bg-slate-950/80 p-5 rounded-2xl border border-slate-300 dark:border-slate-800/80 font-normal">
               {ticket.description || 'No description provided.'}
             </div>
+
+            {ticket.attachments && ticket.attachments.length > 0 && (
+              <div className="pt-2">
+                <AttachmentGallery attachments={ticket.attachments} title="Original Attached Evidence" />
+              </div>
+            )}
           </div>
 
-          <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl p-6 rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/80 space-y-5">
+          <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl p-6 rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/80 space-y-5">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-300 flex items-center gap-2">
                 <History className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
@@ -209,7 +239,7 @@ export const TicketDetailPage: React.FC = () => {
 
         {/* Right Column */}
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl p-6 rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/80 space-y-4 text-xs">
+          <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl p-6 rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/80 space-y-4 text-xs">
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 pb-3 border-b border-slate-100 dark:border-slate-800/80">
               Ticket Metadata & SLA
             </h3>
@@ -267,7 +297,7 @@ export const TicketDetailPage: React.FC = () => {
           </div>
 
           {(isAdmin || isManager || isTechnician) && (
-            <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl p-6 rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/80 space-y-4 text-xs">
+            <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl p-6 rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/80 space-y-4 text-xs">
               <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 pb-3 border-b border-slate-100 dark:border-slate-800/80 flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 <span>Update Ticket Progress</span>
@@ -281,7 +311,7 @@ export const TicketDetailPage: React.FC = () => {
                   <select
                     value={newStatus}
                     onChange={(e) => setNewStatus(e.target.value as TicketStatus)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
                   >
                     <option value="Open" className="bg-white dark:bg-slate-900">Open</option>
                     <option value="In Progress" className="bg-white dark:bg-slate-900">In Progress</option>
@@ -297,7 +327,7 @@ export const TicketDetailPage: React.FC = () => {
                   <select
                     value={newPriority}
                     onChange={(e) => setNewPriority(e.target.value as TicketPriority)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
                   >
                     <option value="Low" className="bg-white dark:bg-slate-900">Low</option>
                     <option value="Medium" className="bg-white dark:bg-slate-900">Medium</option>
@@ -316,7 +346,7 @@ export const TicketDetailPage: React.FC = () => {
                       value={assigneeIdInput}
                       onChange={(e) => setAssigneeIdInput(e.target.value)}
                       placeholder="e.g. 3 (leave empty for unassigned)"
-                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-semibold"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-semibold"
                     />
                   </div>
                 )}
@@ -330,7 +360,17 @@ export const TicketDetailPage: React.FC = () => {
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder="Provide troubleshooting notes or resolution context..."
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium resize-y"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-medium resize-y"
+                  />
+                </div>
+
+                <div>
+                  <FileUploadZone
+                    files={commentFiles}
+                    onFilesChange={setCommentFiles}
+                    disabled={isUpdating}
+                    label="Attach Files / Screenshots (Optional)"
+                    maxFiles={3}
                   />
                 </div>
 

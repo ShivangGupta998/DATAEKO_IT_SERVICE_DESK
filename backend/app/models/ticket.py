@@ -36,6 +36,27 @@ class Ticket(Base):
         nullable=True
     )
 
+    attachments = Column(
+        Text,
+        nullable=True
+    )
+
+    # ==========================
+    # CSAT SATISFACTION FIELDS
+    # ==========================
+    csat_rating = Column(
+        Integer,
+        nullable=True
+    )
+    csat_feedback = Column(
+        Text,
+        nullable=True
+    )
+    csat_submitted_at = Column(
+        DateTime,
+        nullable=True
+    )
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     updated_at = Column(

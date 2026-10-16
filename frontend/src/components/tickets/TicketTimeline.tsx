@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clock, User as UserIcon, MessageSquare, ArrowRight } from 'lucide-react';
 import { TicketHistoryItem } from '../../types/ticket';
+import { AttachmentGallery } from '../common/AttachmentGallery';
 
 export const TicketTimeline: React.FC<{ history: TicketHistoryItem[]; className?: string }> = ({
   history,
@@ -85,6 +86,13 @@ export const TicketTimeline: React.FC<{ history: TicketHistoryItem[]; className?
                     <span>Comment Note</span>
                   </div>
                   {item.comment}
+                </div>
+              )}
+
+              {/* Attached Evidence & Files */}
+              {item.attachments && item.attachments.length > 0 && (
+                <div className="mt-2.5">
+                  <AttachmentGallery attachments={item.attachments} title="" />
                 </div>
               )}
             </div>

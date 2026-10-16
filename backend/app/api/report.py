@@ -114,11 +114,26 @@ def get_reports_dashboard(
             "pending_queue": pending_queue
         })
 
+    # CSAT Satisfaction Calculation
+    csat_agg = db.query(
+        func.count(Ticket.id).label("total_csat"),
+        func.avg(Ticket.csat_rating).label("avg_csat"),
+        func.count(case((Ticket.csat_rating >= 4, 1))).label("positive_csat")
+    ).filter(Ticket.csat_rating.isnot(None)).first()
+
+    total_csat = csat_agg.total_csat if csat_agg else 0
+    avg_csat = round(float(csat_agg.avg_csat), 2) if csat_agg and csat_agg.avg_csat is not None else 0.0
+    positive_csat = csat_agg.positive_csat if csat_agg else 0
+    satisfaction_rate = round((positive_csat / total_csat * 100), 1) if total_csat > 0 else 0.0
+
     return {
         "total_volume": total_tickets,
         "active_in_flight": active_in_flight,
         "resolved_rate": resolved_rate,
         "sla_health": sla_health,
+        "average_csat": avg_csat,
+        "total_csat": total_csat,
+        "satisfaction_rate": satisfaction_rate,
         "status_breakdown": status_breakdown,
         "priority_breakdown": priority_breakdown,
         "agent_performance": agent_performance,
@@ -129,6 +144,64 @@ def get_reports_dashboard(
 # ============================================================
 # INDIVIDUAL SUB-REPORTS
 # ============================================================
+@router.get("/csat-analysis")
+def csat_analysis_report(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin_manager)
+):
+    csat_agg = db.query(
+        func.count(Ticket.id).label("total_csat"),
+        func.avg(Ticket.csat_rating).label("avg_csat"),
+        func.count(case((Ticket.csat_rating >= 4, 1))).label("positive_csat")
+    ).filter(Ticket.csat_rating.isnot(None)).first()
+
+    total_csat = csat_agg.total_csat if csat_agg else 0
+    avg_csat = round(float(csat_agg.avg_csat), 2) if csat_agg and csat_agg.avg_csat is not None else 0.0
+    positive_csat = csat_agg.positive_csat if csat_agg else 0
+    satisfaction_rate = round((positive_csat / total_csat * 100), 1) if total_csat > 0 else 0.0
+
+    breakdown_rows = (
+        db.query(Ticket.csat_rating, func.count(Ticket.id).label("count"))
+        .filter(Ticket.csat_rating.isnot(None))
+        .group_by(Ticket.csat_rating)
+        .order_by(Ticket.csat_rating.asc())
+        .all()
+    )
+    breakdown_map = {row.csat_rating: row.count for row in breakdown_rows}
+    rating_breakdown = [
+        {"stars": stars, "count": breakdown_map.get(stars, 0), "label": f"{stars} Stars"}
+        for stars in range(1, 6)
+    ]
+
+    recent_feedback_rows = (
+        db.query(Ticket)
+        .filter(Ticket.csat_rating.isnot(None))
+        .order_by(Ticket.csat_submitted_at.desc())
+        .limit(8)
+        .all()
+    )
+    recent_feedback = [
+        {
+            "ticket_id": t.id,
+            "title": t.title,
+            "rating": t.csat_rating,
+            "feedback": t.csat_feedback,
+            "submitted_at": t.csat_submitted_at.isoformat() if t.csat_submitted_at else None,
+            "requester_name": getattr(t.requester, "full_name", None) or getattr(t.requester, "username", "Unknown") if t.requester else "Unknown",
+            "assignee_name": getattr(t.assignee, "full_name", None) or getattr(t.assignee, "username", "Unassigned") if t.assignee else "Unassigned"
+        }
+        for t in recent_feedback_rows
+    ]
+
+    return {
+        "average_csat": avg_csat,
+        "total_responses": total_csat,
+        "satisfaction_rate": satisfaction_rate,
+        "rating_breakdown": rating_breakdown,
+        "recent_feedback": recent_feedback
+    }
+
+
 @router.get("/technician-workload")
 def get_technician_workload(
     db: Session = Depends(get_db),
@@ -168,12 +241,22 @@ def ticket_summary_report(db: Session = Depends(get_db), current_user=Depends(re
         func.count(case((Ticket.status.ilike("closed"), 1))).label("closed_tickets")
     ).first()
 
+    csat_agg = db.query(
+        func.count(Ticket.id).label("total_csat"),
+        func.avg(Ticket.csat_rating).label("avg_csat")
+    ).filter(Ticket.csat_rating.isnot(None)).first()
+
+    avg_csat = round(float(csat_agg.avg_csat), 2) if csat_agg and csat_agg.avg_csat is not None else 0.0
+    total_csat = csat_agg.total_csat if csat_agg else 0
+
     return {
         "total_tickets": counts.total_tickets or 0,
         "open_tickets": counts.open_tickets or 0,
         "in_progress_tickets": counts.in_progress_tickets or 0,
         "resolved_tickets": counts.resolved_tickets or 0,
-        "closed_tickets": counts.closed_tickets or 0
+        "closed_tickets": counts.closed_tickets or 0,
+        "average_csat": avg_csat,
+        "total_csat": total_csat
     }
 
 @router.get("/user-activity")

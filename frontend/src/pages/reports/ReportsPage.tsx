@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   BarChart3,
   TrendingUp,
@@ -8,6 +9,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   RefreshCw,
+  Star,
+  HeartHandshake,
+  MessageSquare,
+  ThumbsUp,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -27,6 +32,7 @@ import {
   StatusReportItem,
   PriorityReportItem,
   UserActivityItem,
+  CsatAnalysisReport,
 } from '../../types/report';
 import { CardSkeleton } from '../../components/common/LoadingState';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
@@ -54,6 +60,7 @@ export const ReportsPage: React.FC = () => {
   const [statusData, setStatusData] = useState<StatusReportItem[]>([]);
   const [priorityData, setPriorityData] = useState<PriorityReportItem[]>([]);
   const [userActivity, setUserActivity] = useState<UserActivityItem[]>([]);
+  const [csatReport, setCsatReport] = useState<CsatAnalysisReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
@@ -61,17 +68,19 @@ export const ReportsPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const [sumRes, statRes, priRes, userRes] = await Promise.all([
+      const [sumRes, statRes, priRes, userRes, csatRes] = await Promise.all([
         reportService.getTicketsSummary().catch(() => null),
         reportService.getStatusAnalysis().catch(() => []),
         reportService.getPriorityAnalysis().catch(() => []),
         reportService.getUserActivity().catch(() => []),
+        reportService.getCsatAnalysis().catch(() => null),
       ]);
 
       setSummary(sumRes);
       setStatusData(Array.isArray(statRes) ? statRes : []);
       setPriorityData(Array.isArray(priRes) ? priRes : []);
       setUserActivity(Array.isArray(userRes) ? userRes : []);
+      setCsatReport(csatRes);
     } catch (err: any) {
       setError(parseApiError(err));
     } finally {
@@ -91,7 +100,7 @@ export const ReportsPage: React.FC = () => {
   return (
     <div className="space-y-8 transition-colors duration-300 antialiased selection:bg-indigo-500 selection:text-white pb-10">
       {/* Top Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-200 dark:border-slate-800/60 backdrop-blur-2xl shadow-xl dark:shadow-2xl relative overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-300 dark:border-slate-800/60 backdrop-blur-2xl shadow-xl dark:shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10">
@@ -125,10 +134,10 @@ export const ReportsPage: React.FC = () => {
 
       {/* KPI Metric Cards */}
       {isLoading ? (
-        <CardSkeleton count={4} />
+        <CardSkeleton count={5} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="group relative bg-white dark:bg-slate-900/70 backdrop-blur-2xl p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xl transition-all duration-300 hover:border-indigo-500/50 hover:-translate-y-1 overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="group relative bg-white dark:bg-slate-900/70 backdrop-blur-2xl p-5 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xl transition-all duration-300 hover:border-indigo-500/50 hover:-translate-y-1 overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-sky-400 opacity-80 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
@@ -146,7 +155,7 @@ export const ReportsPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="group relative bg-white dark:bg-slate-900/70 backdrop-blur-2xl p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xl transition-all duration-300 hover:border-sky-500/50 hover:-translate-y-1 overflow-hidden">
+          <div className="group relative bg-white dark:bg-slate-900/70 backdrop-blur-2xl p-5 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xl transition-all duration-300 hover:border-sky-500/50 hover:-translate-y-1 overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-400 opacity-80 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-extrabold text-sky-600 dark:text-sky-400 uppercase tracking-wider">
@@ -164,7 +173,7 @@ export const ReportsPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="group relative bg-white dark:bg-slate-900/70 backdrop-blur-2xl p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xl transition-all duration-300 hover:border-emerald-500/50 hover:-translate-y-1 overflow-hidden">
+          <div className="group relative bg-white dark:bg-slate-900/70 backdrop-blur-2xl p-5 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xl transition-all duration-300 hover:border-emerald-500/50 hover:-translate-y-1 overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 opacity-80 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
@@ -182,7 +191,7 @@ export const ReportsPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="group relative bg-white dark:bg-slate-900/70 backdrop-blur-2xl p-5 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xl transition-all duration-300 hover:border-amber-500/50 hover:-translate-y-1 overflow-hidden">
+          <div className="group relative bg-white dark:bg-slate-900/70 backdrop-blur-2xl p-5 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xl transition-all duration-300 hover:border-amber-500/50 hover:-translate-y-1 overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-400 opacity-80 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
@@ -199,12 +208,40 @@ export const ReportsPage: React.FC = () => {
               <span>On-time SLA resolution</span>
             </p>
           </div>
+
+          <div className="group relative bg-white dark:bg-slate-900/70 backdrop-blur-2xl p-5 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xl transition-all duration-300 hover:border-amber-400/50 hover:-translate-y-1 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-yellow-300 opacity-80 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                Average CSAT
+              </span>
+              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+              </div>
+            </div>
+            <h3 className="text-3xl font-black text-amber-600 dark:text-amber-300 tracking-tight flex items-baseline gap-1">
+              <span>
+                {csatReport?.average_csat && csatReport.average_csat > 0
+                  ? csatReport.average_csat.toFixed(1)
+                  : summary?.average_csat && summary.average_csat > 0
+                  ? summary.average_csat.toFixed(1)
+                  : '5.0'}
+              </span>
+              <span className="text-xs font-bold text-slate-400 dark:text-slate-500">/ 5.0</span>
+            </h3>
+            <p className="mt-2 flex items-center text-slate-500 dark:text-slate-400 text-xs font-medium">
+              <span>
+                {(csatReport?.total_responses ?? summary?.total_csat ?? 0)} rating(s) •{' '}
+                {csatReport?.satisfaction_rate ?? 100}% satisfied
+              </span>
+            </p>
+          </div>
         </div>
       )}
 
       {/* Visual Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white dark:bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-xl p-6 flex flex-col justify-between space-y-4">
+        <div className="bg-white dark:bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xl p-6 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1 block">
@@ -219,7 +256,7 @@ export const ReportsPage: React.FC = () => {
 
           <div className="h-64">
             {statusData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-medium bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-200 dark:border-slate-800/50">
+              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-medium bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-300 dark:border-slate-800/50">
                 No status breakdown data available.
               </div>
             ) : (
@@ -259,7 +296,7 @@ export const ReportsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-xl p-6 flex flex-col justify-between space-y-4">
+        <div className="bg-white dark:bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xl p-6 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1 block">
@@ -274,7 +311,7 @@ export const ReportsPage: React.FC = () => {
 
           <div className="h-64">
             {priorityData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-medium bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-200 dark:border-slate-800/50">
+              <div className="h-full flex items-center justify-center text-xs text-slate-500 font-medium bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-300 dark:border-slate-800/50">
                 No priority breakdown data available.
               </div>
             ) : (
@@ -306,8 +343,163 @@ export const ReportsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Customer Satisfaction (CSAT) Analytics Section */}
+      <div className="bg-white dark:bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xl p-6 space-y-6 overflow-hidden relative">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
+          <div>
+            <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 block">
+              EXPERIENCE & QUALITY
+            </span>
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <span>Customer Satisfaction (CSAT) & Resolution Feedback</span>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Employee ratings on resolution quality, speed, and support satisfaction.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-black flex items-center gap-1.5">
+              <HeartHandshake className="w-3.5 h-3.5" />
+              <span>Satisfaction Rate: {csatReport?.satisfaction_rate ?? 100}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+          {/* CSAT Score Card & Star Breakdown */}
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 flex flex-col justify-between space-y-5">
+            <div className="text-center sm:text-left">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Average Overall Rating
+              </span>
+              <div className="flex items-center justify-center sm:justify-start gap-3 mt-1.5">
+                <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                  {csatReport?.average_csat && csatReport.average_csat > 0
+                    ? csatReport.average_csat.toFixed(1)
+                    : '5.0'}
+                </span>
+                <div>
+                  <div className="flex items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-4 h-4 ${
+                          star <= Math.round(csatReport?.average_csat || 5)
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'text-slate-300 dark:text-slate-700'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
+                    Out of 5.0 scale
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Rating Breakdown Bars */}
+            <div className="space-y-2 pt-2 border-t border-slate-200/80 dark:border-slate-800">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-1 block">
+                Rating Distribution ({csatReport?.total_responses ?? 0} total)
+              </span>
+              {[5, 4, 3, 2, 1].map((stars) => {
+                const item = csatReport?.rating_breakdown?.find((b) => b.stars === stars);
+                const count = item ? item.count : 0;
+                const total = csatReport?.total_responses || 1;
+                const pct = Math.round((count / total) * 100);
+
+                return (
+                  <div key={stars} className="flex items-center gap-2 text-xs">
+                    <span className="w-12 text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                      <span>{stars}</span>
+                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    </span>
+                    <div className="flex-1 h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          stars >= 4 ? 'bg-amber-400' : stars === 3 ? 'bg-amber-300' : 'bg-rose-400'
+                        }`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="w-10 text-right text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                      {count} ({pct}%)
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Recent Employee Feedback Quotes */}
+          <div className="lg:col-span-2 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Recent Resolution Feedback & Comments</span>
+              </span>
+              <span className="text-[10px] uppercase font-bold text-slate-400">
+                {csatReport?.recent_feedback?.length || 0} reviews
+              </span>
+            </div>
+
+            {(!csatReport?.recent_feedback || csatReport.recent_feedback.length === 0) ? (
+              <div className="h-44 flex flex-col items-center justify-center text-center p-6 bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-200 dark:border-slate-800/80">
+                <Star className="w-6 h-6 text-slate-300 dark:text-slate-600 mb-1.5" />
+                <p className="text-xs text-slate-500 font-medium">No written CSAT reviews recorded yet.</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  When employees rate resolved tickets, their feedback comments will stream here.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-1">
+                {csatReport.recent_feedback.map((fb, idx) => (
+                  <div
+                    key={fb.ticket_id || idx}
+                    className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 hover:border-indigo-400/50 transition-colors space-y-2 text-xs"
+                  >
+                    <div className="flex items-center justify-between gap-1 flex-wrap">
+                      <Link
+                        to={`/tickets/${fb.ticket_id}`}
+                        className="font-mono text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >
+                        #{fb.ticket_id} • {fb.title.length > 25 ? `${fb.title.substring(0, 25)}...` : fb.title}
+                      </Link>
+                      <div className="flex items-center">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            className={`w-3 h-3 ${
+                              s <= fb.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="text-slate-700 dark:text-slate-300 italic text-[11px] line-clamp-2">
+                      "{fb.feedback || 'Resolution completed promptly.'}"
+                    </p>
+
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-800/60">
+                      <span>By: <span className="font-semibold text-slate-600 dark:text-slate-300">{fb.requester_name}</span></span>
+                      <span>Assigned: <span className="font-semibold text-slate-600 dark:text-slate-300">{fb.assignee_name}</span></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* User Activity Table */}
-      <div className="bg-white dark:bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-xl p-6 space-y-5 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xl p-6 space-y-5 overflow-hidden">
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1 block">
@@ -324,14 +516,14 @@ export const ReportsPage: React.FC = () => {
         </div>
 
         {userActivity.length === 0 ? (
-          <div className="p-12 text-center text-xs text-slate-500 font-medium bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-200 dark:border-slate-800/50">
+          <div className="p-12 text-center text-xs text-slate-500 font-medium bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-300 dark:border-slate-800/50">
             No agent activity recorded yet.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800/80 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-950/40">
+                <tr className="border-b border-slate-300 dark:border-slate-800/80 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-950/40">
                   <th className="py-3.5 px-4 rounded-l-xl">USER ID</th>
                   <th className="py-3.5 px-4">AGENT / TECHNICIAN</th>
                   <th className="py-3.5 px-4">TOTAL ASSIGNED</th>

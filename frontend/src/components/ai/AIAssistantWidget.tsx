@@ -656,7 +656,7 @@ export const AIAssistantWidget: React.FC = () => {
         <div
           role="dialog"
           aria-label="IT Service Desk Copilot"
-          className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[450px] max-h-[660px] h-[84vh] z-50 flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
+          className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[450px] max-h-[660px] h-[84vh] z-50 flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-2xl overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
         >
           {/* Panel Header */}
           <div className="px-4 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-slate-800 flex items-center justify-between shrink-0">
@@ -1018,7 +1018,7 @@ export const AIAssistantWidget: React.FC = () => {
           {/* Text / Search Input Bar */}
           <form
             onSubmit={handleSendMessage}
-            className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0 flex items-center gap-2"
+            className="p-3 bg-white dark:bg-slate-900 border-t border-slate-300 dark:border-slate-800 shrink-0 flex items-center gap-2"
           >
             <div className="relative flex-1">
               <input

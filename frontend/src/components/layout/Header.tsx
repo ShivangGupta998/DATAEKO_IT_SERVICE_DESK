@@ -54,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar, pageTitle
   };
 
   return (
-    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 transition-colors duration-300">
+    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-300 dark:border-slate-800 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 transition-colors duration-300">
       {/* Mobile Toggle, Page Title & Search Bar */}
       <div className="flex items-center gap-3">
         <button
@@ -111,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar, pageTitle
           )}
         </Link>
 
-        <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:bg-slate-800" />
+        <div className="hidden sm:block h-6 w-[1px] bg-slate-300 dark:bg-slate-800" />
 
         {/* Create Ticket Button */}
         {(isAdmin || isManager || isEmployee) && (

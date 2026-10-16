@@ -1,8 +1,17 @@
-from pywebpush import webpush, WebPushException
 import json
+import logging
+from typing import Optional, Dict, Any
+from pywebpush import webpush, WebPushException
 
-def send_desktop_popup(subscription_info, title: str, message: str):
+logger = logging.getLogger(__name__)
+
+def send_desktop_popup(
+    subscription_info: Optional[Dict[str, Any]], title: str, message: str
+) -> None:
     """Sends native OS popup notification to user's desktop."""
+    if not subscription_info:
+        return
+
     try:
         webpush(
             subscription_info=subscription_info,
@@ -11,4 +20,6 @@ def send_desktop_popup(subscription_info, title: str, message: str):
             vapid_claims={"sub": "mailto:admin@servicedesk.com"}
         )
     except WebPushException as ex:
-        print(f"Push notification error: {ex}")
+        logger.error(f"Push notification error: {ex}")
+    except Exception as ex:
+        logger.error(f"Unexpected push notification error: {ex}")
