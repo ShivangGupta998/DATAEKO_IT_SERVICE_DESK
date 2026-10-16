@@ -94,7 +94,7 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-8 transition-colors duration-300 antialiased selection:bg-indigo-500 selection:text-white pb-10">
       {/* Top Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800/60 dark:backdrop-blur-2xl shadow-sm dark:shadow-2xl relative overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-300 dark:border-slate-800/60 dark:backdrop-blur-2xl shadow-sm dark:shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10">
@@ -124,7 +124,7 @@ export const DashboardPage: React.FC = () => {
             type="button"
             onClick={fetchDashboardData}
             disabled={isLoading}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all uppercase tracking-wider shadow-xs hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all uppercase tracking-wider shadow-xs hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 ${isLoading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
@@ -140,7 +140,8 @@ export const DashboardPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Active Tickets / Requests */}
-          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-emerald-500/50 hover:-translate-y-1 overflow-hidden">
+          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-emerald-500/50 hover:-translate-y-1 overflow-hidden">
+
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 opacity-80 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
@@ -160,7 +161,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* SLA At Risk / In Progress */}
-          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-amber-500/50 hover:-translate-y-1 overflow-hidden">
+          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-amber-500/50 hover:-translate-y-1 overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-400 opacity-80 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
@@ -179,7 +180,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* SLA Breached / Needs Attention */}
-          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-rose-500/50 hover:-translate-y-1 overflow-hidden">
+          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-rose-500/50 hover:-translate-y-1 overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-red-400 opacity-80 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-extrabold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
@@ -198,7 +199,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* Resolved Total */}
-          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-indigo-500/50 hover:-translate-y-1 overflow-hidden">
+          <div className="group relative bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl p-5 rounded-2xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-xl dark:shadow-black/50 transition-all duration-300 hover:border-indigo-500/50 hover:-translate-y-1 overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-sky-400 opacity-80 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
@@ -220,7 +221,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Main Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/50 flex flex-col overflow-hidden transition-all p-6 space-y-5">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/50 flex flex-col overflow-hidden transition-all p-6 space-y-5">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-base font-extrabold text-slate-900 dark:text-white tracking-wide">
@@ -240,14 +241,14 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {recentTickets.length === 0 ? (
-            <div className="p-12 text-center text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-200 dark:border-slate-800/50">
+            <div className="p-12 text-center text-xs text-slate-500 dark:text-slate-400 font-medium bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-300 dark:border-slate-800/50">
               No tickets found in queue.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800/80 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-950/40">
+                  <tr className="border-b border-slate-300 dark:border-slate-800/80 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-950/40">
                     <th className="py-3.5 px-4 rounded-l-xl">TICKET ID</th>
                     <th className="py-3.5 px-4">SUBJECT</th>
                     <th className="py-3.5 px-4">STATUS</th>
@@ -289,7 +290,7 @@ export const DashboardPage: React.FC = () => {
 
         {/* Right Sidebar Quick Actions */}
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-6 shadow-xs dark:shadow-2xl dark:shadow-black/50 space-y-4">
+          <div className="bg-white dark:bg-slate-900/70 dark:backdrop-blur-2xl rounded-3xl border border-slate-300 dark:border-slate-800/80 p-6 shadow-xs dark:shadow-2xl dark:shadow-black/50 space-y-4">
             <h4 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
               Quick Shortcuts
             </h4>
@@ -297,7 +298,7 @@ export const DashboardPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/tickets/new?category=Hardware')}
-                className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-left transition-all group"
+                className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-300 dark:border-slate-800 text-left transition-all group"
               >
                 <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">
                   <Laptop className="w-4 h-4" />
@@ -311,7 +312,7 @@ export const DashboardPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/access-requests')}
-                className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-left transition-all group"
+                className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-300 dark:border-slate-800 text-left transition-all group"
               >
                 <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-all">
                   <KeyRound className="w-4 h-4" />
@@ -325,7 +326,7 @@ export const DashboardPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/knowledge-base')}
-                className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-left transition-all group"
+                className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-300 dark:border-slate-800 text-left transition-all group"
               >
                 <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
                   <BookOpen className="w-4 h-4" />
@@ -339,6 +340,7 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
     </div>
   );
 };

@@ -166,7 +166,7 @@ export const AccessRequestListPage: React.FC = () => {
   return (
     <div className="space-y-8 transition-colors duration-300 antialiased selection:bg-indigo-500 selection:text-white pb-10">
       {/* Header Banner */}
-      <div className="bg-white/80 dark:bg-slate-900/40 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800/60 backdrop-blur-2xl shadow-xl dark:shadow-2xl relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="bg-white/80 dark:bg-slate-900/40 p-6 sm:p-8 rounded-3xl border border-slate-300 dark:border-slate-800/60 backdrop-blur-2xl shadow-xl dark:shadow-2xl relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 space-y-2">
@@ -189,7 +189,7 @@ export const AccessRequestListPage: React.FC = () => {
             type="button"
             onClick={fetchRequests}
             disabled={isLoading}
-            className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800/80 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+            className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800/80 transition-all shadow-sm active:scale-95 disabled:opacity-50"
             title="Refresh Access Requests"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-600 dark:text-indigo-400' : ''}`} />
@@ -209,7 +209,7 @@ export const AccessRequestListPage: React.FC = () => {
       {error && <ErrorAlert error={error} onRetry={fetchRequests} />}
 
       {/* Control Bar */}
-      <div className="bg-white/80 dark:bg-slate-900/70 backdrop-blur-2xl p-4 rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-md dark:shadow-2xl flex flex-col sm:flex-row items-center gap-3">
+      <div className="bg-white/80 dark:bg-slate-900/70 backdrop-blur-2xl p-4 rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-md dark:shadow-2xl flex flex-col sm:flex-row items-center gap-3">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -220,7 +220,7 @@ export const AccessRequestListPage: React.FC = () => {
               setCurrentPage(1);
             }}
             placeholder="Search by system, requester, or justification reason..."
-            className="w-full pl-11 pr-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-indigo-200 placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none"
+            className="w-full pl-11 pr-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-indigo-200 placeholder-slate-400 dark:placeholder-slate-500 rounded-2xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none"
           />
         </div>
 
@@ -230,7 +230,7 @@ export const AccessRequestListPage: React.FC = () => {
             setStatusFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl font-bold uppercase tracking-wider w-full sm:w-auto focus:ring-2 focus:ring-indigo-500/50 outline-none"
+          className="px-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl font-bold uppercase tracking-wider w-full sm:w-auto focus:ring-2 focus:ring-indigo-500/50 outline-none"
         >
           <option value="ALL">All Request Statuses</option>
           <option value="Pending">Pending Review</option>
@@ -240,7 +240,7 @@ export const AccessRequestListPage: React.FC = () => {
       </div>
 
       {/* Main Table Segment */}
-      <div className="bg-white/90 dark:bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-lg dark:shadow-2xl overflow-hidden">
+      <div className="bg-white/90 dark:bg-slate-900/70 backdrop-blur-2xl rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-lg dark:shadow-2xl overflow-hidden">
         {isLoading ? (
           <div className="p-6">
             <TableSkeleton rows={5} columns={8} />
@@ -256,7 +256,7 @@ export const AccessRequestListPage: React.FC = () => {
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
-                <thead className="bg-slate-100/80 dark:bg-slate-950/80 text-slate-500 dark:text-slate-400 uppercase tracking-widest text-[10px] font-black border-b border-slate-200 dark:border-slate-800">
+                <thead className="bg-slate-100/80 dark:bg-slate-950/80 text-slate-500 dark:text-slate-400 uppercase tracking-widest text-[10px] font-black border-b border-slate-300 dark:border-slate-800">
                   <tr>
                     <th className="py-4 px-5">Request ID</th>
                     <th className="py-4 px-5">System / Application</th>

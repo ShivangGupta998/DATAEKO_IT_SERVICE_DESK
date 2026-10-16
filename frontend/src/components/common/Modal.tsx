@@ -60,7 +60,7 @@ export const Modal: React.FC<ModalProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.15 }}
-              className={`w-full ${widthMap[maxWidth]} p-6 my-8 text-left align-middle bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 relative z-10`}
+              className={`w-full ${widthMap[maxWidth]} p-6 my-8 text-left align-middle bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-300 dark:border-slate-800 relative z-10`}
             >
               <div className="flex items-start justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
                 <div>

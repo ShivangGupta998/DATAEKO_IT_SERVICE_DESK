@@ -1,5 +1,8 @@
+import os
+import uuid
+import json
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, UploadFile, File
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
@@ -7,11 +10,10 @@ from app.database.database import get_db
 from app.models.ticket import Ticket
 from app.models.ticket_activity import TicketActivity
 from app.models.user import User
-from app.schemas.ticket import TicketCreate, TicketUpdate, TicketResponse
+from app.schemas.ticket import TicketCreate, TicketUpdate, TicketResponse, TicketCsatSubmit
 from app.core.dependencies import get_current_user, require_roles
 from app.services.notification_service import create_notification
 from app.services.slack_service import (
-    send_slack_message,
     send_ticket_created_notification,
     send_ticket_assigned_notification,
     send_ticket_priority_notification,
@@ -26,6 +28,12 @@ ADMIN = 1
 MANAGER = 2
 TECHNICIAN = 3
 EMPLOYEE = 4
+
+ALLOWED_EXTENSIONS = {
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg",
+    ".pdf", ".txt", ".log", ".csv", ".json", ".doc", ".docx", ".zip"
+}
+MAX_FILE_SIZE = 15 * 1024 * 1024  # 15 MB
 
 
 def add_sla_details(ticket):
@@ -48,7 +56,64 @@ def add_sla_details(ticket):
         requester_full_name = getattr(ticket.requester, 'full_name', None)
         ticket.requester_name = requester_full_name or ticket.requester.username
 
+    # Parse attachments if stored as serialized JSON
+    raw_attachments = getattr(ticket, 'attachments', None)
+    if isinstance(raw_attachments, str):
+        try:
+            parsed = json.loads(raw_attachments)
+            ticket.attachments = parsed if isinstance(parsed, list) else []
+        except Exception:
+            ticket.attachments = []
+    elif not raw_attachments:
+        ticket.attachments = []
+
     return ticket
+
+
+@router.post("/upload")
+async def upload_ticket_attachments(
+    files: list[UploadFile] = File(...),
+    current_user: User = Depends(get_current_user)
+):
+    upload_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../uploads/tickets"))
+    os.makedirs(upload_dir, exist_ok=True)
+
+    uploaded_items = []
+    for file in files:
+        ext = os.path.splitext(file.filename)[1].lower() if file.filename else ""
+        if ext not in ALLOWED_EXTENSIONS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"File '{file.filename}' has unsupported extension '{ext}'. Allowed: {', '.join(sorted(ALLOWED_EXTENSIONS))}"
+            )
+
+        orig_stem = os.path.splitext(file.filename)[0] if file.filename else "file"
+        safe_base = "".join(c for c in orig_stem if c.isalnum() or c in ("-", "_"))[:40] or "attachment"
+        unique_name = f"{uuid.uuid4().hex[:12]}_{safe_base}{ext}"
+        destination = os.path.join(upload_dir, unique_name)
+
+        file_size = 0
+        with open(destination, "wb") as buffer:
+            while chunk := await file.read(1024 * 1024):
+                file_size += len(chunk)
+                if file_size > MAX_FILE_SIZE:
+                    buffer.close()
+                    if os.path.exists(destination):
+                        os.remove(destination)
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"File '{file.filename}' exceeds maximum allowed size of 15MB"
+                    )
+                buffer.write(chunk)
+
+        uploaded_items.append({
+            "name": file.filename,
+            "url": f"/uploads/tickets/{unique_name}",
+            "size": file_size,
+            "type": file.content_type or "application/octet-stream"
+        })
+
+    return uploaded_items
 
 
 @router.post("/", response_model=TicketResponse, status_code=status.HTTP_201_CREATED)
@@ -66,6 +131,11 @@ async def create_ticket(
 
     sla_due = calculate_sla_due(ticket_data.priority)
 
+    attachments_json = (
+        json.dumps([a.model_dump() if hasattr(a, 'model_dump') else a.dict() if hasattr(a, 'dict') else a for a in ticket_data.attachments])
+        if ticket_data.attachments else None
+    )
+
     ticket = Ticket(
         title=ticket_data.title,
         description=ticket_data.description,
@@ -74,7 +144,8 @@ async def create_ticket(
         status="open",
         source="web",
         requester_id=user_id,
-        sla_due=sla_due
+        sla_due=sla_due,
+        attachments=attachments_json
     )
 
     db.add(ticket)
@@ -85,7 +156,8 @@ async def create_ticket(
         ticket_id=ticket.id,
         user_id=user_id,
         action="created",
-        comment="Ticket created"
+        comment="Ticket created",
+        attachments=attachments_json
     )
     db.add(activity)
 
@@ -197,12 +269,38 @@ def get_ticket_history(
     if role_id == TECHNICIAN and ticket.assignee_id != user_id:
         raise HTTPException(status_code=403, detail="Permission denied")
 
-    return (
+    activities = (
         db.query(TicketActivity)
+        .options(joinedload(TicketActivity.user))
         .filter(TicketActivity.ticket_id == ticket_id)
         .order_by(TicketActivity.created_at.asc())
         .all()
     )
+
+    result = []
+    for act in activities:
+        att_parsed = []
+        if getattr(act, "attachments", None):
+            try:
+                parsed = json.loads(act.attachments) if isinstance(act.attachments, str) else act.attachments
+                att_parsed = parsed if isinstance(parsed, list) else []
+            except Exception:
+                att_parsed = []
+        result.append({
+            "id": act.id,
+            "ticket_id": act.ticket_id,
+            "user_id": act.user_id,
+            "action": act.action,
+            "comment": act.comment,
+            "attachments": att_parsed,
+            "created_at": act.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ") if act.created_at else None,
+            "user": {
+                "id": act.user.id,
+                "username": act.user.username,
+                "full_name": getattr(act.user, "full_name", None)
+            } if act.user else None
+        })
+    return result
 
 
 @router.get("/{ticket_id}", response_model=TicketResponse)
@@ -316,6 +414,24 @@ async def update_ticket(
             assignment_happened = True
             changes.append(f"Assigned to technician {agent.username}")
 
+    new_attachments_json = None
+    if ticket_data.attachments:
+        new_items = [
+            a.model_dump() if hasattr(a, 'model_dump') else a.dict() if hasattr(a, 'dict') else a
+            for a in ticket_data.attachments
+        ]
+        new_attachments_json = json.dumps(new_items)
+        existing_list = []
+        if ticket.attachments:
+            try:
+                parsed = json.loads(ticket.attachments) if isinstance(ticket.attachments, str) else list(ticket.attachments)
+                existing_list = parsed if isinstance(parsed, list) else []
+            except Exception:
+                existing_list = []
+        existing_list.extend(new_items)
+        ticket.attachments = json.dumps(existing_list)
+        changes.append(f"Attached {len(new_items)} file(s)")
+
     if ticket_data.comment:
         changes.append(f"Comment: {ticket_data.comment}")
 
@@ -324,7 +440,8 @@ async def update_ticket(
             ticket_id=ticket.id,
             user_id=user_id,
             action="updated",
-            comment=" | ".join(changes)
+            comment=" | ".join(changes),
+            attachments=new_attachments_json
         )
         db.add(activity)
 
@@ -420,5 +537,75 @@ async def update_ticket(
             assignee_email=assignee_email,
             assignee_slack_id=assignee_slack_id
         )
+
+    return add_sla_details(ticket)
+
+
+@router.post("/{ticket_id}/csat", response_model=TicketResponse)
+async def submit_ticket_csat(
+    ticket_id: int,
+    csat_data: TicketCsatSubmit,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    ticket = (
+        db.query(Ticket)
+        .options(
+            joinedload(Ticket.assignee),
+            joinedload(Ticket.requester)
+        )
+        .filter(Ticket.id == ticket_id)
+        .first()
+    )
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    user_id = current_user.id
+    role_id = current_user.role_id
+
+    # Only ticket requester or admin/manager can submit CSAT rating
+    if ticket.requester_id != user_id and role_id not in [ADMIN, MANAGER]:
+        raise HTTPException(status_code=403, detail="Only the ticket requester can submit a CSAT rating")
+
+    # Ticket must be resolved or closed
+    normalized_status = (ticket.status or "").lower()
+    if normalized_status not in ["resolved", "closed"]:
+        raise HTTPException(
+            status_code=400,
+            detail="CSAT feedback can only be submitted once the ticket is marked as Resolved or Closed"
+        )
+
+    ticket.csat_rating = csat_data.rating
+    ticket.csat_feedback = csat_data.feedback.strip() if csat_data.feedback else None
+    ticket.csat_submitted_at = datetime.now(timezone.utc)
+
+    # Log in TicketActivity
+    feedback_snippet = f" - \"{ticket.csat_feedback}\"" if ticket.csat_feedback else ""
+    activity = TicketActivity(
+        ticket_id=ticket.id,
+        user_id=user_id,
+        action="csat_submitted",
+        comment=f"CSAT: {ticket.csat_rating}/5 stars{feedback_snippet}"
+    )
+    db.add(activity)
+
+    # Send notification to assigned technician if assigned
+    if ticket.assignee_id:
+        create_notification(
+            db=db,
+            user_id=ticket.assignee_id,
+            title="CSAT Feedback Received",
+            message=f"Ticket #{ticket.id} received a {ticket.csat_rating}/5 star satisfaction rating.",
+            notification_type="Ticket"
+        )
+        await notification_manager.send_personal_notification(
+            user_id=str(ticket.assignee_id),
+            title=f"CSAT Feedback: Ticket #{ticket.id}",
+            message=f"Requester rated resolution {ticket.csat_rating}/5 stars.",
+            link=f"/tickets/{ticket.id}"
+        )
+
+    db.commit()
+    db.refresh(ticket)
 
     return add_sla_details(ticket)

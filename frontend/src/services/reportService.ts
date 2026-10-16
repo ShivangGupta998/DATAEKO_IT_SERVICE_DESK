@@ -4,6 +4,7 @@ import {
   UserActivityItem,
   PriorityDistributionItem,
   StatusDistributionItem,
+  CsatAnalysisReport,
 } from '../types/report';
 
 export const reportService = {
@@ -12,6 +13,14 @@ export const reportService = {
    */
   async getTicketsSummary(): Promise<TicketSummaryReport> {
     const response = await apiClient.get<TicketSummaryReport>('/reports/tickets-summary');
+    return response.data;
+  },
+
+  /**
+   * Get CSAT satisfaction analytics and breakdown
+   */
+  async getCsatAnalysis(): Promise<CsatAnalysisReport> {
+    const response = await apiClient.get<CsatAnalysisReport>('/reports/csat-analysis');
     return response.data;
   },
 

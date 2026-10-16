@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, AlertCircle, Send, HelpCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Send, HelpCircle, Loader2 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 import { ticketService } from '../../services/ticketService';
-import { TicketPriority, TicketCategory } from '../../types/ticket';
+import { TicketPriority, TicketCategory, Attachment } from '../../types/ticket';
 import { parseApiError } from '../../api/client';
+import { FileUploadZone } from '../../components/common/FileUploadZone';
 
 export const TicketCreatePage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export const TicketCreatePage: React.FC = () => {
     categoryParam && validCategories.includes(categoryParam) ? categoryParam : 'hardware'
   );
   const [priority, setPriority] = useState<string>('medium');
+  const [files, setFiles] = useState<File[]>([]);
   const source = 'portal';
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -46,12 +48,18 @@ export const TicketCreatePage: React.FC = () => {
     setErrorMessage(null);
 
     try {
+      let uploadedAttachments: Attachment[] = [];
+      if (files.length > 0) {
+        uploadedAttachments = await ticketService.uploadAttachments(files);
+      }
+
       const created = await ticketService.createTicket({
         title: title.trim(),
         description: description.trim(),
         category: category.toLowerCase() as TicketCategory,
         priority: priority.toLowerCase() as TicketPriority,
         source: source.toLowerCase(),
+        attachments: uploadedAttachments,
       });
 
       success('Ticket Created Successfully', `#${created.id} - ${created.title}`);
@@ -96,7 +104,7 @@ export const TicketCreatePage: React.FC = () => {
       {/* Main Light & Dark Form Card */}
       <form
         onSubmit={handleSubmit}
-        className="relative bg-white dark:bg-slate-900/60 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/80 space-y-6 overflow-hidden"
+        className="relative bg-white dark:bg-slate-900/60 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xs dark:shadow-2xl dark:shadow-black/80 space-y-6 overflow-hidden"
       >
         {/* Title */}
         <div className="relative z-10">
@@ -109,7 +117,7 @@ export const TicketCreatePage: React.FC = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Laptop battery failing rapidly or Unable to connect to VPN"
-            className="w-full px-4 py-3 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
+            className="w-full px-4 py-3 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
           />
         </div>
 
@@ -122,7 +130,7 @@ export const TicketCreatePage: React.FC = () => {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-3 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-semibold cursor-pointer"
+              className="w-full px-4 py-3 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-semibold cursor-pointer"
             >
               <option value="hardware" className="bg-white dark:bg-slate-900">Hardware (Laptops, Monitors, Peripherals)</option>
               <option value="software" className="bg-white dark:bg-slate-900">Software (OS, Productivity Tools, License)</option>
@@ -140,7 +148,7 @@ export const TicketCreatePage: React.FC = () => {
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
-              className="w-full px-4 py-3 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-semibold cursor-pointer"
+              className="w-full px-4 py-3 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-semibold cursor-pointer"
             >
               <option value="low" className="bg-white dark:bg-slate-900">Low - General query or non-blocking issue</option>
               <option value="medium" className="bg-white dark:bg-slate-900">Medium - Standard workflow impairment</option>
@@ -161,7 +169,17 @@ export const TicketCreatePage: React.FC = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Please detail: 1) What happened? 2) Steps to reproduce? 3) Any error messages? 4) Hardware/Device model if applicable..."
-            className="w-full px-4 py-3 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all resize-y leading-relaxed font-medium"
+            className="w-full px-4 py-3 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all resize-y leading-relaxed font-medium"
+          />
+        </div>
+
+        {/* Attachments & Screenshots */}
+        <div className="relative z-10">
+          <FileUploadZone
+            files={files}
+            onFilesChange={setFiles}
+            disabled={isSubmitting}
+            label="Attachments & Screenshots (Optional)"
           />
         </div>
 
