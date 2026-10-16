@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
 import { AIAssistantWidget } from '../ai/AIAssistantWidget';
 
+
 class WidgetErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: { children: React.ReactNode }) {
     super(props);
@@ -50,11 +51,12 @@ export const AppLayout: React.FC = () => {
   const pageTitle = getPageTitle(location.pathname);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex text-slate-800 dark:text-slate-100 antialiased">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#02060d] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(9,24,48,0.9),rgba(2,6,13,1))] flex text-slate-800 dark:text-slate-100 antialiased relative overflow-x-hidden transition-colors duration-300">
+
       {/* Mobile Sidebar Backdrop */}
       {mobileSidebarOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/60 z-30 lg:hidden backdrop-blur-xs"
+          className="fixed inset-0 bg-slate-900/60 dark:bg-black/70 z-30 lg:hidden backdrop-blur-sm"
           onClick={() => setMobileSidebarOpen(false)}
         />
       )}
@@ -63,10 +65,10 @@ export const AppLayout: React.FC = () => {
       <Sidebar isOpen={mobileSidebarOpen} onCloseMobile={() => setMobileSidebarOpen(false)} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 relative z-10">
         <Header onToggleMobileSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)} pageTitle={pageTitle} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto relative z-10">
           <Outlet />
         </main>
       </div>

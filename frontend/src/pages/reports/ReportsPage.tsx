@@ -541,7 +541,7 @@ export const ReportsPage: React.FC = () => {
                   return (
                     <tr key={userId} className="hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 transition-colors group">
                       <td className="py-4 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                        #{userId}
+                        {item.user_id ? `#${item.user_id}` : (typeof userId === 'number' ? `#${userId}` : '—')}
                       </td>
                       <td className="py-4 px-4 font-medium text-slate-800 dark:text-slate-200">
                         {displayName}

@@ -7,6 +7,7 @@ from app.database.database import get_db
 from app.models.ticket import Ticket
 from app.models.user import User
 from app.core.dependencies import get_current_user
+from app.services.reports import calculate_workload_metrics
 
 router = APIRouter(
     prefix="/reports",
@@ -60,7 +61,7 @@ def get_reports_dashboard(
     if total_sla_tickets > 0:
         breached_count = db.query(Ticket).filter(
             Ticket.sla_due_date < datetime.utcnow(),
-            Ticket.status.notin_(["resolved", "closed"])
+            ~func.lower(Ticket.status).in_(["resolved", "closed"])
         ).count()
         sla_health_pct = max(0.0, ((total_sla_tickets - breached_count) / total_sla_tickets) * 100)
         sla_health = f"{sla_health_pct:.1f}%"
@@ -90,29 +91,7 @@ def get_reports_dashboard(
     ]
 
     # Agent / Technician Workload Breakdown
-    technicians = db.query(User).filter(User.role_id == 3).all()
-    agent_performance = []
-    
-    for tech in technicians:
-        total_assigned = db.query(Ticket).filter(Ticket.assignee_id == tech.id).count()
-        resolved_tickets = db.query(Ticket).filter(
-            Ticket.assignee_id == tech.id,
-            Ticket.status.in_(["resolved", "closed"])
-        ).count()
-        pending_queue = db.query(Ticket).filter(
-            Ticket.assignee_id == tech.id,
-            Ticket.status.in_(["open", "in_progress"])
-        ).count()
-
-        agent_performance.append({
-            "id": tech.id,
-            "user_id": tech.id,
-            "agent_name": tech.username or f"User #{tech.id}",
-            "username": tech.username or f"User #{tech.id}",
-            "total_assigned": total_assigned,
-            "resolved_tickets": resolved_tickets,
-            "pending_queue": pending_queue
-        })
+    agent_performance = calculate_workload_metrics(db)
 
     # CSAT Satisfaction Calculation
     csat_agg = db.query(
@@ -202,34 +181,15 @@ def csat_analysis_report(
     }
 
 
+@router.get("/workload")
 @router.get("/technician-workload")
+@router.get("/user-activity")
 def get_technician_workload(
     db: Session = Depends(get_db),
     current_user=Depends(require_admin_manager)
 ):
-    technicians = db.query(User).filter(User.role_id == 3).all()
-    result = []
-    for tech in technicians:
-        total_assigned = db.query(Ticket).filter(Ticket.assignee_id == tech.id).count()
-        resolved_tickets = db.query(Ticket).filter(
-            Ticket.assignee_id == tech.id,
-            Ticket.status.in_(["resolved", "closed"])
-        ).count()
-        pending_queue = db.query(Ticket).filter(
-            Ticket.assignee_id == tech.id,
-            Ticket.status.in_(["open", "in_progress"])
-        ).count()
+    return calculate_workload_metrics(db)
 
-        result.append({
-            "id": tech.id,
-            "user_id": tech.id,
-            "agent_name": tech.username or f"User #{tech.id}",
-            "username": tech.username or f"User #{tech.id}",
-            "total_assigned": total_assigned,
-            "resolved_tickets": resolved_tickets,
-            "pending_queue": pending_queue
-        })
-    return result
 
 @router.get("/tickets-summary")
 def ticket_summary_report(db: Session = Depends(get_db), current_user=Depends(require_admin_manager)):
@@ -258,19 +218,6 @@ def ticket_summary_report(db: Session = Depends(get_db), current_user=Depends(re
         "average_csat": avg_csat,
         "total_csat": total_csat
     }
-
-@router.get("/user-activity")
-def user_activity_report(db: Session = Depends(get_db), current_user=Depends(require_admin_manager)):
-    result = (
-        db.query(
-            User.email.label("user_identifier"),
-            func.count(Ticket.id).label("total_tickets")
-        )
-        .outerjoin(Ticket, User.id == Ticket.requester_id)
-        .group_by(User.id, User.email)
-        .all()
-    )
-    return [{"user": row.user_identifier, "total_tickets": row.total_tickets} for row in result]
 
 @router.get("/priority-analysis")
 def priority_analysis(db: Session = Depends(get_db), current_user=Depends(require_admin_manager)):

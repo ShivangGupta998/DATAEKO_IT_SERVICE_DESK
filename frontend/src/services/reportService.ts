@@ -25,10 +25,18 @@ export const reportService = {
   },
 
   /**
+   * Get technician & agent workload performance
+   */
+  async getWorkload(): Promise<UserActivityItem[]> {
+    const response = await apiClient.get<UserActivityItem[]>('/reports/workload');
+    return response.data;
+  },
+
+  /**
    * Get user / technician activity report
    */
   async getUserActivity(): Promise<UserActivityItem[]> {
-    const response = await apiClient.get<UserActivityItem[]>('/reports/user-activity');
+    const response = await apiClient.get<UserActivityItem[]>('/reports/workload');
     return response.data;
   },
 

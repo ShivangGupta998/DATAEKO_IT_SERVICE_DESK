@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Download, ExternalLink, Eye, FileCode, FileText, Image as ImageIcon, Paperclip, X } from 'lucide-react';
+import { Download, ExternalLink, Eye, FileCode, FileText, Image as ImageIcon, Loader2, Paperclip, X } from 'lucide-react';
 import { Attachment } from '../../types/ticket';
+import { getStoredApiUrl } from '../../api/client';
 
 interface AttachmentGalleryProps {
   attachments?: Attachment[];
@@ -14,8 +15,60 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
   className = '',
 }) => {
   const [activeImage, setActiveImage] = useState<Attachment | null>(null);
+  const [downloadingUrl, setDownloadingUrl] = useState<string | null>(null);
 
   if (!attachments || attachments.length === 0) return null;
+
+  const getAttachmentUrl = (rawUrl?: string): string => {
+    if (!rawUrl) return '';
+    if (
+      rawUrl.startsWith('http://') ||
+      rawUrl.startsWith('https://') ||
+      rawUrl.startsWith('blob:') ||
+      rawUrl.startsWith('data:')
+    ) {
+      return rawUrl;
+    }
+    const apiBase = getStoredApiUrl().replace(/\/+$/, '');
+    const cleanPath = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`;
+    return `${apiBase}${cleanPath}`;
+  };
+
+  const handleDownload = async (e: React.MouseEvent, att: Attachment) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const fullUrl = getAttachmentUrl(att.url);
+    if (!fullUrl) return;
+
+    try {
+      setDownloadingUrl(att.url);
+      const res = await fetch(fullUrl);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch file: ${res.status}`);
+      }
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const tempLink = document.createElement('a');
+      tempLink.href = blobUrl;
+      tempLink.download = att.name || 'attachment';
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.warn('Direct blob download failed, falling back to direct navigation:', err);
+      const tempLink = document.createElement('a');
+      tempLink.href = fullUrl;
+      tempLink.download = att.name || 'attachment';
+      tempLink.target = '_blank';
+      tempLink.rel = 'noreferrer';
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+    } finally {
+      setDownloadingUrl(null);
+    }
+  };
 
   const formatFileSize = (bytes?: number): string => {
     if (!bytes) return '';
@@ -68,9 +121,12 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                   className="relative w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 cursor-pointer border border-slate-200 dark:border-slate-700"
                 >
                   <img
-                    src={att.url}
+                    src={getAttachmentUrl(att.url)}
                     alt={att.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
                   />
                   <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
                     <Eye className="w-4 h-4" />
@@ -89,7 +145,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                   title={att.name}
                   onClick={() => {
                     if (isImg) setActiveImage(att);
-                    else window.open(att.url, '_blank');
+                    else window.open(getAttachmentUrl(att.url), '_blank');
                   }}
                 >
                   {att.name}
@@ -103,16 +159,19 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
 
               {/* Actions */}
               <div className="flex items-center gap-1 shrink-0">
-                <a
-                  href={att.url}
-                  download={att.name}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  title="Download / View"
+                <button
+                  type="button"
+                  onClick={(e) => handleDownload(e, att)}
+                  disabled={downloadingUrl === att.url}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-50"
+                  title="Download File"
                 >
-                  <Download className="w-3.5 h-3.5" />
-                </a>
+                  {downloadingUrl === att.url ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-500" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5" />
+                  )}
+                </button>
               </div>
             </div>
           );
@@ -145,17 +204,22 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
-                <a
-                  href={activeImage.url}
-                  download={activeImage.name}
-                  className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1.5 text-xs font-bold"
+                <button
+                  type="button"
+                  onClick={(e) => handleDownload(e, activeImage)}
+                  disabled={downloadingUrl === activeImage.url}
+                  className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1.5 text-xs font-bold cursor-pointer disabled:opacity-50"
                   title="Download Image"
                 >
-                  <Download className="w-4 h-4" />
+                  {downloadingUrl === activeImage.url ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
                   <span>Download</span>
-                </a>
+                </button>
                 <a
-                  href={activeImage.url}
+                  href={getAttachmentUrl(activeImage.url)}
                   target="_blank"
                   rel="noreferrer"
                   className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -166,7 +230,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveImage(null)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   title="Close Preview"
                 >
                   <X className="w-5 h-5" />
@@ -177,7 +241,7 @@ export const AttachmentGallery: React.FC<AttachmentGalleryProps> = ({
             {/* Lightbox Body / Image Viewer */}
             <div className="p-4 overflow-auto max-h-[75vh] flex items-center justify-center bg-slate-950/40">
               <img
-                src={activeImage.url}
+                src={getAttachmentUrl(activeImage.url)}
                 alt={activeImage.name}
                 className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-lg"
               />
