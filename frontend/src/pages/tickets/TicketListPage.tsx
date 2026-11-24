@@ -181,7 +181,7 @@ export const TicketListPage: React.FC = () => {
             type="button"
             onClick={fetchTickets}
             disabled={isLoading}
-            className="p-2.5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm"
+            className="p-2.5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-300 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-700 transition-all shadow-sm"
             title="Refresh tickets"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -200,7 +200,7 @@ export const TicketListPage: React.FC = () => {
       {error && <ErrorAlert error={error} onRetry={fetchTickets} />}
 
       {/* Filter Toolbar */}
-      <div className="bg-white dark:bg-slate-900/60 dark:backdrop-blur-2xl p-4 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-2xl dark:shadow-black/80 space-y-4">
+      <div className="bg-white dark:bg-slate-900/60 dark:backdrop-blur-2xl p-4 sm:p-5 rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-sm dark:shadow-2xl dark:shadow-black/80 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Search Box */}
           <div className="relative">
@@ -210,7 +210,7 @@ export const TicketListPage: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search ID, title, user..."
-              className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 font-medium"
+              className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 font-medium"
             />
           </div>
 
@@ -218,7 +218,7 @@ export const TicketListPage: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
+            className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
           >
             <option value="ALL" className="bg-white dark:bg-slate-900">All Statuses</option>
             <option value="Open" className="bg-white dark:bg-slate-900">Open</option>
@@ -231,7 +231,7 @@ export const TicketListPage: React.FC = () => {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
+            className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
           >
             <option value="ALL" className="bg-white dark:bg-slate-900">All Priorities</option>
             <option value="Low" className="bg-white dark:bg-slate-900">Low</option>
@@ -244,7 +244,7 @@ export const TicketListPage: React.FC = () => {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
+            className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
           >
             <option value="ALL" className="bg-white dark:bg-slate-900">All Categories</option>
             <option value="hardware" className="bg-white dark:bg-slate-900">Hardware</option>
@@ -273,7 +273,7 @@ export const TicketListPage: React.FC = () => {
       </div>
 
       {/* Tickets Table Container */}
-      <div className="bg-white dark:bg-slate-900/60 dark:backdrop-blur-2xl rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-2xl dark:shadow-black/80 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900/60 dark:backdrop-blur-2xl rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-sm dark:shadow-2xl dark:shadow-black/80 overflow-hidden">
         {isLoading ? (
           <TableSkeleton />
         ) : paginatedTickets.length === 0 ? (
@@ -286,7 +286,7 @@ export const TicketListPage: React.FC = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
-              <thead className="bg-slate-50 dark:bg-slate-950/80 text-[10px] uppercase font-black tracking-widest text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-slate-950/80 text-[10px] uppercase font-black tracking-widest text-slate-500 dark:text-slate-400 border-b border-slate-300 dark:border-slate-800">
                 <tr>
                   <th
                     onClick={() => handleSort('id')}
@@ -371,7 +371,7 @@ export const TicketListPage: React.FC = () => {
 
         {/* Pagination Footer */}
         {filteredTickets.length > pageSize && (
-          <div className="p-4 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+          <div className="p-4 border-t border-slate-300 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
             <Pagination
               currentPage={currentPage}
               totalItems={filteredTickets.length}

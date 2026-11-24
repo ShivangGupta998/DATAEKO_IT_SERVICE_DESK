@@ -4,11 +4,12 @@ import logging
 import re
 import collections
 
+from app.core.config import settings
 from app.database.database import get_db
 from app.models.ticket import Ticket
 from app.models.ticket_activity import TicketActivity
 from app.models.user import User
-from app.services.slack_service import send_slack_message
+from app.services.slack_service import send_slack_message, send_ticket_created_notification
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +154,7 @@ async def handle_slack_events(
             # 1. In-Thread Acknowledgment for Slack Creation:
             # Reply directly in that message thread with creation details
             confirmation_msg = (
-                f"🎫 *Ticket created successfully!*\n\n"
+                f"🎫 *[Dataeko IT Service Desk] Ticket created successfully!*\n\n"
                 f"*Ticket ID:* #{new_ticket.id}\n"
                 f"*Title:* {new_ticket.title}\n"
                 f"*Category:* {new_ticket.category}\n"
@@ -168,6 +169,15 @@ async def handle_slack_events(
                 message=confirmation_msg,
                 channel=channel_id,
                 thread_ts=thread_identifier
+            )
+
+            # 2. Broadcast new ticket notification to all users in the main channel
+            # (Only ticket creation is broadcast to everyone; subsequent updates go to private DMs)
+            background_tasks.add_task(
+                send_ticket_created_notification,
+                ticket=new_ticket,
+                requester_name=user.username if user else "Slack User",
+                channel=settings.SLACK_CHANNEL_ID
             )
 
             logger.info(f"Successfully created Ticket #{new_ticket.id} via Slack Event with in-thread acknowledgment")

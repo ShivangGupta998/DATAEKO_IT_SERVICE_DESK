@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
@@ -8,7 +8,8 @@ from app.models.user import User
 from app.models.role import Role
 from app.models.department import Department
 from app.core.security import hash_password
-from app.core.dependencies import require_roles, get_current_user
+from app.core.dependencies import require_roles
+
 
 
 router = APIRouter(

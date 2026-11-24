@@ -1,3 +1,4 @@
+from typing import Callable, Any
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -7,12 +8,17 @@ from app.models.permission import Permission
 from app.models.role_permission import RolePermission
 
 
-def require_permission(permission_name: str):
+def require_permission(permission_name: str) -> Callable[..., Any]:
+    """Dependency factory checking if current user's role has the given permission."""
     def permission_checker(
-        current_user: dict = Depends(get_current_user),
+        current_user: Any = Depends(get_current_user),
         db: Session = Depends(get_db)
-    ):
-        role_id = current_user.get("role_id")
+    ) -> Any:
+        if isinstance(current_user, dict):
+            role_id = current_user.get("role_id")
+        else:
+            role_id = getattr(current_user, "role_id", None)
+
         if role_id is None:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

@@ -1,5 +1,5 @@
 import { apiClient } from '../api/client';
-import { Ticket, TicketCreate, TicketUpdate, TicketHistoryItem } from '../types/ticket';
+import { Ticket, TicketCreate, TicketUpdate, TicketHistoryItem, Attachment } from '../types/ticket';
 
 export const ticketService = {
   /**
@@ -51,11 +51,34 @@ export const ticketService = {
   },
 
   /**
+   * Upload attachments (screenshots, logs, docs)
+   */
+  async uploadAttachments(files: File[]): Promise<Attachment[]> {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+    const response = await apiClient.post<Attachment[]>('/tickets/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  /**
    * Update ticket (status, priority, assignee_id, comment, etc.)
    * Note: Assignment is done via PATCH /tickets/{id} with assignee_id
    */
   async updateTicket(ticketId: number | string, data: TicketUpdate): Promise<Ticket> {
     const response = await apiClient.patch<Ticket>(`/tickets/${ticketId}`, data);
+    return response.data;
+  },
+
+  /**
+   * Submit Customer Satisfaction (CSAT) rating & feedback
+   */
+  async submitCsat(
+    ticketId: number | string,
+    data: { rating: number; feedback?: string }
+  ): Promise<Ticket> {
+    const response = await apiClient.post<Ticket>(`/tickets/${ticketId}/csat`, data);
     return response.data;
   },
 };

@@ -1,4 +1,5 @@
-from typing import Union, Optional
+import logging
+from typing import Optional, Dict, Any
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -7,7 +8,6 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.user import User
 from app.models.role import Role
-from app.models.department import Department
 from app.schemas.user import UserCreate
 
 from app.core.security import (
@@ -18,6 +18,7 @@ from app.core.security import (
 from app.core.jwt import create_access_token
 from app.core.dependencies import get_current_user
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/auth",
@@ -33,7 +34,7 @@ router = APIRouter(
 def register(
     user: UserCreate,
     db: Session = Depends(get_db)
-):
+) -> Dict[str, Any]:
 
     existing_email = db.query(User).filter(
         User.email == user.email
@@ -79,41 +80,39 @@ def register(
 
 
 # ============================================================
-# LOGIN USER (WITH DEBUG LOGGING)
+# LOGIN USER
 # ============================================================
 
 @router.post("/login")
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
-):
+) -> Dict[str, Any]:
     # Look up user by Email OR Username
     user = db.query(User).filter(
         (User.email == form_data.username) | (User.username == form_data.username)
     ).first()
 
     if not user:
-        print("DEBUG: User not found in database!")
+        logger.warning(f"Login failed: User '{form_data.username}' not found in database")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
 
-    print(f"DEBUG: Found user -> {user.email} (Username: {user.username})")
-    print(f"DEBUG: Incoming password -> {form_data.password}")
-    print(f"DEBUG: Stored hash -> {user.hashed_password}")
+    logger.info(f"Login attempt received for user '{user.email}' (Username: {user.username})")
 
     if not user.is_active:
-        print("DEBUG: User account is inactive!")
+        logger.warning(f"Login rejected: User account '{user.email}' is inactive")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User account is inactive"
         )
 
     is_valid = verify_password(form_data.password, user.hashed_password)
-    print(f"DEBUG: Password match result -> {is_valid}")
 
     if not is_valid:
+        logger.warning(f"Login failed: Invalid credentials provided for user '{user.email}'")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
@@ -123,6 +122,7 @@ def login(
     role_name = "Employee"
     if hasattr(user, "role") and user.role:
         role_name = user.role.name
+
     else:
         role_record = db.query(Role).filter(Role.id == user.role_id).first()
         if role_record:
@@ -163,9 +163,9 @@ class ChangePasswordRequest(BaseModel):
 
 @router.get("/me")
 def get_profile(
-    current_user=Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
     db: Session = Depends(get_db)
-):
+) -> Dict[str, Any]:
     if isinstance(current_user, dict):
         user_id = current_user.get("user_id") or current_user.get("id") or current_user.get("sub")
     else:
@@ -216,9 +216,9 @@ def get_profile(
 @router.patch("/me")
 def update_profile(
     data: ProfileUpdate,
-    current_user=Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
     db: Session = Depends(get_db)
-):
+) -> Dict[str, Any]:
     if isinstance(current_user, dict):
         user_id = current_user.get("user_id") or current_user.get("id") or current_user.get("sub")
     else:
@@ -274,9 +274,10 @@ def update_profile(
 @router.post("/change-password")
 def change_password(
     data: ChangePasswordRequest,
-    current_user=Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
     db: Session = Depends(get_db)
-):
+) -> Dict[str, str]:
+
     if isinstance(current_user, dict):
         user_id = current_user.get("user_id") or current_user.get("id") or current_user.get("sub")
     else:

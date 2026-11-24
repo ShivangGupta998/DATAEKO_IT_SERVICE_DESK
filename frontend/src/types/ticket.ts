@@ -13,6 +13,13 @@ export interface SLAInfo {
   due_date?: string;
 }
 
+export interface Attachment {
+  name: string;
+  url: string;
+  size?: number;
+  type?: string;
+}
+
 export interface Ticket {
   id: number;
   title: string;
@@ -20,6 +27,7 @@ export interface Ticket {
   category?: TicketCategory;
   priority: TicketPriority;
   status: TicketStatus;
+  attachments?: Attachment[];
   requester_id?: number;
   requester_name?: string;
   requester_email?: string;
@@ -43,6 +51,9 @@ export interface Ticket {
   sla_due_date?: string;
   remaining_minutes?: number;
   sla?: SLAInfo;
+  csat_rating?: number;
+  csat_feedback?: string;
+  csat_submitted_at?: string;
   created_at: string;
   updated_at?: string;
   closed_at?: string;
@@ -54,6 +65,7 @@ export interface TicketCreate {
   category?: string;
   priority?: TicketPriority;
   source?: string;
+  attachments?: Attachment[];
 }
 
 export interface TicketUpdate {
@@ -64,6 +76,7 @@ export interface TicketUpdate {
   status?: TicketStatus;
   assignee_id?: number | null;
   comment?: string;
+  attachments?: Attachment[];
 }
 
 export interface TicketHistoryItem {
@@ -74,6 +87,7 @@ export interface TicketHistoryItem {
   new_value?: string;
   action?: string;
   comment?: string;
+  attachments?: Attachment[];
   changed_by_id?: number;
   changed_by_name?: string;
   created_at: string;

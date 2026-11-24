@@ -142,22 +142,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
   return (
     <aside
       id="main-sidebar"
-      className={`fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-100 flex flex-col border-r border-slate-800 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+      className={`fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-950/70 dark:backdrop-blur-2xl text-slate-800 dark:text-slate-100 flex flex-col border-r border-slate-200 dark:border-slate-800/80 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.06),4px_0_24px_rgba(0,0,0,0.5)] transition-transform duration-300 ease-in-out lg:translate-x-0 ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
       {/* Brand Header */}
-      <div className="p-5 flex items-center space-x-3 border-b border-slate-800/80">
-        <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-indigo-500/20 border border-indigo-400/30 shrink-0">
+      <div className="p-5 flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800/80">
+        <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-indigo-500/25 dark:shadow-sky-500/30 border border-indigo-400/30 dark:border-sky-400/30 shrink-0">
           <ShieldCheck className="w-5 h-5" />
         </div>
-        <h1 className="text-white font-extrabold text-lg tracking-tight">
+        <h1 className="font-black text-xl tracking-tight text-slate-900 dark:text-white">
           IT Service Desk
         </h1>
       </div>
 
       {/* Navigation Section */}
-      <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto">
+      <nav className="flex-1 px-4 space-y-1.5 mt-4 overflow-y-auto">
         {filteredNavItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -167,45 +167,45 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
               end={item.end}
               onClick={onCloseMobile}
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors ${
+                `flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 border ${
                   isActive
-                    ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800 font-medium'
+                    ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/30 dark:shadow-sky-500/25 border-indigo-400/30 dark:border-sky-400/40'
+                    : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-medium'
                 }`
               }
             >
-              <Icon className="w-4 h-4 shrink-0" />
-              <span className="text-sm">{item.label}</span>
+              <Icon className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+              <span className="text-sm tracking-tight">{item.label}</span>
             </NavLink>
           );
         })}
       </nav>
 
       {/* User Card & Logout Footer */}
-      <div className="p-4 mt-auto border-t border-slate-800 bg-slate-900/80">
+      <div className="p-4 mt-auto border-t border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/60 dark:backdrop-blur-xl">
         <Link
           to="/profile"
           onClick={onCloseMobile}
-          className="flex items-center space-x-3 p-2 -m-2 rounded-xl hover:bg-slate-800/90 transition-all group cursor-pointer"
+          className="flex items-center space-x-3 p-2 -m-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/50 dark:hover:border dark:hover:border-sky-500/20 transition-all group cursor-pointer"
           title="View & Edit Profile Settings"
         >
           {avatarUrl ? (
             <img
               src={avatarUrl}
               alt="Avatar"
-              className="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-indigo-500/40 group-hover:border-indigo-400 transition-colors"
+              className="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-indigo-500/40 dark:border-sky-400/60 dark:shadow-[0_0_10px_rgba(56,189,248,0.3)] transition-colors"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-slate-700 group-hover:bg-indigo-600 flex items-center justify-center text-slate-200 group-hover:text-white font-bold text-xs shrink-0 border border-slate-600 transition-colors">
+            <div className="w-10 h-10 rounded-full bg-slate-700 dark:bg-slate-800 dark:border-2 dark:border-sky-400/60 dark:shadow-[0_0_10px_rgba(56,189,248,0.3)] flex items-center justify-center text-slate-200 dark:text-sky-200 font-bold text-xs shrink-0 transition-colors">
               {getInitials(user?.full_name, user?.username)}
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-white uppercase tracking-wider truncate group-hover:text-indigo-300 transition-colors">
+            <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider truncate group-hover:text-indigo-600 dark:group-hover:text-sky-300 transition-colors">
               {user?.full_name || user?.username || 'USER'}
             </p>
             <div className="flex items-center space-x-2">
-              <p className="text-[10px] text-indigo-400 font-semibold truncate">
+              <p className="text-[10px] text-indigo-600 dark:text-sky-400 font-semibold truncate uppercase">
                 {roleName || 'Employee'}
               </p>
             </div>
@@ -215,7 +215,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
         <button
           type="button"
           onClick={handleLogout}
-          className="mt-4 w-full block text-center py-2 text-xs font-bold text-slate-400 hover:text-rose-400 hover:border-rose-500/40 border border-slate-700 rounded-lg transition-all uppercase tracking-wider"
+          className="mt-4 w-full block text-center py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-400 dark:hover:border-rose-500/50 border border-slate-300 dark:border-slate-700/60 dark:bg-slate-900/50 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-xl transition-all uppercase tracking-wider active:scale-98"
         >
           LOGOUT
         </button>

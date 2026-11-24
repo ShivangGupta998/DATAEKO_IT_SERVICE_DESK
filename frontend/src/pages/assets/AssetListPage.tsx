@@ -229,7 +229,7 @@ export const AssetListPage: React.FC = () => {
   return (
     <div className="space-y-6 antialiased selection:bg-indigo-500 selection:text-white pb-10 transition-colors duration-300">
       {/* Top Banner / Header */}
-      <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/80 p-6 sm:p-8 rounded-2xl shadow-xs dark:shadow-2xl dark:shadow-black/80 relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl border border-slate-300 dark:border-slate-800/80 p-6 sm:p-8 rounded-2xl shadow-xs dark:shadow-2xl dark:shadow-black/80 relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="relative z-10 space-y-1.5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold uppercase tracking-widest">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-pulse" />
@@ -250,7 +250,7 @@ export const AssetListPage: React.FC = () => {
             type="button"
             onClick={fetchAssets}
             disabled={isLoading}
-            className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-xs active:scale-95 disabled:opacity-50"
+            className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-xs active:scale-95 disabled:opacity-50"
             title="Refresh Inventory"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-600 dark:text-indigo-400' : ''}`} />
@@ -272,7 +272,7 @@ export const AssetListPage: React.FC = () => {
       {error && <ErrorAlert error={error} onRetry={fetchAssets} />}
 
       {/* Filter & Control Bar */}
-      <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/80 p-3.5 rounded-2xl shadow-xs dark:shadow-2xl dark:shadow-black/80 flex flex-col sm:flex-row items-center gap-3">
+      <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl border border-slate-300 dark:border-slate-800/80 p-3.5 rounded-2xl shadow-xs dark:shadow-2xl dark:shadow-black/80 flex flex-col sm:flex-row items-center gap-3">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
           <input
@@ -283,7 +283,7 @@ export const AssetListPage: React.FC = () => {
               setCurrentPage(1);
             }}
             placeholder="Search by tag, name, model, serial number, category..."
-            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
+            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
           />
         </div>
 
@@ -293,7 +293,7 @@ export const AssetListPage: React.FC = () => {
             setStatusFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-semibold w-full sm:w-auto focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none cursor-pointer"
+          className="px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-semibold w-full sm:w-auto focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none cursor-pointer"
         >
           <option value="ALL" className="bg-white dark:bg-slate-900">All Asset Statuses</option>
           <option value="Available" className="bg-white dark:bg-slate-900">Available</option>
@@ -304,7 +304,7 @@ export const AssetListPage: React.FC = () => {
       </div>
 
       {/* Assets Table Container */}
-      <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-xs dark:shadow-2xl dark:shadow-black/80 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900/60 backdrop-blur-2xl border border-slate-300 dark:border-slate-800/80 rounded-2xl shadow-xs dark:shadow-2xl dark:shadow-black/80 overflow-hidden">
         {isLoading ? (
           <div className="p-6">
             <TableSkeleton rows={5} columns={canManageAssets ? 8 : 7} />
@@ -320,7 +320,7 @@ export const AssetListPage: React.FC = () => {
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-                <thead className="bg-slate-50/80 dark:bg-slate-950/50 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-200 dark:border-slate-800/80">
+                <thead className="bg-slate-50/80 dark:bg-slate-950/50 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-300 dark:border-slate-800/80">
                   <tr>
                     <th className="py-3.5 px-4">Asset Tag</th>
                     <th className="py-3.5 px-4">Name / Model</th>
@@ -342,10 +342,14 @@ export const AssetListPage: React.FC = () => {
                         {asset.asset_tag}
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-slate-900 dark:text-white">{asset.name || 'N/A'}</div>
-                        {asset.model && asset.model !== asset.name && (
+                        <div className="font-bold text-slate-900 dark:text-white">
+                          {asset.name || asset.model || 'N/A'}
+                        </div>
+                        {asset.name && asset.model && asset.model !== asset.name ? (
                           <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{asset.model}</div>
-                        )}
+                        ) : asset.manufacturer ? (
+                          <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{asset.manufacturer}</div>
+                        ) : null}
                       </td>
                       <td className="py-3.5 px-4 font-medium">
                         <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 inline-block font-semibold">
@@ -377,8 +381,19 @@ export const AssetListPage: React.FC = () => {
                                   setSelectedAsset(asset);
                                   setShowAssignModal(true);
                                 }}
-                                className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all"
-                                title="Assign to Employee"
+                                disabled={asset.status !== 'Available' && asset.status !== 'Assigned'}
+                                className={`p-1.5 rounded-lg border transition-all ${
+                                  asset.status === 'Available' || asset.status === 'Assigned'
+                                    ? 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:bg-indigo-50 dark:hover:bg-indigo-500/10'
+                                    : 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400'
+                                }`}
+                                title={
+                                  asset.status === 'Assigned'
+                                    ? 'Reassign to Employee'
+                                    : asset.status === 'Available'
+                                    ? 'Assign to Employee'
+                                    : 'Cannot assign asset in current status'
+                                }
                               >
                                 <UserCheck className="w-4 h-4" />
                               </button>
@@ -556,8 +571,8 @@ export const AssetListPage: React.FC = () => {
       <Modal
         isOpen={showAssignModal}
         onClose={() => setShowAssignModal(false)}
-        title={`Assign Asset: ${selectedAsset?.asset_tag}`}
-        subtitle={`Assign ${selectedAsset?.name} to an active employee`}
+        title={`${selectedAsset?.status === 'Assigned' ? 'Reassign' : 'Assign'} Asset: ${selectedAsset?.asset_tag}`}
+        subtitle={`${selectedAsset?.status === 'Assigned' ? 'Reassign' : 'Assign'} ${selectedAsset?.name || selectedAsset?.model || selectedAsset?.asset_tag || 'asset'} to an active employee`}
       >
         <form onSubmit={handleAssignAsset} className="space-y-4">
           <div>
@@ -601,7 +616,11 @@ export const AssetListPage: React.FC = () => {
               disabled={isSubmitting}
               className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md shadow-indigo-600/20 transition-all disabled:opacity-50"
             >
-              {isSubmitting ? 'Assigning...' : 'Confirm Assignment'}
+              {isSubmitting
+                ? 'Saving...'
+                : selectedAsset?.status === 'Assigned'
+                ? 'Confirm Reassignment'
+                : 'Confirm Assignment'}
             </button>
           </div>
         </form>

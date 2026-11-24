@@ -6,6 +6,7 @@ export interface Asset {
   name: string;
   category?: string;
   model?: string;
+  manufacturer?: string | null;
   serial_number?: string;
   cost?: number;
   status: AssetStatus;
@@ -30,6 +31,7 @@ export interface AssetCreate {
   name: string;
   category?: string;
   model?: string;
+  manufacturer?: string | null;
   serial_number?: string;
   cost?: number;
   status?: string;
@@ -43,6 +45,7 @@ export interface AssetUpdate {
   name?: string;
   category?: string;
   model?: string;
+  manufacturer?: string | null;
   serial_number?: string;
   cost?: number;
   status?: string;

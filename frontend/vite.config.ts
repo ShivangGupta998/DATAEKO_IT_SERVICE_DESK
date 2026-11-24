@@ -15,6 +15,12 @@ export default defineConfig(() => {
       port: 3000,
       strictPort: true, // Prevents Vite from automatically switching to 3001 or other ports
       host: true, // Exposes the server to local network IPs (e.g., 172.31.30.73)
+      proxy: {
+        '/uploads': {
+          target: 'http://localhost:8000',
+          changeOrigin: true,
+        },
+      },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

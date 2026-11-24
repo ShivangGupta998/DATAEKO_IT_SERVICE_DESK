@@ -283,7 +283,7 @@ export const ProfilePage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
       {/* 1. Profile Header & Avatar Card */}
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl relative overflow-hidden transition-colors">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-slate-300 dark:border-slate-800/80 shadow-xl relative overflow-hidden transition-colors">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 bg-indigo-600/10 dark:bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
@@ -445,7 +445,7 @@ export const ProfilePage: React.FC = () => {
 
       {/* 3. Tab Contents */}
       {activeTab === 'info' && (
-        <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
+        <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-xl space-y-6">
           <div>
             <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <UserIcon className="w-4 h-4 text-indigo-500" />
@@ -606,7 +606,7 @@ export const ProfilePage: React.FC = () => {
       )}
 
       {activeTab === 'security' && (
-        <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
+        <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-xl space-y-6">
           <div>
             <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Lock className="w-4 h-4 text-indigo-500" />
@@ -723,7 +723,7 @@ export const ProfilePage: React.FC = () => {
       )}
 
       {activeTab === 'preferences' && (
-        <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
+        <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-xl space-y-6">
           <div>
             <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Bell className="w-4 h-4 text-indigo-500" />
@@ -885,7 +885,7 @@ export const ProfilePage: React.FC = () => {
       )}
 
       {/* RBAC Privileges Matrix & Diagnostic Section */}
-      <div className="bg-white/90 dark:bg-slate-900/80 p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800 backdrop-blur-xl shadow-xl space-y-6">
+      <div className="bg-white/90 dark:bg-slate-900/80 p-6 sm:p-8 rounded-3xl border border-slate-300 dark:border-slate-800 backdrop-blur-xl shadow-xl space-y-6">
         <div>
           <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block mb-1">
             PRIVILEGE MATRIX

@@ -1,5 +1,8 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 from app.database.database import get_db
 
@@ -330,6 +333,12 @@ async def assign_asset(
             detail="Asset not found"
         )
 
+    if asset.status == "Retired":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot assign a retired asset"
+        )
+
     employee = (
         db.query(User)
         .filter(User.id == assign_data.assigned_to)
@@ -354,21 +363,34 @@ async def assign_asset(
     db.commit()
     db.refresh(asset)
 
-    create_notification(
-        db=db,
-        user_id=employee.id,
-        title="Asset Assigned",
-        message=f"Asset '{asset.name}' has been assigned to you.",
-        notification_type="asset"
+    asset_display = (
+        getattr(asset, "name", None)
+        or getattr(asset, "model", None)
+        or getattr(asset, "asset_tag", None)
+        or "Asset"
     )
-    db.commit()
 
-    await notification_manager.send_personal_notification(
-        user_id=str(employee.id),
-        title="Asset Assigned",
-        message=f"Asset '{asset.name}' has been assigned to you.",
-        link="/assets"
-    )
+    try:
+        create_notification(
+            db=db,
+            user_id=employee.id,
+            title="Asset Assigned",
+            message=f"Asset '{asset_display}' has been assigned to you.",
+            notification_type="asset"
+        )
+    except Exception as e:
+        logger.warning(f"Failed to create database notification for asset assignment: {e}")
+        db.rollback()
+
+    try:
+        await notification_manager.send_personal_notification(
+            user_id=str(employee.id),
+            title="Asset Assigned",
+            message=f"Asset '{asset_display}' has been assigned to you.",
+            link="/assets"
+        )
+    except Exception as e:
+        logger.warning(f"Failed to send personal socket notification for asset assignment: {e}")
 
     return asset
 

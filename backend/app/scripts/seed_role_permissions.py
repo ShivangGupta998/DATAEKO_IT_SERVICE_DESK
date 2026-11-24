@@ -1,60 +1,72 @@
+import logging
 from app.database.database import SessionLocal
 from app.models.role import Role
 from app.models.permission import Permission
 from app.models.role_permission import RolePermission
 
-db = SessionLocal()
+logger = logging.getLogger(__name__)
 
-role_permissions = {
-    "Admin": [
-        "manage_users",
-        "manage_settings",
-        "view_reports",
-        "manage_tickets",
-        "update_ticket",
-        "create_ticket",
-    ],
-    "IT Manager": [
-        "view_reports",
-        "manage_tickets",
-        "update_ticket",
-    ],
-    "Agent": [
-        "update_ticket",
-    ],
-    "Employee": [
-        "create_ticket",
-    ],
-}
+def seed_role_permissions() -> None:
+    db = SessionLocal()
 
-for role_name, permission_names in role_permissions.items():
-    role = db.query(Role).filter(Role.name == role_name).first()
+    role_permissions = {
+        "Admin": [
+            "manage_users",
+            "manage_settings",
+            "view_reports",
+            "manage_tickets",
+            "update_ticket",
+            "create_ticket",
+        ],
+        "IT Manager": [
+            "view_reports",
+            "manage_tickets",
+            "update_ticket",
+        ],
+        "Agent": [
+            "update_ticket",
+        ],
+        "Employee": [
+            "create_ticket",
+        ],
+    }
 
-    if not role:
-        continue
+    try:
+        for role_name, permission_names in role_permissions.items():
+            role = db.query(Role).filter(Role.name == role_name).first()
 
-    for permission_name in permission_names:
-        permission = db.query(Permission).filter(
-            Permission.name == permission_name
-        ).first()
+            if not role:
+                continue
 
-        if not permission:
-            continue
+            for permission_name in permission_names:
+                permission = db.query(Permission).filter(
+                    Permission.name == permission_name
+                ).first()
 
-        exists = db.query(RolePermission).filter(
-            RolePermission.role_id == role.id,
-            RolePermission.permission_id == permission.id
-        ).first()
+                if not permission:
+                    continue
 
-        if not exists:
-            db.add(
-                RolePermission(
-                    role_id=role.id,
-                    permission_id=permission.id
-                )
-            )
+                exists = db.query(RolePermission).filter(
+                    RolePermission.role_id == role.id,
+                    RolePermission.permission_id == permission.id
+                ).first()
 
-db.commit()
-db.close()
+                if not exists:
+                    db.add(
+                        RolePermission(
+                            role_id=role.id,
+                            permission_id=permission.id
+                        )
+                    )
 
-print("Role permissions seeded successfully.")
+        db.commit()
+        logger.info("Role permissions seeded successfully.")
+    except Exception as e:
+        logger.error(f"Failed to seed role permissions: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    seed_role_permissions()

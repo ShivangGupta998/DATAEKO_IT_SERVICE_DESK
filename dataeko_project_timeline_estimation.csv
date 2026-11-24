@@ -1,0 +1,28 @@
+DATAEKO,,,,,,,,
+IT Service Desk & Asset Register,,,,,,,,
+Project Phase & Time Estimation,,,,,,,,
+,,,,,,,,
+Prepared for: CFO Review,,,,,,,,
+Prepared by: Dataeko Capstone Team,,,,,,,,
+Timeline: 27 July 2026 - 10 October 2026,,,,,,,,
+,,,,,,,,
+Phase,Task,Details,Timeline,Weeks,Complexity,Estimated Days,Start Date,End Date
+Phase-1,R&A,"Requirement gathering, one pager estimation, architecture plan",Done,Week 1,Low,3,2026-07-27,2026-07-29
+Phase-2,Project Setup,"FastAPI + React (Vite) scaffolding, GitHub repo, Docker setup",Done,Week 1,Medium,2,2026-07-30,2026-07-31
+Phase-3,Database Foundation,"PostgreSQL setup, SQLAlchemy session, Roles/Users/Depts tables",Done,Week 2,High,4,2026-08-03,2026-08-06
+Phase-4,Authentication,"Registration, bcrypt hashing, login, JWT auth, /auth/me",Done,Week 2-3,Medium,4,2026-08-07,2026-08-12
+Phase-5,RBAC & Permissions,"Permissions, Roles, Role-Permissions tables, API guards",Done,Week 3,Medium,3,2026-08-13,2026-08-17
+Phase-6,Ticket Intake & Queue,"Ticket creation, triage queue, comments, file attachments",Done,Week 4,High,5,2026-08-18,2026-08-22
+Phase-7,SLA Tracking,"SLA policies, breach timers, escalation rules, SLA logs",Done,Week 5,High,5,2026-08-25,2026-08-29
+Phase-8,Asset Register,"Asset CRUD, categories, assignment, lifecycle status tracking",Done,Week 6,Medium,4,2026-09-01,2026-09-04
+Phase-9,Access Request Workflow,"Request submission, manager approval workflow, audit trail",Done,Week 6-7,Medium,4,2026-09-07,2026-09-10
+Phase-10,Employee Offboarding,"Reclaim assets, revoke access, checklist tracking, handovers",Done,Week 7,High,4,2026-09-11,2026-09-16
+Phase-11,Knowledge Base,"Articles, categories, search, resolution deflection guides",Done,Week 8,Medium,4,2026-09-17,2026-09-22
+Phase-12,User Profile & Preferences,"Profile settings, avatar crop/upload, timezone, OOO status",Done,Week 8-9,Medium,3,2026-09-23,2026-09-25
+Phase-13,Slack Bot & Notifications,"Slack bot intake, event webhooks, channel broadcast, DM routing",Done,Week 9-10,High,6,2026-09-28,2026-10-03
+Phase-14,AI Support & Integration,"Google Gemini AI assistant widget, testing & bug fixes",Done,Week 10-11,High,3,2026-10-05,2026-10-07
+Phase-15,Deployment & Cost Review,"AWS Lightsail 2GB, Docker CI/CD, SSL, CFO cost review",Done,Week 11,High,3,2026-10-08,2026-10-10
+,,,,,,,,
+,,,,,Total Estimated Days,57,,
+,,,,,Project Start,2026-07-27,,
+,,,,,Project End,2026-10-10,,

@@ -1,6 +1,6 @@
-import os
+from typing import Generator
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from app.core.config import settings
 
 # Initialize SQLAlchemy engine with SSL, keepalives, and pool management
@@ -29,8 +29,8 @@ SessionLocal = sessionmaker(
 Base = declarative_base()
 
 # Dependency to yield database sessions per API request
-def get_db():
-    db = SessionLocal()
+def get_db() -> Generator[Session, None, None]:
+    db: Session = SessionLocal()
     try:
         yield db
     finally:

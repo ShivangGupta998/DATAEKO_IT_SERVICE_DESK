@@ -1,9 +1,9 @@
 import json
 import os
-import urllib.request
-import urllib.error
+from urllib import request as urllib_request, error as urllib_error
 from typing import List, Dict, Optional, Any
-from fastapi import APIRouter, Depends, HTTPException
+
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.core.config import settings
 
@@ -166,14 +166,14 @@ def ai_chat_endpoint(payload: AIChatRequest):
 
         try:
             req_data = json.dumps(request_body).encode("utf-8")
-            req = urllib.request.Request(
+            req = urllib_request.Request(
                 url,
                 data=req_data,
                 headers={"Content-Type": "application/json"},
                 method="POST"
             )
 
-            with urllib.request.urlopen(req, timeout=15) as response:
+            with urllib_request.urlopen(req, timeout=15) as response:
                 res_body = response.read().decode("utf-8")
                 res_json = json.loads(res_body)
                 
@@ -189,13 +189,14 @@ def ai_chat_endpoint(payload: AIChatRequest):
                             suggested_actions=actions,
                             configured=True
                         )
-        except urllib.error.HTTPError as http_err:
+        except urllib_error.HTTPError as http_err:
             error_details = http_err.read().decode("utf-8")
             last_error = f"Gemini API error ({model}): {http_err.code} - {error_details}"
             continue
         except Exception as e:
             last_error = f"Connection error ({model}): {str(e)}"
             continue
+
 
     # If all models failed
     raise HTTPException(status_code=502, detail=f"Failed to query Gemini API: {last_error}")

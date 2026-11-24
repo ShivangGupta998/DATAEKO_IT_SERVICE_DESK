@@ -1,11 +1,15 @@
 import asyncio
+import logging
 from datetime import datetime, time, timedelta
-from sqlalchemy.orm import Session
+from typing import Optional
 
 from app.database.database import SessionLocal
 from app.services.auto_assign_service import auto_assign_stale_tickets
 
+logger = logging.getLogger(__name__)
+
 # Business Hours Configuration: Mon-Fri, 9:00 AM - 5:00 PM
+
 WORK_START_HOUR = 9
 WORK_END_HOUR = 17
 
@@ -49,7 +53,9 @@ def calculate_sla_due(priority: str) -> datetime:
     sla_hours = {"critical": 2, "high": 8, "medium": 24, "low": 72}.get(p, 24)
     return add_business_hours(now, sla_hours)
 
-def get_sla_status(sla_due: datetime, resolved_at: datetime = None, status: str = "") -> str:
+def get_sla_status(
+    sla_due: datetime, resolved_at: Optional[datetime] = None, status: str = ""
+) -> str:
     """Returns SLA status taking resolution state and paused states into account."""
     if status.lower() in ["waiting for customer", "paused"]:
         return "Paused"
@@ -68,9 +74,9 @@ def get_remaining_minutes(sla_due: datetime) -> int:
     remaining = sla_due - datetime.utcnow()
     return int(remaining.total_seconds() / 60)
 
-async def start_sla_and_auto_assign_scheduler():
+async def start_sla_and_auto_assign_scheduler() -> None:
     """Background task loop executing auto-assignment every 90 minutes."""
-    print("--> SLA & Auto-Assign Background Task Initiated (90 min interval).")
+    logger.info("--> SLA & Auto-Assign Background Task Initiated (90 min interval).")
     while True:
         try:
             db = SessionLocal()
@@ -79,7 +85,7 @@ async def start_sla_and_auto_assign_scheduler():
             finally:
                 db.close()
         except Exception as e:
-            print(f"--> Auto-Assign Loop Exception: {e}")
+            logger.error(f"--> Auto-Assign Loop Exception: {e}")
             
         # 5400 seconds = 90 minutes
         await asyncio.sleep(5400)

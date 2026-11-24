@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DATAEKO IT Service Desk &amp; Asset Register — Capstone Presentation</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @media print {
+      body { background: #0f172a !important; color: white !important; }
+      .no-print { display: none !important; }
+      .slide-container { display: block !important; }
+      .slide { display: flex !important; page-break-after: always; min-height: 100vh; height: auto; }
+      .speaker-notes { display: block !important; margin-top: 1.5rem; border-top: 1px dashed #64748b; }
+    }
+    .slide {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+      transform: scale(0.98);
+    }
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1);
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+    .glass-pill {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(71, 85, 105, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+
+  <!-- Top Navigation & Controls Bar -->
+  <header class="no-print w-full px-6 py-4 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md fixed top-0 left-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <div>
+        <h1 class="text-sm font-extrabold tracking-tight text-white flex items-center gap-2">
+          <span>DATAEKO</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded-full border border-cyan-800/50">Capstone 2026</span>
+        </h1>
+        <p class="text-[11px] text-slate-400">Enterprise IT Service Desk &amp; Asset Register</p>
+      </div>
+    </div>
+
+    <!-- Center Slide Counter -->
+    <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-4 py-1.5 rounded-full shadow-inner">
+      <span id="slide-current" class="font-mono text-xs font-bold text-cyan-400">01</span>
+      <span class="text-slate-500 text-xs font-bold">/</span>
+      <span id="slide-total" class="font-mono text-xs font-bold text-slate-400">12</span>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-2">
+      <button onclick="toggleNotes()" id="notes-btn" title="Toggle Speaker Notes (Key: N)" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-all flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <span>Notes (N)</span>
+      </button>
+
+      <button onclick="window.print()" title="Print / Save as PDF" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-all flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        <span>PDF</span>
+      </button>
+
+      <button onclick="toggleFullscreen()" title="Fullscreen Mode (Key: F)" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+        <span>Full (F)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Slide Canvas -->
+  <main class="flex-1 flex items-center justify-center pt-20 pb-20 px-4 md:px-12 w-full max-w-7xl mx-auto">
+    <div class="w-full slide-container">
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 1: Title & Capstone Overview -->
+      <!-- ============================================================== -->
+      <section class="slide active flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="absolute -top-32 -right-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-cyan-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-4xl space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            Final Capstone Presentation • Executive Board &amp; CFO Review
+          </div>
+
+          <h2 class="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight">
+            DATAEKO <span class="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">IT Service Desk</span><br>
+            &amp; Asset Register
+          </h2>
+
+          <p class="text-lg md:text-xl text-slate-300 font-normal leading-relaxed">
+            A production-ready Enterprise ITSM &amp; ITAM platform combining automated SLA enforcement, asset lifecycle governance, omnichannel Slack bot intake, and Google Gemini AI Copilot deflection.
+          </p>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-slate-800">
+            <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Project Timeline</span>
+              <p class="text-sm font-bold text-white mt-0.5">27 Jul – 10 Oct 2026</p>
+              <span class="text-[11px] text-emerald-400 font-medium">100% Complete</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Engineering Effort</span>
+              <p class="text-sm font-bold text-white mt-0.5">57 Estimated Days</p>
+              <span class="text-[11px] text-cyan-400 font-medium">15 Full Phases</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Architecture</span>
+              <p class="text-sm font-bold text-white mt-0.5">FastAPI + React Vite</p>
+              <span class="text-[11px] text-indigo-400 font-medium">PostgreSQL 16 + Docker</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Operating Budget</span>
+              <p class="text-sm font-bold text-white mt-0.5">₹880 / Month Flat</p>
+              <span class="text-[11px] text-emerald-400 font-medium">AWS Lightsail 2GB</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> Good morning/afternoon. Today I present DATAEKO IT Service Desk &amp; Asset Register—an enterprise solution designed to solve IT request bottlenecks, eliminate untracked hardware/software licenses, and automate day-to-day operations using modern asynchronous technologies and AI.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 2: Problem Statement & Industry Motivation -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
+            Industry Challenges &amp; Business Opportunity
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            The Problem: IT Fragmentation &amp; Spreadsheet Chaos
+          </h2>
+
+          <p class="text-base text-slate-300 max-w-3xl">
+            Mid-sized enterprises bleed operational hours and security compliance through disconnected emails, spreadsheets, and manual asset tracking.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4">
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-red-900/40 space-y-3">
+              <div class="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center font-bold">01</div>
+              <h3 class="text-base font-bold text-white">SLA Breaches &amp; Lost Tickets</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Requests scattered across email inboxes and Slack DMs lack priority matrices, response timers, and automated technician assignment, leading to 35%+ SLA breaches.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-amber-900/40 space-y-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">02</div>
+              <h3 class="text-base font-bold text-white">Ghost Assets &amp; License Waste</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Hardware laptops and recurring SaaS licenses are tracked in stale Excel sheets. Unreturned equipment during offboarding costs companies thousands annually.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-purple-900/40 space-y-3">
+              <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold">03</div>
+              <h3 class="text-base font-bold text-white">Access Governance &amp; Audit Risk</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Ad-hoc verbal approvals for sensitive permissions fail SOC2/ISO audits. No single pane of glass exists to track who requested, approved, or revoked access.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> We analyzed the operational bottlenecks in typical organizations: IT requests get lost in personal chat threads, offboarded staff keep company assets, and when audits arrive, there's no auditable record of access approvals. DATAEKO was built specifically to solve these 3 pain points.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 3: System Architecture & Tech Stack -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold">
+            Engineering Backbone
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            High-Performance Full-Stack Architecture
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+            <!-- Frontend -->
+            <div class="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+              <div class="text-xs font-bold uppercase tracking-wider text-cyan-400">Presentation Layer</div>
+              <h3 class="text-lg font-extrabold text-white">React 18 + Vite</h3>
+              <ul class="text-xs text-slate-300 space-y-2">
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Cyber-Azure Glassmorphism UI</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Tailwind CSS + Lucide Icons</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Framer Motion animations</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Sub-second client bundle load</li>
+              </ul>
+            </div>
+
+            <!-- Backend -->
+            <div class="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+              <div class="text-xs font-bold uppercase tracking-wider text-indigo-400">Compute Layer</div>
+              <h3 class="text-lg font-extrabold text-white">FastAPI (Python 3.12)</h3>
+              <ul class="text-xs text-slate-300 space-y-2">
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>Asynchronous ASGI (Uvicorn)</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>SQLAlchemy 2.0 ORM</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>JWT + Bcrypt authentication</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>Background SLA schedulers</li>
+              </ul>
+            </div>
+
+            <!-- Database -->
+            <div class="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+              <div class="text-xs font-bold uppercase tracking-wider text-emerald-400">Data &amp; Persistence</div>
+              <h3 class="text-lg font-extrabold text-white">PostgreSQL 16</h3>
+              <ul class="text-xs text-slate-300 space-y-2">
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>ACID relational integrity</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Foreign-key cascading safety</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Sub-5ms query response times</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Nightly automated S3 snapshots</li>
+              </ul>
+            </div>
+
+            <!-- Integrations -->
+            <div class="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+              <div class="text-xs font-bold uppercase tracking-wider text-purple-400">AI &amp; Omnichannel</div>
+              <h3 class="text-lg font-extrabold text-white">Gemini &amp; Slack</h3>
+              <ul class="text-xs text-slate-300 space-y-2">
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>Google Gemini AI Assistant widget</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>Slack Webhook auto-broadcasting</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>Dual-mode (Dark / Light) styling</li>
+                <li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>Dockerized multi-container stack</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> Our architectural philosophy is high performance and low footprint. FastAPI gives us non-blocking async Python with automatic OpenAPI docs. React with Vite delivers instantaneous client-side navigation. PostgreSQL 16 guarantees ACID transaction safety for critical asset ownership.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 4: The 7 Core Operational Workflows -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-5">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+            Standard Operating Procedures (ITIL v4)
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            The 7 Core Operational Workflows
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-2">
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+              <span class="text-xs font-bold text-indigo-400">Workflow 1</span>
+              <h4 class="text-sm font-bold text-white mt-1">Ticket Management</h4>
+              <p class="text-[11px] text-slate-400 mt-1">Intake, priority matrix, round-robin tech assignment, live SLA breach countdown, CSAT feedback.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+              <span class="text-xs font-bold text-cyan-400">Workflow 2</span>
+              <h4 class="text-sm font-bold text-white mt-1">Asset Registry &amp; ITAM</h4>
+              <p class="text-[11px] text-slate-400 mt-1">Hardware/SaaS lifecycle: In Stock &rarr; Assigned &rarr; In Repair &rarr; Retired with serials and cost tracking.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+              <span class="text-xs font-bold text-emerald-400">Workflow 3</span>
+              <h4 class="text-sm font-bold text-white mt-1">Access Request Governance</h4>
+              <p class="text-[11px] text-slate-400 mt-1">Dual-gate approval workflow: Requester &rarr; Dept Manager Approval &rarr; IT Admin Provisioning &rarr; Audit Trail.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+              <span class="text-xs font-bold text-red-400">Workflow 4</span>
+              <h4 class="text-sm font-bold text-white mt-1">Employee Offboarding</h4>
+              <p class="text-[11px] text-slate-400 mt-1">Checklist automation: Hardware reclaim, SaaS license revocation, email handover, safe account deactivation.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+              <span class="text-xs font-bold text-amber-400">Workflow 5</span>
+              <h4 class="text-sm font-bold text-white mt-1">Knowledge Base &amp; Deflection</h4>
+              <p class="text-[11px] text-slate-400 mt-1">Tier-0 self-service articles with category search, quick troubleshooting steps, reducing repetitive ticket creation.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+              <span class="text-xs font-bold text-purple-400">Workflow 6 &amp; 7</span>
+              <h4 class="text-sm font-bold text-white mt-1">Onboarding &amp; Slack Bot</h4>
+              <p class="text-[11px] text-slate-400 mt-1">Day-1 user creation, role assignment, initial hardware dispatch, and real-time bi-directional Slack notification webhooks.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> Rather than building a generic ticket app, we engineered 7 end-to-end business workflows. Each workflow addresses a critical organizational requirement—from hiring to offboarding, and from incident triage to automated Slack notifications.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 5: Deep Dive: Automated Ticket Intake & SLA Engine -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold">
+            Workflow 1 Deep Dive
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            Automated SLA Engine &amp; Intelligent Triage
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+              <h3 class="text-base font-bold text-cyan-400 uppercase tracking-wider">Dynamic SLA Matrix</h3>
+              <div class="space-y-3 text-xs">
+                <div class="flex justify-between items-center p-2.5 rounded-xl bg-slate-950/60 border border-red-900/40">
+                  <span class="font-bold text-red-400">CRITICAL Priority</span>
+                  <span class="font-mono text-white">4 Hours SLA Target</span>
+                </div>
+                <div class="flex justify-between items-center p-2.5 rounded-xl bg-slate-950/60 border border-amber-900/40">
+                  <span class="font-bold text-amber-400">HIGH Priority</span>
+                  <span class="font-mono text-white">8 Hours SLA Target</span>
+                </div>
+                <div class="flex justify-between items-center p-2.5 rounded-xl bg-slate-950/60 border border-indigo-900/40">
+                  <span class="font-bold text-indigo-400">MEDIUM Priority</span>
+                  <span class="font-mono text-white">24 Hours SLA Target</span>
+                </div>
+                <div class="flex justify-between items-center p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <span class="font-bold text-slate-400">LOW Priority</span>
+                  <span class="font-mono text-white">48 Hours SLA Target</span>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400 italic">
+                * Background asyncio scheduler runs every 60s, computing remaining minutes and flagging breached states in real time.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+              <h3 class="text-base font-bold text-emerald-400 uppercase tracking-wider">Closed-Loop Resolution Cycle</h3>
+              <ul class="space-y-3 text-xs text-slate-300">
+                <li class="flex items-start gap-2.5">
+                  <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px]">1</span>
+                  <span><strong>Multi-Channel Intake:</strong> Employees create tickets via Web Portal or directly via Slack Bot webhook.</span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                  <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px]">2</span>
+                  <span><strong>Auto-Assignment:</strong> Unassigned tickets are assigned strictly to registered Technicians (Role ID: 3) to prevent queue starvation.</span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                  <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px]">3</span>
+                  <span><strong>Pre-Breach Alerts:</strong> Slack channel alerts fire 30 minutes before SLA deadline expires.</span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                  <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px]">4</span>
+                  <span><strong>CSAT Rating Trigger:</strong> When resolved, requester receives an instant 1–5 star rating prompt with qualitative feedback.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> The SLA engine isn't a static timestamp—it's a background worker constantly evaluating every open ticket against business hours and priority thresholds. It auto-notifies technicians on Slack before a breach occurs, keeping our compliance high.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 6: Deep Dive: Asset Management & Access Governance -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold">
+            Workflows 2 &amp; 3 Deep Dive
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            Asset Lifecycle &amp; Access Governance
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <!-- Asset Register -->
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-white">Full ITAM Asset Lifecycle</h3>
+                <span class="text-[10px] font-bold text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">150+ Assets</span>
+              </div>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Tracks hardware laptops, monitors, accessories, and SaaS subscription seats with full financial depreciation and warranty dates.
+              </p>
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2 text-xs">
+                <div class="flex items-center justify-between text-slate-300">
+                  <span>State Flow</span>
+                  <span class="font-mono text-cyan-400 text-[11px]">In Stock &rarr; Assigned &rarr; Repair &rarr; Retired</span>
+                </div>
+                <div class="flex items-center justify-between text-slate-300">
+                  <span>Ticket Attachment</span>
+                  <span class="text-slate-400">Tickets link directly to specific asset serial numbers</span>
+                </div>
+                <div class="flex items-center justify-between text-slate-300">
+                  <span>Asset Reclaim</span>
+                  <span class="text-emerald-400 font-semibold">Auto-triggered during employee offboarding</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Access Requests -->
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-white">Dual-Gate Access Governance</h3>
+                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">SOC2 Ready</span>
+              </div>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Replaces risky email approvals with an immutable, auditable multi-step workflow for AWS, GitHub, VPN, and database credentials.
+              </p>
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2 text-xs">
+                <div class="flex items-center justify-between text-slate-300">
+                  <span>Step 1: Request</span>
+                  <span class="text-slate-400">User submits reason &amp; duration</span>
+                </div>
+                <div class="flex items-center justify-between text-slate-300">
+                  <span>Step 2: Manager Gate</span>
+                  <span class="text-amber-400 font-semibold">Department Manager reviews &amp; approves</span>
+                </div>
+                <div class="flex items-center justify-between text-slate-300">
+                  <span>Step 3: Provisioning</span>
+                  <span class="text-cyan-400 font-semibold">IT Admin fulfills credentials with audit timestamp</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> Notice how Asset Registry and Access Requests connect into Offboarding. When an employee leaves, the system doesn't rely on memory—it pulls all assets assigned to their user ID and prompts the IT technician to revoke their approved access permissions.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 7: AI Copilot & Omnichannel Slack Integration -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-semibold">
+            AI &amp; Omnichannel Experience
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            Google Gemini AI Copilot &amp; Slack Integration
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <!-- AI Copilot -->
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-purple-900/40 space-y-3">
+              <div class="flex items-center gap-2 text-purple-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <h3 class="text-base font-bold text-white">Google Gemini AI Support Widget</h3>
+              </div>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                An interactive floating AI assistant embedded directly into the portal that guides employees and drafts solutions.
+              </p>
+              <ul class="text-xs text-slate-300 space-y-2 pt-1">
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span><strong>Self-Service Deflection:</strong> Answers FAQs using indexed KB articles before tickets are logged.</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span><strong>Smart Categorization:</strong> Recommends category &amp; priority based on user description text.</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span><strong>Technician Triage Assist:</strong> Summarizes long ticket activity threads in seconds.</li>
+              </ul>
+            </div>
+
+            <!-- Slack Webhooks -->
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-cyan-900/40 space-y-3">
+              <div class="flex items-center gap-2 text-cyan-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                <h3 class="text-base font-bold text-white">Bi-Directional Slack Bot</h3>
+              </div>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Connects IT technicians directly to where teams already communicate—zero delay between ticket events and notifications.
+              </p>
+              <ul class="text-xs text-slate-300 space-y-2 pt-1">
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span><strong>Instant Event Broadcast:</strong> Ticket created, assigned, priority changed, and resolved alerts.</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span><strong>Slash Command Intake:</strong> Employees create tickets with <code>/ticket [title]</code> without opening web app.</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span><strong>Escalation Pings:</strong> Technicians get tagged directly when critical SLA is under 30 mins.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> Modern employees don't want to log into another portal just to report a monitor issue. With our Slack bot, they can trigger tickets right from Slack. Meanwhile, Google Gemini serves as our first line of defense, deflecting routine password and Wi-Fi inquiries.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 8: Security, RBAC & Enterprise Governance -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold">
+            Security &amp; Authorization
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            Role-Based Access Control (RBAC) &amp; Security
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-red-500/30 space-y-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-red-400 bg-red-950 px-2 py-0.5 rounded">Role ID 1</span>
+              <h3 class="text-base font-bold text-white">Administrator</h3>
+              <p class="text-xs text-slate-400">Full system oversight, user role editing, system configuration, executive reports access, and cloud backup management.</p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-amber-500/30 space-y-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950 px-2 py-0.5 rounded">Role ID 2</span>
+              <h3 class="text-base font-bold text-white">Manager</h3>
+              <p class="text-xs text-slate-400">Reviews &amp; approves departmental access requests, monitors team ticket volume, and views department performance analytics.</p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-cyan-500/30 space-y-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded">Role ID 3</span>
+              <h3 class="text-base font-bold text-white">Technician / Agent</h3>
+              <p class="text-xs text-slate-400">Assigned tickets in queue, manages asset inventories, posts internal investigation notes, and updates ticket status.</p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 space-y-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded">Role ID 4</span>
+              <h3 class="text-base font-bold text-white">Employee</h3>
+              <p class="text-xs text-slate-400">Creates tickets, tracks personal asset assignments, browses Knowledge Base, submits access requests, and rates CSAT.</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400 flex flex-wrap gap-4 items-center justify-between">
+            <span><strong>Cryptographic Safeguards:</strong> Bcrypt password hashing (salt rounds: 12) + Stateless JWT authorization bearer tokens with auto-expiration.</span>
+            <span class="text-emerald-400 font-semibold font-mono">Zero Hardcoded Credentials</span>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> Security isn't an afterthought. We implemented clean 4-tier Role-Based Access Control. Each API endpoint validates the role token before executing, ensuring employees can never view unassigned asset pools or approve their own access requests.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 9: Executive Reports, Analytics & CSAT -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold">
+            Leadership Visibility
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            Real-Time Analytics &amp; CSAT Intelligence
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <div class="text-xs font-bold uppercase text-indigo-400">Operational Health</div>
+              <h3 class="text-xl font-black text-white">SLA Compliance</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Calculates live percentage of tickets resolved within targeted duration. Automatically accounts for resolved vs breached tickets.
+              </p>
+              <div class="text-3xl font-black text-emerald-400 font-mono">94.8%</div>
+              <span class="text-[11px] text-slate-500">Industry benchmark: > 90%</span>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <div class="text-xs font-bold uppercase text-cyan-400">Workforce Efficiency</div>
+              <h3 class="text-xl font-black text-white">Technician Workload</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Live aggregation measuring Assigned Tickets, Resolved Tickets, and Pending Queue per technician using conditional SQL case metrics.
+              </p>
+              <div class="text-3xl font-black text-cyan-400 font-mono">100% Balanced</div>
+              <span class="text-[11px] text-slate-500">Zero queue starvation</span>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <div class="text-xs font-bold uppercase text-amber-400">User Satisfaction</div>
+              <h3 class="text-xl font-black text-white">Customer CSAT</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                1 to 5 star rating prompt triggered on ticket closure with optional qualitative comments. Displayed on executive dashboard.
+              </p>
+              <div class="text-3xl font-black text-amber-400 font-mono">4.8 / 5.0 ⭐</div>
+              <span class="text-[11px] text-slate-500">High employee trust</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> IT leadership needs clear metrics, not gut feelings. Our Reports dashboard provides real-time SLA health, workload distribution across all agents, and CSAT customer satisfaction scores to track employee happiness.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 10: Infrastructure, DevOps & Cost Analysis -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+            CFO &amp; Cloud Economics
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            Production Deployment: AWS Lightsail 2GB
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-emerald-500/30 space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase text-emerald-400">Selected Architecture</span>
+                <span class="text-lg font-black text-white font-mono">Flat ₹880 / Month ($10)</span>
+              </div>
+              <ul class="text-xs text-slate-300 space-y-2">
+                <li class="flex items-center justify-between py-1 border-b border-slate-800">
+                  <span class="text-slate-400">Hardware Allocation</span>
+                  <span class="font-bold text-white">1 vCPU, 2 GB RAM, 60 GB NVMe SSD</span>
+                </li>
+                <li class="flex items-center justify-between py-1 border-b border-slate-800">
+                  <span class="text-slate-400">Network &amp; Bandwidth</span>
+                  <span class="font-bold text-white">3,000 GB (3 TB) Data Out Included Free</span>
+                </li>
+                <li class="flex items-center justify-between py-1 border-b border-slate-800">
+                  <span class="text-slate-400">Dedicated Public IPv4</span>
+                  <span class="font-bold text-emerald-400">Included Free (Zero hourly fees)</span>
+                </li>
+                <li class="flex items-center justify-between py-1 border-b border-slate-800">
+                  <span class="text-slate-400">Nightly Automated S3 Backups</span>
+                  <span class="font-bold text-white">~₹10 / month (30-day retention)</span>
+                </li>
+                <li class="flex items-center justify-between py-1 text-emerald-300 font-bold">
+                  <span>Total Annual Cloud Budget</span>
+                  <span>₹10,560 / Year Flat</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+              <span class="text-xs font-bold uppercase text-cyan-400">Empirical Memory Footprint</span>
+              <div class="space-y-2.5 text-xs">
+                <div>
+                  <div class="flex justify-between text-slate-300 mb-1">
+                    <span>Active Usage: ~385 MB</span>
+                    <span class="text-cyan-400 font-bold">19% of 2,048 MB</span>
+                  </div>
+                  <div class="w-full h-3 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                    <div class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full" style="width: 19%"></div>
+                  </div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1">
+                  <span class="text-[11px] font-bold text-white">1,663 MB Free Safety Buffer (81% Free)</span>
+                  <p class="text-[11px] text-slate-400">
+                    Guarantees zero memory swapping, sustaining up to 10× to 15× concurrency spikes without server degradation.
+                  </p>
+                </div>
+                <p class="text-[11px] text-slate-400">
+                  <strong>Zero DevOps Overhead:</strong> Single <code>docker compose up -d</code> launches backend, database, and Nginx with automated Let's Encrypt SSL renewal.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> From a CFO perspective, AWS Lightsail 2GB in Mumbai offers 100% budget certainty. Traditional EC2+RDS stacks easily cost ₹8,000–₹12,000/month with hidden bandwidth and IPv4 charges. Our entire containerized stack runs cleanly under ₹880/month with 80% free RAM headroom.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 11: Project Timeline & Completed Milestones -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+            Execution &amp; Delivery Tracking
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            Project Timeline &amp; Milestones
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+              <span class="text-[10px] font-bold text-cyan-400 uppercase">Phase 1 – 5 • Weeks 1 – 3</span>
+              <h4 class="text-base font-bold text-white">Foundation &amp; Security</h4>
+              <p class="text-xs text-slate-400">Requirements gathering, PostgreSQL relational models, JWT auth, and RBAC tables.</p>
+              <span class="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded">16 Days • Completed</span>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+              <span class="text-[10px] font-bold text-indigo-400 uppercase">Phase 6 – 10 • Weeks 4 – 7</span>
+              <h4 class="text-base font-bold text-white">Core Transaction Workflows</h4>
+              <p class="text-xs text-slate-400">Ticket intake, dynamic SLA tracking, Asset Register, Access Requests, and Employee Offboarding.</p>
+              <span class="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded">22 Days • Completed</span>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+              <span class="text-[10px] font-bold text-purple-400 uppercase">Phase 11 – 15 • Weeks 8 – 11</span>
+              <h4 class="text-base font-bold text-white">AI, Slack &amp; Deployment</h4>
+              <p class="text-xs text-slate-400">Knowledge Base, Slack bot webhooks, Gemini AI Copilot, AWS Lightsail deployment &amp; CFO review.</p>
+              <span class="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded">19 Days • Completed</span>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+            <span><strong>Total Delivery:</strong> 15 Phases completed across 57 estimated days (27 July – 10 October 2026).</span>
+            <span class="text-emerald-400 font-bold">100% On Time &amp; Verified</span>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> We executed our project over 11 structured weeks, hitting every milestone on schedule without scope creep. All 15 phases—from initial database design to our final production deployment on AWS—are fully implemented, tested, and live.
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- SLIDE 12: Business Impact, Future Roadmap & Conclusion -->
+      <!-- ============================================================== -->
+      <section class="slide flex-col justify-center min-h-[640px] p-8 md:p-14 rounded-3xl glass-card relative overflow-hidden shadow-2xl">
+        <div class="relative z-10 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+            Value Delivered &amp; What's Next
+          </div>
+
+          <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+            Business Impact &amp; Future Vision
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-emerald-500/30 space-y-3">
+              <h3 class="text-base font-bold text-emerald-400 uppercase tracking-wider">Quantifiable Business Impact</h3>
+              <ul class="text-xs text-slate-300 space-y-2.5">
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-bold">&check;</span>
+                  <span><strong>35% Faster Resolution Times:</strong> Automated technician assignment and Slack alerts eliminate ticket triage delays.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-bold">&check;</span>
+                  <span><strong>100% Asset Accountability:</strong> Zero unreturned laptops or orphaned SaaS accounts during employee offboarding.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-bold">&check;</span>
+                  <span><strong>Audit-Ready Compliance:</strong> Immutable audit trails for all sensitive credential and system access grants.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-bold">&check;</span>
+                  <span><strong>Over 90% Cost Reduction:</strong> ₹880/mo cloud spend replaces expensive enterprise SaaS tools like ServiceNow or Jira Service Desk.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <h3 class="text-base font-bold text-cyan-400 uppercase tracking-wider">Future Roadmap</h3>
+              <ul class="text-xs text-slate-300 space-y-2.5">
+                <li class="flex items-start gap-2">
+                  <span class="text-cyan-400 font-bold">&rarr;</span>
+                  <span><strong>Mobile App (React Native):</strong> Push notifications and barcode scanner for scanning laptop serial numbers in the field.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-cyan-400 font-bold">&rarr;</span>
+                  <span><strong>Automated SAML / SSO:</strong> Integration with Okta, Google Workspace, and Microsoft Entra ID.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-cyan-400 font-bold">&rarr;</span>
+                  <span><strong>Self-Healing Scripts:</strong> Automated remediation scripts triggered by recurring common alerts.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="pt-4 text-center">
+            <p class="text-lg font-bold text-white">Thank you! Questions &amp; Discussion</p>
+            <p class="text-xs text-slate-400 mt-1">Dataeko Capstone Engineering Team • Abhishek Singh Lagwal &amp; Team</p>
+          </div>
+        </div>
+
+        <div class="speaker-notes hidden mt-6 p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 text-xs text-amber-200">
+          <strong>Speaker Talking Points:</strong> In conclusion, DATAEKO delivers enterprise ITSM capabilities at a fraction of the cost of legacy platforms, backed by a clean modern architecture and validated by our comprehensive testing. Thank you for your time, and we'd be delighted to answer any questions.
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Bottom Floating Navigation Bar -->
+  <footer class="no-print w-full px-6 py-4 flex items-center justify-between border-t border-slate-800/80 bg-slate-900/60 backdrop-blur-md fixed bottom-0 left-0 z-50">
+    <div class="flex items-center gap-2">
+      <button onclick="prevSlide()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white transition-all flex items-center gap-1.5 text-xs font-semibold">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <span class="hidden sm:inline">Prev (Left)</span>
+      </button>
+
+      <button onclick="nextSlide()" class="p-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all flex items-center gap-1.5 text-xs font-semibold">
+        <span class="hidden sm:inline">Next (Right)</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- Quick Jump Dots -->
+    <div class="flex items-center gap-1.5 overflow-x-auto max-w-md py-1" id="dots-container"></div>
+
+    <div class="text-[11px] text-slate-500 hidden md:block">
+      Use <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[10px]">&larr;</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[10px]">&rarr;</kbd> to navigate
+    </div>
+  </footer>
+
+  <!-- Interactive Slide Controller Script -->
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    let currentSlide = 0;
+    let showNotes = false;
+
+    document.getElementById('slide-total').textContent = String(totalSlides).padStart(2, '0');
+
+    // Generate Dots
+    const dotsContainer = document.getElementById('dots-container');
+    slides.forEach((_, idx) => {
+      const dot = document.createElement('button');
+      dot.className = `w-2.5 h-2.5 rounded-full transition-all ${idx === 0 ? 'bg-cyan-400 w-6' : 'bg-slate-700 hover:bg-slate-500'}`;
+      dot.title = `Slide ${idx + 1}`;
+      dot.onclick = () => goToSlide(idx);
+      dotsContainer.appendChild(dot);
+    });
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        if (idx === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      document.getElementById('slide-current').textContent = String(currentSlide + 1).padStart(2, '0');
+
+      // Update dots
+      const dots = dotsContainer.children;
+      for (let i = 0; i < dots.length; i++) {
+        if (i === currentSlide) {
+          dots[i].className = 'w-6 h-2.5 rounded-full bg-cyan-400 transition-all';
+        } else {
+          dots[i].className = 'w-2.5 h-2.5 rounded-full bg-slate-700 hover:bg-slate-500 transition-all';
+        }
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(n) {
+      if (n >= 0 && n < totalSlides) {
+        currentSlide = n;
+        updateSlide();
+      }
+    }
+
+    function toggleNotes() {
+      showNotes = !showNotes;
+      document.querySelectorAll('.speaker-notes').forEach(el => {
+        el.classList.toggle('hidden', !showNotes);
+      });
+      document.getElementById('notes-btn').classList.toggle('bg-amber-950', showNotes);
+      document.getElementById('notes-btn').classList.toggle('border-amber-700', showNotes);
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard Navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key.toLowerCase() === 'n') {
+        toggleNotes();
+      } else if (e.key.toLowerCase() === 'f') {
+        toggleFullscreen();
+      }
+    });
+  </script>
+</body>
+</html>

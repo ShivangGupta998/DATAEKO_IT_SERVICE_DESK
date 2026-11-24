@@ -1,15 +1,13 @@
 from typing import Optional
-from fastapi import APIRouter, status
+from fastapi import APIRouter
 from pydantic import BaseModel
 import datetime
 import logging
 from slack_sdk.errors import SlackApiError
 
 from app.core.config import settings
-from app.services.slack_service import (
-    slack_client,
-    get_slack_user_id_by_email,
-)
+from app.services.slack_service import slack_client
+
 
 logger = logging.getLogger(__name__)
 
