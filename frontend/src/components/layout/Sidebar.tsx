@@ -193,10 +193,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCloseMobile }) => {
             <img
               src={avatarUrl}
               alt="Avatar"
-              className="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-indigo-500/40 dark:border-sky-400/60 dark:shadow-[0_0_10px_rgba(244,63,94,0.35)] transition-colors"
+              className="w-10 h-10 rounded-full object-cover shrink-0 border-2 border-indigo-500/40 dark:border-sky-400/60 dark:shadow-[0_0_10px_rgba(56,189,248,0.3)] transition-colors"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-slate-700 dark:bg-slate-800 dark:border-2 dark:border-sky-400/60 dark:shadow-[0_0_10px_rgba(244,63,94,0.35)] flex items-center justify-center text-slate-200 dark:text-sky-200 font-bold text-xs shrink-0 transition-colors">
+            <div className="w-10 h-10 rounded-full bg-slate-700 dark:bg-slate-800 dark:border-2 dark:border-sky-400/60 dark:shadow-[0_0_10px_rgba(56,189,248,0.3)] flex items-center justify-center text-slate-200 dark:text-sky-200 font-bold text-xs shrink-0 transition-colors">
               {getInitials(user?.full_name, user?.username)}
             </div>
           )}

@@ -51,7 +51,7 @@ export const AppLayout: React.FC = () => {
   const pageTitle = getPageTitle(location.pathname);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070204] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(60,10,20,0.85),rgba(7,2,4,1))] flex text-slate-800 dark:text-slate-100 antialiased relative overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#02060d] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(9,24,48,0.9),rgba(2,6,13,1))] flex text-slate-800 dark:text-slate-100 antialiased relative overflow-x-hidden transition-colors duration-300">
 
       {/* Mobile Sidebar Backdrop */}
       {mobileSidebarOpen && (

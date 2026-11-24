@@ -148,7 +148,7 @@ export const DashboardPage: React.FC = () => {
             type="button"
             onClick={fetchDashboardData}
             disabled={isLoading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700/80 text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all uppercase tracking-wider shadow-xs hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 dark:shadow-[0_0_15px_rgba(244,63,94,0.2)]"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700/80 text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-all uppercase tracking-wider shadow-xs hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 dark:shadow-[0_0_15px_rgba(56,189,248,0.12)]"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-indigo-600 dark:text-sky-400 ${isLoading ? 'animate-spin' : ''}`} />
             <span>REFRESH</span>
@@ -237,7 +237,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* 4. Resolved Total (Electric Sky & Indigo Glass) */}
-          <div className="group relative bg-white dark:bg-slate-900/40 dark:backdrop-blur-2xl p-5 rounded-3xl border border-slate-300 dark:border-sky-500/35 shadow-xs dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_0_22px_rgba(244,63,94,0.2),0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-300 hover:border-sky-500/60 hover:-translate-y-1 overflow-hidden">
+          <div className="group relative bg-white dark:bg-slate-900/40 dark:backdrop-blur-2xl p-5 rounded-3xl border border-slate-300 dark:border-sky-500/35 shadow-xs dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_0_22px_rgba(56,189,248,0.18),0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-300 hover:border-sky-500/60 hover:-translate-y-1 overflow-hidden">
             {/* Top-Right Neon Gradient Ambient Light */}
             <div className="absolute top-0 right-0 w-36 h-36 bg-sky-500/15 rounded-full blur-2xl pointer-events-none" />
 
@@ -245,13 +245,13 @@ export const DashboardPage: React.FC = () => {
               <span className="text-[11px] font-extrabold text-indigo-600 dark:text-sky-400 uppercase tracking-wider">
                 RESOLVED TOTAL
               </span>
-              <div className="p-2.5 rounded-2xl bg-indigo-50 dark:bg-sky-500/10 border border-indigo-200 dark:border-sky-500/40 text-indigo-600 dark:text-sky-400 dark:shadow-[0_0_14px_rgba(244,63,94,0.35)]">
+              <div className="p-2.5 rounded-2xl bg-indigo-50 dark:bg-sky-500/10 border border-indigo-200 dark:border-sky-500/40 text-indigo-600 dark:text-sky-400 dark:shadow-[0_0_14px_rgba(56,189,248,0.3)]">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
 
             {/* Oversized Split-Lighting Chrome & Neon Number */}
-            <h3 className="text-5xl font-black text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-b dark:from-white dark:via-sky-100 dark:to-sky-400 dark:drop-shadow-[0_0_20px_rgba(244,63,94,0.55)] tracking-tight relative z-10">
+            <h3 className="text-5xl font-black text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-b dark:from-white dark:via-sky-100 dark:to-sky-400 dark:drop-shadow-[0_0_20px_rgba(56,189,248,0.55)] tracking-tight relative z-10">
               {displayResolved}
             </h3>
 
@@ -303,7 +303,7 @@ export const DashboardPage: React.FC = () => {
 
                   return (
                     <tr key={ticket.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
-                      <td className="py-4 px-4 font-mono font-bold text-indigo-600 dark:text-sky-400 dark:drop-shadow-[0_0_8px_rgba(244,63,94,0.35)]">
+                      <td className="py-4 px-4 font-mono font-bold text-indigo-600 dark:text-sky-400 dark:drop-shadow-[0_0_8px_rgba(56,189,248,0.3)]">
                         #{ticket.id}
                       </td>
                       <td className="py-4 px-4 font-medium text-slate-800 dark:text-slate-200 max-w-[200px] truncate">

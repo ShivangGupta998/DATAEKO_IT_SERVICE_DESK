@@ -121,7 +121,7 @@ export const LoginPage: React.FC = () => {
           baseX: currentX,
           baseY: currentY,
           terminalRadius: Math.random() * 3 + 3.5,
-          glowColor: Math.random() > 0.35 ? '#ef4444' : '#dc2626',
+          glowColor: Math.random() > 0.35 ? '#0284c7' : '#4f46e5',
           depth,
           pulseProgress: Math.random(),
           pulseSpeed: Math.random() * 0.005 + 0.002,
@@ -202,13 +202,13 @@ export const LoginPage: React.FC = () => {
       );
 
       if (isDarkMode) {
-        bg.addColorStop(0, '#2d0a12');
-        bg.addColorStop(0.6, '#150508');
-        bg.addColorStop(1, '#070204');
+        bg.addColorStop(0, '#091830');
+        bg.addColorStop(0.6, '#050d1a');
+        bg.addColorStop(1, '#02060d');
       } else {
         bg.addColorStop(0, '#ffffff');
-        bg.addColorStop(0.7, '#fef2f2');
-        bg.addColorStop(1, '#fee2e2');
+        bg.addColorStop(0.7, '#f8fafc');
+        bg.addColorStop(1, '#e2e8f0');
       }
 
       ctx.fillStyle = bg;
@@ -230,9 +230,9 @@ export const LoginPage: React.FC = () => {
         ctx.beginPath();
         ctx.arc(p.x + px * 0.2, p.y + py * 0.2, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = isDarkMode
-          ? `rgba(248, 113, 113, ${pAlpha})`
-          : `rgba(220, 38, 38, ${pAlpha})`;
-        ctx.shadowColor = isDarkMode ? '#f87171' : '#dc2626';
+          ? `rgba(56, 189, 248, ${pAlpha})`
+          : `rgba(2, 132, 199, ${pAlpha})`;
+        ctx.shadowColor = isDarkMode ? '#38bdf8' : '#0284c7';
         ctx.shadowBlur = 6;
         ctx.fill();
         ctx.restore();
@@ -263,15 +263,15 @@ export const LoginPage: React.FC = () => {
 
         // Base Line Stroke
         ctx.strokeStyle = isDarkMode
-          ? `rgba(160, 38, 50, ${0.4 * circuit.depth})`
+          ? `rgba(38, 90, 160, ${0.4 * circuit.depth})`
           : `rgba(15, 23, 42, ${0.45 * circuit.depth})`;
         ctx.lineWidth = isDarkMode ? 1.5 * circuit.depth : 1.8 * circuit.depth;
         ctx.stroke();
 
         // Accent Stroke
         ctx.strokeStyle = isDarkMode
-          ? `rgba(248, 113, 113, ${0.15 * circuit.depth})`
-          : `rgba(220, 38, 38, ${0.25 * circuit.depth})`;
+          ? `rgba(56, 189, 248, ${0.15 * circuit.depth})`
+          : `rgba(2, 132, 199, ${0.25 * circuit.depth})`;
         ctx.lineWidth = 3.2 * circuit.depth;
         ctx.stroke();
 
@@ -283,10 +283,10 @@ export const LoginPage: React.FC = () => {
 
         ctx.beginPath();
         ctx.arc(startX, startY, (circuit.terminalRadius + nodePulse) * circuit.depth, 0, Math.PI * 2);
-        ctx.fillStyle = isDarkMode ? '#20060c' : '#ffffff';
-        ctx.strokeStyle = isDarkMode ? '#f87171' : '#0f172a';
+        ctx.fillStyle = isDarkMode ? '#061528' : '#ffffff';
+        ctx.strokeStyle = isDarkMode ? '#38bdf8' : '#0f172a';
         ctx.lineWidth = isDarkMode ? 1.5 : 2;
-        ctx.shadowColor = isDarkMode ? '#f87171' : '#dc2626';
+        ctx.shadowColor = isDarkMode ? '#38bdf8' : '#0284c7';
         ctx.shadowBlur = 8;
         ctx.fill();
         ctx.stroke();
@@ -298,10 +298,10 @@ export const LoginPage: React.FC = () => {
 
         ctx.beginPath();
         ctx.arc(endX, endY, (circuit.terminalRadius + 2.5) * circuit.depth, 0, Math.PI * 2);
-        ctx.fillStyle = isDarkMode ? '#1a0408' : '#ffffff';
-        ctx.strokeStyle = isDarkMode ? '#ef4444' : '#b91c1c';
+        ctx.fillStyle = isDarkMode ? '#040d1a' : '#ffffff';
+        ctx.strokeStyle = isDarkMode ? '#818cf8' : '#0369a1';
         ctx.lineWidth = isDarkMode ? 1.7 : 2.2;
-        ctx.shadowColor = isDarkMode ? '#ef4444' : '#dc2626';
+        ctx.shadowColor = isDarkMode ? '#818cf8' : '#0284c7';
         ctx.shadowBlur = 10;
         ctx.fill();
         ctx.stroke();
@@ -372,7 +372,7 @@ export const LoginPage: React.FC = () => {
                 /* Light Mode: Turns original logo pure black */
                 brightness-0 contrast-200
                 /* Dark Mode: Reverts to original white/cyan glowing logo */
-                dark:brightness-200 dark:contrast-100 dark:drop-shadow-[0_0_16px_rgba(244,63,94,0.95)]"
+                dark:brightness-200 dark:contrast-100 dark:drop-shadow-[0_0_16px_rgba(56,189,248,0.95)]"
             />
           </div>
         </div>

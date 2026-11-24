@@ -396,7 +396,7 @@ export const RegisterPage: React.FC = () => {
               alt="DATAEKO logo"
               className="h-10 w-auto object-contain transition-all duration-300 group-hover:scale-105
                 brightness-0 contrast-200
-                dark:brightness-200 dark:contrast-100 dark:drop-shadow-[0_0_16px_rgba(244,63,94,0.95)]"
+                dark:brightness-200 dark:contrast-100 dark:drop-shadow-[0_0_16px_rgba(56,189,248,0.95)]"
             />
           </div>
         </div>
