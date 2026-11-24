@@ -28,7 +28,7 @@ export const ParticleWaveBackground: React.FC = () => {
     let count = 0;
 
     const render = () => {
-      ctx.fillStyle = '#090d16'; // Dark background matching theme
+      ctx.fillStyle = '#090305'; // Dark background matching theme
       ctx.fillRect(0, 0, width, height);
 
       count += 0.03;
@@ -52,7 +52,7 @@ export const ParticleWaveBackground: React.FC = () => {
           const alpha = Math.min(1, Math.max(0.1, (iy / numRows) * 0.9));
           ctx.beginPath();
           ctx.arc(px, py, radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(129, 140, 248, ${alpha})`; // Indigo glow color
+          ctx.fillStyle = `rgba(239, 68, 68, ${alpha})`; // Crimson red glow color
           ctx.fill();
         }
       }

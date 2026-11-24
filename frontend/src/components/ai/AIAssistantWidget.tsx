@@ -630,7 +630,7 @@ export const AIAssistantWidget: React.FC = () => {
           className={`group relative flex items-center gap-2.5 px-5 py-2.5 rounded-full font-bold shadow-xl transition-all duration-300 transform active:scale-95 ${
             isOpen
               ? 'bg-slate-800 text-white dark:bg-slate-900/90 dark:border dark:border-sky-500/30 dark:backdrop-blur-xl hover:bg-slate-900'
-              : 'bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-500 text-white dark:border dark:border-sky-400/40 dark:shadow-[0_0_20px_rgba(56,189,248,0.35),inset_0_1px_1px_rgba(255,255,255,0.25)] hover:shadow-indigo-500/40'
+              : 'bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-500 text-white dark:border dark:border-sky-400/40 dark:shadow-[0_0_20px_rgba(239,68,68,0.45),inset_0_1px_1px_rgba(255,255,255,0.25)] hover:shadow-indigo-500/40'
           }`}
         >
           {/* Animated Glow Halo */}
@@ -668,7 +668,7 @@ export const AIAssistantWidget: React.FC = () => {
         <div
           role="dialog"
           aria-label="IT Service Desk Copilot"
-          className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[450px] max-h-[660px] h-[84vh] z-50 flex flex-col rounded-3xl bg-white dark:bg-slate-950/85 dark:backdrop-blur-2xl border border-slate-300 dark:border-cyan-500/25 shadow-2xl dark:shadow-[0_8px_32px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
+          className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-[450px] max-h-[660px] h-[84vh] z-50 flex flex-col rounded-3xl bg-white dark:bg-slate-950/85 dark:backdrop-blur-2xl border border-slate-300 dark:border-rose-500/30 shadow-2xl dark:shadow-[0_8px_32px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
         >
           {/* Panel Header */}
           <div className="px-4 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-slate-800 flex items-center justify-between shrink-0">

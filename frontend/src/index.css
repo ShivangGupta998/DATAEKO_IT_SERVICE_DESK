@@ -1,5 +1,43 @@
 @import "tailwindcss";
 
+@theme {
+  --color-indigo-50: #fef2f2;
+  --color-indigo-100: #fee2e2;
+  --color-indigo-200: #fecaca;
+  --color-indigo-300: #fca5a5;
+  --color-indigo-400: #f87171;
+  --color-indigo-500: #ef4444;
+  --color-indigo-600: #dc2626;
+  --color-indigo-700: #b91c1c;
+  --color-indigo-800: #991b1b;
+  --color-indigo-900: #7f1d1d;
+  --color-indigo-950: #450a0a;
+
+  --color-sky-50: #fff1f2;
+  --color-sky-100: #ffe4e6;
+  --color-sky-200: #fecdd3;
+  --color-sky-300: #fda4af;
+  --color-sky-400: #fb7185;
+  --color-sky-500: #f43f5e;
+  --color-sky-600: #e11d48;
+  --color-sky-700: #be123c;
+  --color-sky-800: #9f1239;
+  --color-sky-900: #881337;
+  --color-sky-950: #4c0519;
+
+  --color-blue-50: #fff1f2;
+  --color-blue-100: #fee2e2;
+  --color-blue-200: #fecaca;
+  --color-blue-300: #fca5a5;
+  --color-blue-400: #f87171;
+  --color-blue-500: #ef4444;
+  --color-blue-600: #dc2626;
+  --color-blue-700: #b91c1c;
+  --color-blue-800: #991b1b;
+  --color-blue-900: #7f1d1d;
+  --color-blue-950: #450a0a;
+}
+
 /* Register dark mode class-driven variant */
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -13,7 +51,7 @@ html {
 }
 
 html.dark {
-  background-color: #020617;
+  background-color: #080305;
   color: #f8fafc;
 }
 

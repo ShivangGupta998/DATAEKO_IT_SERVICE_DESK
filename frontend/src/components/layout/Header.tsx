@@ -102,10 +102,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileSidebar, pageTitle
             <img
               src={avatarUrl}
               alt="Profile"
-              className="w-8 h-8 rounded-full object-cover border border-slate-300 dark:border-sky-400/60 dark:shadow-[0_0_10px_rgba(56,189,248,0.25)]"
+              className="w-8 h-8 rounded-full object-cover border border-slate-300 dark:border-sky-400/60 dark:shadow-[0_0_10px_rgba(244,63,94,0.3)]"
             />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-linear-to-tr from-indigo-600 to-sky-500 dark:from-indigo-600 dark:to-sky-500 text-white font-bold text-[11px] flex items-center justify-center shadow-xs dark:shadow-[0_0_10px_rgba(56,189,248,0.25)]">
+            <div className="w-8 h-8 rounded-full bg-linear-to-tr from-indigo-600 to-sky-500 dark:from-indigo-600 dark:to-sky-500 text-white font-bold text-[11px] flex items-center justify-center shadow-xs dark:shadow-[0_0_10px_rgba(244,63,94,0.3)]">
               {getInitials(user?.full_name, user?.username)}
             </div>
           )}
