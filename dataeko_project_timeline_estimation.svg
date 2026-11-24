@@ -1,0 +1,374 @@
+<svg width="1420" height="840" viewBox="0 0 1420 840" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<rect width="1420" height="840" fill="#f8f9fa"/>
+<rect x="42" y="15" width="1335" height="805" rx="8" fill="#ffffff" stroke="#d1d5db" stroke-width="1.2"/>
+<rect x="42" y="15" width="1335" height="24" fill="#f1f3f5" rx="8"/>
+<line x1="42" y1="39" x2="1377" y2="39" stroke="#d1d5db" stroke-width="1"/>
+<text x="97.0" y="31" font-size="11" font-weight="600" fill="#6c757d" text-anchor="middle">A</text>
+<text x="244.5" y="31" font-size="11" font-weight="600" fill="#6c757d" text-anchor="middle">B</text>
+<line x1="152" y1="15" x2="152" y2="39" stroke="#d1d5db" stroke-width="1"/>
+<text x="554.5" y="31" font-size="11" font-weight="600" fill="#6c757d" text-anchor="middle">C</text>
+<line x1="337" y1="15" x2="337" y2="39" stroke="#d1d5db" stroke-width="1"/>
+<text x="822.0" y="31" font-size="11" font-weight="600" fill="#6c757d" text-anchor="middle">D</text>
+<line x1="772" y1="15" x2="772" y2="39" stroke="#d1d5db" stroke-width="1"/>
+<text x="914.5" y="31" font-size="11" font-weight="600" fill="#6c757d" text-anchor="middle">E</text>
+<line x1="872" y1="15" x2="872" y2="39" stroke="#d1d5db" stroke-width="1"/>
+<text x="1007.0" y="31" font-size="11" font-weight="600" fill="#6c757d" text-anchor="middle">F</text>
+<line x1="957" y1="15" x2="957" y2="39" stroke="#d1d5db" stroke-width="1"/>
+<text x="1112.0" y="31" font-size="11" font-weight="600" fill="#6c757d" text-anchor="middle">G</text>
+<line x1="1057" y1="15" x2="1057" y2="39" stroke="#d1d5db" stroke-width="1"/>
+<text x="1219.5" y="31" font-size="11" font-weight="600" fill="#6c757d" text-anchor="middle">H</text>
+<line x1="1167" y1="15" x2="1167" y2="39" stroke="#d1d5db" stroke-width="1"/>
+<text x="1324.5" y="31" font-size="11" font-weight="600" fill="#6c757d" text-anchor="middle">I</text>
+<line x1="1272" y1="15" x2="1272" y2="39" stroke="#d1d5db" stroke-width="1"/>
+<rect x="42" y="39" width="1335" height="70" fill="#162e51"/>
+<text x="710.0" y="64" font-size="20" font-weight="900" fill="#ffffff" letter-spacing="1.5" text-anchor="middle">DATAEKO</text>
+<text x="710.0" y="84" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">IT Service Desk &amp; Asset Register</text>
+<text x="710.0" y="101" font-size="11" font-weight="500" fill="#93c5fd" text-anchor="middle">Project Phase &amp; Time Estimation</text>
+<rect x="42" y="109" width="1335" height="56" fill="#ffffff"/>
+<text x="710.0" y="127" font-size="12" font-weight="800" fill="#1e293b" text-anchor="middle">Prepared for: CFO Review</text>
+<text x="710.0" y="143" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Prepared by: Dataeko Capstone Team</text>
+<text x="710.0" y="158" font-size="11.5" font-weight="700" fill="#0f766e" text-anchor="middle">Timeline: 27 July 2026 – 10 October 2026 (100% Completed)</text>
+<rect x="42" y="165" width="1335" height="32" fill="#1b365d"/>
+<text x="97.0" y="185" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">Phase</text>
+<text x="164" y="185" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="start">Task</text>
+<line x1="152" y1="165" x2="152" y2="197" stroke="#2e4c79" stroke-width="1"/>
+<text x="349" y="185" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="start">Details</text>
+<line x1="337" y1="165" x2="337" y2="197" stroke="#2e4c79" stroke-width="1"/>
+<text x="822.0" y="185" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">Timeline</text>
+<line x1="772" y1="165" x2="772" y2="197" stroke="#2e4c79" stroke-width="1"/>
+<text x="914.5" y="185" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">Weeks</text>
+<line x1="872" y1="165" x2="872" y2="197" stroke="#2e4c79" stroke-width="1"/>
+<text x="1007.0" y="185" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">Complexity</text>
+<line x1="957" y1="165" x2="957" y2="197" stroke="#2e4c79" stroke-width="1"/>
+<text x="1112.0" y="185" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">Estimated Days</text>
+<line x1="1057" y1="165" x2="1057" y2="197" stroke="#2e4c79" stroke-width="1"/>
+<text x="1219.5" y="185" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">Start Date</text>
+<line x1="1167" y1="165" x2="1167" y2="197" stroke="#2e4c79" stroke-width="1"/>
+<text x="1324.5" y="185" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">End Date</text>
+<line x1="1272" y1="165" x2="1272" y2="197" stroke="#2e4c79" stroke-width="1"/>
+<rect x="42" y="197" width="1335" height="30" fill="#ffffff"/>
+<line x1="42" y1="227" x2="1377" y2="227" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="216" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-1</text>
+<line x1="152" y1="197" x2="152" y2="227" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="216" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">R&amp;A</text>
+<line x1="337" y1="197" x2="337" y2="227" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="216" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Requirement gathering, one pager estimation, architecture plan</text>
+<line x1="772" y1="197" x2="772" y2="227" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="202.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="216.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="197" x2="872" y2="227" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="216" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 1</text>
+<line x1="957" y1="197" x2="957" y2="227" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="202.0" width="72" height="20" rx="5" fill="#e2f0d9"/>
+<text x="1007.0" y="216.0" font-size="10.5" font-weight="700" fill="#385723" text-anchor="middle">Low</text>
+<line x1="1057" y1="197" x2="1057" y2="227" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="216" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">3</text>
+<line x1="1167" y1="197" x2="1167" y2="227" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="216" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-07-27</text>
+<line x1="1272" y1="197" x2="1272" y2="227" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="216" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-07-29</text>
+<rect x="42" y="227" width="1335" height="30" fill="#f8fafc"/>
+<line x1="42" y1="257" x2="1377" y2="257" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="246" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-2</text>
+<line x1="152" y1="227" x2="152" y2="257" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="246" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">Project Setup</text>
+<line x1="337" y1="227" x2="337" y2="257" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="246" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">FastAPI + React (Vite) scaffolding, GitHub repo, Docker setup</text>
+<line x1="772" y1="227" x2="772" y2="257" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="232.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="246.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="227" x2="872" y2="257" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="246" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 1</text>
+<line x1="957" y1="227" x2="957" y2="257" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="232.0" width="72" height="20" rx="5" fill="#fff2cc"/>
+<text x="1007.0" y="246.0" font-size="10.5" font-weight="700" fill="#806000" text-anchor="middle">Medium</text>
+<line x1="1057" y1="227" x2="1057" y2="257" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="246" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2</text>
+<line x1="1167" y1="227" x2="1167" y2="257" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="246" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-07-30</text>
+<line x1="1272" y1="227" x2="1272" y2="257" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="246" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-07-31</text>
+<rect x="42" y="257" width="1335" height="30" fill="#ffffff"/>
+<line x1="42" y1="287" x2="1377" y2="287" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="276" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-3</text>
+<line x1="152" y1="257" x2="152" y2="287" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="276" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">Database Foundation</text>
+<line x1="337" y1="257" x2="337" y2="287" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="276" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">PostgreSQL setup, SQLAlchemy session, Roles/Users/Depts tables</text>
+<line x1="772" y1="257" x2="772" y2="287" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="262.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="276.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="257" x2="872" y2="287" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="276" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 2</text>
+<line x1="957" y1="257" x2="957" y2="287" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="262.0" width="72" height="20" rx="5" fill="#fce4d6"/>
+<text x="1007.0" y="276.0" font-size="10.5" font-weight="700" fill="#c00000" text-anchor="middle">High</text>
+<line x1="1057" y1="257" x2="1057" y2="287" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="276" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">4</text>
+<line x1="1167" y1="257" x2="1167" y2="287" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="276" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-08-03</text>
+<line x1="1272" y1="257" x2="1272" y2="287" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="276" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-08-06</text>
+<rect x="42" y="287" width="1335" height="30" fill="#f8fafc"/>
+<line x1="42" y1="317" x2="1377" y2="317" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="306" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-4</text>
+<line x1="152" y1="287" x2="152" y2="317" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="306" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">Authentication</text>
+<line x1="337" y1="287" x2="337" y2="317" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="306" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Registration, bcrypt hashing, login, JWT auth, /auth/me</text>
+<line x1="772" y1="287" x2="772" y2="317" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="292.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="306.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="287" x2="872" y2="317" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="306" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 2-3</text>
+<line x1="957" y1="287" x2="957" y2="317" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="292.0" width="72" height="20" rx="5" fill="#fff2cc"/>
+<text x="1007.0" y="306.0" font-size="10.5" font-weight="700" fill="#806000" text-anchor="middle">Medium</text>
+<line x1="1057" y1="287" x2="1057" y2="317" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="306" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">4</text>
+<line x1="1167" y1="287" x2="1167" y2="317" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="306" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-08-07</text>
+<line x1="1272" y1="287" x2="1272" y2="317" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="306" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-08-12</text>
+<rect x="42" y="317" width="1335" height="30" fill="#ffffff"/>
+<line x1="42" y1="347" x2="1377" y2="347" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="336" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-5</text>
+<line x1="152" y1="317" x2="152" y2="347" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="336" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">RBAC &amp; Permissions</text>
+<line x1="337" y1="317" x2="337" y2="347" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="336" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Permissions, Roles, Role-Permissions tables, API guards</text>
+<line x1="772" y1="317" x2="772" y2="347" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="322.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="336.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="317" x2="872" y2="347" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="336" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 3</text>
+<line x1="957" y1="317" x2="957" y2="347" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="322.0" width="72" height="20" rx="5" fill="#fff2cc"/>
+<text x="1007.0" y="336.0" font-size="10.5" font-weight="700" fill="#806000" text-anchor="middle">Medium</text>
+<line x1="1057" y1="317" x2="1057" y2="347" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="336" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">3</text>
+<line x1="1167" y1="317" x2="1167" y2="347" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="336" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-08-13</text>
+<line x1="1272" y1="317" x2="1272" y2="347" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="336" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-08-17</text>
+<rect x="42" y="347" width="1335" height="30" fill="#f8fafc"/>
+<line x1="42" y1="377" x2="1377" y2="377" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="366" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-6</text>
+<line x1="152" y1="347" x2="152" y2="377" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="366" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">Ticket Intake &amp; Queue</text>
+<line x1="337" y1="347" x2="337" y2="377" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="366" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Ticket creation, triage queue, comments, file attachments</text>
+<line x1="772" y1="347" x2="772" y2="377" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="352.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="366.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="347" x2="872" y2="377" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="366" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 4</text>
+<line x1="957" y1="347" x2="957" y2="377" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="352.0" width="72" height="20" rx="5" fill="#fce4d6"/>
+<text x="1007.0" y="366.0" font-size="10.5" font-weight="700" fill="#c00000" text-anchor="middle">High</text>
+<line x1="1057" y1="347" x2="1057" y2="377" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="366" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">5</text>
+<line x1="1167" y1="347" x2="1167" y2="377" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="366" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-08-18</text>
+<line x1="1272" y1="347" x2="1272" y2="377" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="366" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-08-22</text>
+<rect x="42" y="377" width="1335" height="30" fill="#ffffff"/>
+<line x1="42" y1="407" x2="1377" y2="407" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="396" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-7</text>
+<line x1="152" y1="377" x2="152" y2="407" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="396" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">SLA Tracking</text>
+<line x1="337" y1="377" x2="337" y2="407" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="396" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">SLA policies, breach timers, escalation rules, SLA logs</text>
+<line x1="772" y1="377" x2="772" y2="407" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="382.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="396.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="377" x2="872" y2="407" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="396" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 5</text>
+<line x1="957" y1="377" x2="957" y2="407" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="382.0" width="72" height="20" rx="5" fill="#fce4d6"/>
+<text x="1007.0" y="396.0" font-size="10.5" font-weight="700" fill="#c00000" text-anchor="middle">High</text>
+<line x1="1057" y1="377" x2="1057" y2="407" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="396" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">5</text>
+<line x1="1167" y1="377" x2="1167" y2="407" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="396" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-08-25</text>
+<line x1="1272" y1="377" x2="1272" y2="407" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="396" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-08-29</text>
+<rect x="42" y="407" width="1335" height="30" fill="#f8fafc"/>
+<line x1="42" y1="437" x2="1377" y2="437" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="426" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-8</text>
+<line x1="152" y1="407" x2="152" y2="437" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="426" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">Asset Register</text>
+<line x1="337" y1="407" x2="337" y2="437" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="426" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Asset CRUD, categories, assignment, lifecycle status tracking</text>
+<line x1="772" y1="407" x2="772" y2="437" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="412.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="426.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="407" x2="872" y2="437" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="426" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 6</text>
+<line x1="957" y1="407" x2="957" y2="437" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="412.0" width="72" height="20" rx="5" fill="#fff2cc"/>
+<text x="1007.0" y="426.0" font-size="10.5" font-weight="700" fill="#806000" text-anchor="middle">Medium</text>
+<line x1="1057" y1="407" x2="1057" y2="437" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="426" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">4</text>
+<line x1="1167" y1="407" x2="1167" y2="437" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="426" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-01</text>
+<line x1="1272" y1="407" x2="1272" y2="437" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="426" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-04</text>
+<rect x="42" y="437" width="1335" height="30" fill="#ffffff"/>
+<line x1="42" y1="467" x2="1377" y2="467" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="456" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-9</text>
+<line x1="152" y1="437" x2="152" y2="467" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="456" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">Access Request Workflow</text>
+<line x1="337" y1="437" x2="337" y2="467" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="456" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Request submission, manager approval workflow, audit trail</text>
+<line x1="772" y1="437" x2="772" y2="467" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="442.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="456.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="437" x2="872" y2="467" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="456" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 6-7</text>
+<line x1="957" y1="437" x2="957" y2="467" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="442.0" width="72" height="20" rx="5" fill="#fff2cc"/>
+<text x="1007.0" y="456.0" font-size="10.5" font-weight="700" fill="#806000" text-anchor="middle">Medium</text>
+<line x1="1057" y1="437" x2="1057" y2="467" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="456" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">4</text>
+<line x1="1167" y1="437" x2="1167" y2="467" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="456" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-07</text>
+<line x1="1272" y1="437" x2="1272" y2="467" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="456" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-10</text>
+<rect x="42" y="467" width="1335" height="30" fill="#f8fafc"/>
+<line x1="42" y1="497" x2="1377" y2="497" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="486" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-10</text>
+<line x1="152" y1="467" x2="152" y2="497" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="486" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">Employee Offboarding</text>
+<line x1="337" y1="467" x2="337" y2="497" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="486" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Reclaim assets, revoke access, checklist tracking, handovers</text>
+<line x1="772" y1="467" x2="772" y2="497" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="472.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="486.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="467" x2="872" y2="497" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="486" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 7</text>
+<line x1="957" y1="467" x2="957" y2="497" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="472.0" width="72" height="20" rx="5" fill="#fce4d6"/>
+<text x="1007.0" y="486.0" font-size="10.5" font-weight="700" fill="#c00000" text-anchor="middle">High</text>
+<line x1="1057" y1="467" x2="1057" y2="497" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="486" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">4</text>
+<line x1="1167" y1="467" x2="1167" y2="497" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="486" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-11</text>
+<line x1="1272" y1="467" x2="1272" y2="497" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="486" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-16</text>
+<rect x="42" y="497" width="1335" height="30" fill="#ffffff"/>
+<line x1="42" y1="527" x2="1377" y2="527" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="516" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-11</text>
+<line x1="152" y1="497" x2="152" y2="527" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="516" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">Knowledge Base</text>
+<line x1="337" y1="497" x2="337" y2="527" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="516" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Articles, categories, search, resolution deflection guides</text>
+<line x1="772" y1="497" x2="772" y2="527" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="502.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="516.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="497" x2="872" y2="527" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="516" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 8</text>
+<line x1="957" y1="497" x2="957" y2="527" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="502.0" width="72" height="20" rx="5" fill="#fff2cc"/>
+<text x="1007.0" y="516.0" font-size="10.5" font-weight="700" fill="#806000" text-anchor="middle">Medium</text>
+<line x1="1057" y1="497" x2="1057" y2="527" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="516" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">4</text>
+<line x1="1167" y1="497" x2="1167" y2="527" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="516" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-17</text>
+<line x1="1272" y1="497" x2="1272" y2="527" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="516" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-22</text>
+<rect x="42" y="527" width="1335" height="30" fill="#f8fafc"/>
+<line x1="42" y1="557" x2="1377" y2="557" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="546" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-12</text>
+<line x1="152" y1="527" x2="152" y2="557" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="546" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">User Profile &amp; Preferences</text>
+<line x1="337" y1="527" x2="337" y2="557" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="546" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Profile settings, avatar crop/upload, timezone, OOO status</text>
+<line x1="772" y1="527" x2="772" y2="557" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="532.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="546.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="527" x2="872" y2="557" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="546" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 8-9</text>
+<line x1="957" y1="527" x2="957" y2="557" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="532.0" width="72" height="20" rx="5" fill="#fff2cc"/>
+<text x="1007.0" y="546.0" font-size="10.5" font-weight="700" fill="#806000" text-anchor="middle">Medium</text>
+<line x1="1057" y1="527" x2="1057" y2="557" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="546" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">3</text>
+<line x1="1167" y1="527" x2="1167" y2="557" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="546" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-23</text>
+<line x1="1272" y1="527" x2="1272" y2="557" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="546" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-25</text>
+<rect x="42" y="557" width="1335" height="30" fill="#ffffff"/>
+<line x1="42" y1="587" x2="1377" y2="587" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="576" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-13</text>
+<line x1="152" y1="557" x2="152" y2="587" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="576" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">Slack Bot &amp; Notifications</text>
+<line x1="337" y1="557" x2="337" y2="587" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="576" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Slack bot intake, event webhooks, channel broadcast, DM routing</text>
+<line x1="772" y1="557" x2="772" y2="587" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="562.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="576.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="557" x2="872" y2="587" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="576" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 9-10</text>
+<line x1="957" y1="557" x2="957" y2="587" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="562.0" width="72" height="20" rx="5" fill="#fce4d6"/>
+<text x="1007.0" y="576.0" font-size="10.5" font-weight="700" fill="#c00000" text-anchor="middle">High</text>
+<line x1="1057" y1="557" x2="1057" y2="587" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="576" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">6</text>
+<line x1="1167" y1="557" x2="1167" y2="587" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="576" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-09-28</text>
+<line x1="1272" y1="557" x2="1272" y2="587" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="576" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-10-03</text>
+<rect x="42" y="587" width="1335" height="30" fill="#f8fafc"/>
+<line x1="42" y1="617" x2="1377" y2="617" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="606" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-14</text>
+<line x1="152" y1="587" x2="152" y2="617" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="606" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">AI Support &amp; Integration</text>
+<line x1="337" y1="587" x2="337" y2="617" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="606" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">Google Gemini AI assistant widget, testing &amp; bug fixes</text>
+<line x1="772" y1="587" x2="772" y2="617" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="592.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="606.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="587" x2="872" y2="617" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="606" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 10-11</text>
+<line x1="957" y1="587" x2="957" y2="617" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="592.0" width="72" height="20" rx="5" fill="#fce4d6"/>
+<text x="1007.0" y="606.0" font-size="10.5" font-weight="700" fill="#c00000" text-anchor="middle">High</text>
+<line x1="1057" y1="587" x2="1057" y2="617" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="606" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">3</text>
+<line x1="1167" y1="587" x2="1167" y2="617" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="606" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-10-05</text>
+<line x1="1272" y1="587" x2="1272" y2="617" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="606" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-10-07</text>
+<rect x="42" y="617" width="1335" height="30" fill="#ffffff"/>
+<line x1="42" y1="647" x2="1377" y2="647" stroke="#e2e8f0" stroke-width="1"/>
+<text x="97.0" y="636" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">Phase-15</text>
+<line x1="152" y1="617" x2="152" y2="647" stroke="#e2e8f0" stroke-width="1"/>
+<text x="162" y="636" font-size="11" font-weight="700" fill="#1e293b" text-anchor="start">Deployment &amp; Cost Review</text>
+<line x1="337" y1="617" x2="337" y2="647" stroke="#e2e8f0" stroke-width="1"/>
+<text x="347" y="636" font-size="10.5" font-weight="500" fill="#0f172a" text-anchor="start">AWS Lightsail 2GB, Docker CI/CD, SSL, CFO cost review</text>
+<line x1="772" y1="617" x2="772" y2="647" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="782.0" y="622.0" width="80" height="20" rx="10" fill="#dcfce7"/>
+<text x="822.0" y="636.0" font-size="10.5" font-weight="700" fill="#15803d" text-anchor="middle">Done</text>
+<line x1="872" y1="617" x2="872" y2="647" stroke="#e2e8f0" stroke-width="1"/>
+<text x="914.5" y="636" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">Week 11</text>
+<line x1="957" y1="617" x2="957" y2="647" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="971.0" y="622.0" width="72" height="20" rx="5" fill="#fce4d6"/>
+<text x="1007.0" y="636.0" font-size="10.5" font-weight="700" fill="#c00000" text-anchor="middle">High</text>
+<line x1="1057" y1="617" x2="1057" y2="647" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1112.0" y="636" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">3</text>
+<line x1="1167" y1="617" x2="1167" y2="647" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1219.5" y="636" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-10-08</text>
+<line x1="1272" y1="617" x2="1272" y2="647" stroke="#e2e8f0" stroke-width="1"/>
+<text x="1324.5" y="636" font-size="11" font-weight="500" fill="#475569" text-anchor="middle">2026-10-10</text>
+<rect x="952" y="659" width="425" height="76" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<line x1="952" y1="684" x2="1377" y2="684" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="952" y1="709" x2="1377" y2="709" stroke="#e2e8f0" stroke-width="1"/>
+<line x1="1172" y1="659" x2="1172" y2="735" stroke="#e2e8f0" stroke-width="1"/>
+<text x="970" y="676" font-size="11.5" font-weight="700" fill="#334155">Completed Work</text>
+<text x="1272" y="676" font-size="13" font-weight="900" fill="#0f172a" text-anchor="middle">57 Days (15 Phases Done)</text>
+<text x="970" y="701" font-size="11.5" font-weight="700" fill="#334155">Project Start Date</text>
+<text x="1272" y="701" font-size="12" font-weight="700" fill="#0369a1" text-anchor="middle">2026-07-27</text>
+<text x="970" y="726" font-size="11.5" font-weight="700" fill="#334155">Project End Date</text>
+<text x="1272" y="726" font-size="12" font-weight="800" fill="#15803d" text-anchor="middle">2026-10-10 (Completed)</text>
+</svg>
